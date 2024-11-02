@@ -43,6 +43,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@dfinity/utils": "^2.6.0",
 		"@junobuild/core-peer": "^0.0.28",
 		"nanoid": "^5.0.7"
 	}
