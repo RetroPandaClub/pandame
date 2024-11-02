@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { del, get, set } from './storage.utils';
 
 const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
@@ -14,10 +14,7 @@ const error = new Error('Mock storage error');
 describe('set', () => {
 	beforeEach(() => {
 		localStorage.clear();
-	});
-
-	afterEach(() => {
-		setItemSpy.mockRestore();
+		consoleErrorSpy.mockClear();
 	});
 
 	it('should store the value in localStorage as a JSON string', () => {
@@ -45,10 +42,7 @@ describe('set', () => {
 describe('del', () => {
 	beforeEach(() => {
 		localStorage.clear();
-	});
-
-	afterEach(() => {
-		removeItemSpy.mockRestore();
+		consoleErrorSpy.mockClear();
 	});
 
 	it('should remove the value from localStorage', () => {
@@ -82,10 +76,7 @@ describe('del', () => {
 describe('get', () => {
 	beforeEach(() => {
 		localStorage.clear();
-	});
-
-	afterEach(() => {
-		removeItemSpy.mockRestore();
+		consoleErrorSpy.mockClear();
 	});
 
 	it('should return parsed value when key exists in localStorage', () => {
