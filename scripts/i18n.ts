@@ -22,7 +22,9 @@ const generateTypes = async (): Promise<void> => {
 	}
 
 	if (!existsSync(PATH_TO_OUTPUT_DIR)) {
-		console.log(`The output file directory at ${PATH_TO_OUTPUT_DIR} does not exist. Creating it now...`);
+		console.log(
+			`The output file directory at ${PATH_TO_OUTPUT_DIR} does not exist. Creating it now...`
+		);
 		mkdirSync(PATH_TO_OUTPUT_DIR, { recursive: true });
 	}
 
