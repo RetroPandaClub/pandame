@@ -12,7 +12,8 @@
 		"format": "prettier --write .",
 		"postinstall:copy-auth": "node -e \"require('fs').cpSync('node_modules/@junobuild/core-peer/dist/workers/', './static/workers', {recursive: true});\"",
 		"postinstall": "npm run postinstall:copy-auth",
-		"test": "vitest"
+		"test": "vitest",
+		"i18n": "vite-node scripts/i18n.ts && prettier --write ./src/lib/types/i18n.d.ts"
 	},
 	"devDependencies": {
 		"@junobuild/config": "^0.0.16",
@@ -21,6 +22,7 @@
 		"@sveltejs/kit": "^2.7.2",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
 		"@types/eslint": "^9.6.1",
+		"@types/node": "^22.8.6",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^9.13.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -36,6 +38,7 @@
 		"typescript": "^5.6.3",
 		"typescript-eslint": "^8.11.0",
 		"vite": "^5.4.10",
+		"vite-node": "^2.1.4",
 		"vitest": "^2.1.4"
 	},
 	"type": "module",
