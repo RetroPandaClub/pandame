@@ -16,7 +16,7 @@
 		"i18n": "vite-node scripts/i18n.ts && prettier --write ./src/lib/types/i18n.d.ts"
 	},
 	"devDependencies": {
-		"@junobuild/config": "^0.0.14",
+		"@junobuild/config": "^0.0.16",
 		"@junobuild/vite-plugin": "^0.0.18",
 		"@sveltejs/adapter-static": "^3.0.5",
 		"@sveltejs/kit": "^2.7.2",
