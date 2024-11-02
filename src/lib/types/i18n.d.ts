@@ -6,6 +6,8 @@ interface I18nCore {
 	text: {
 		cancel: string;
 		next: string;
+		save: string;
+		back: string;
 		done: string;
 		close: string;
 		refresh: string;
