@@ -104,6 +104,7 @@ jobs:
         run: npm run test
 
   may-merge:
+    if: ${{ always() }}
     needs: ['check', 'formatting', 'build', 'lint', 'test']
     runs-on: ubuntu-20.04
     steps:

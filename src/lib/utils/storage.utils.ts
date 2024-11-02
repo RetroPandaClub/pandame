@@ -3,6 +3,7 @@ import { nonNullish } from '@dfinity/utils';
 
 export const set = <T>({ key, value }: { key: string; value: T }) => {
 	try {
+		const foo = 1;
 		localStorage.setItem(key, JSON.stringify(value));
 	} catch (err: unknown) {
 		// We use the local storage for the operational part of the app but, not crucial
