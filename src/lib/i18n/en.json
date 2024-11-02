@@ -1,0 +1,21 @@
+{
+	"core": {
+		"text": {
+			"cancel": "Cancel",
+			"next": "Next",
+			"save": "Save",
+			"back": "Back",
+			"done": "Done",
+			"close": "Close",
+			"refresh": "Refresh",
+			"name": "Name",
+			"symbol": "Symbol",
+			"decimals": "Decimals",
+			"amount": "Amount",
+			"max": "Max",
+			"more": "More",
+			"reject": "Reject",
+			"approve": "Approve"
+		}
+	}
+}
