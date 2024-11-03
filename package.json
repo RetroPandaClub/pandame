@@ -14,7 +14,7 @@
 		"postinstall": "npm run postinstall:copy-auth",
 		"test": "vitest",
 		"i18n": "vite-node scripts/i18n.ts && prettier --write ./src/lib/types/i18n.d.ts",
-		"playwright:install": "playwright install --with-deps",
+		"playwright:install": "npx playwright install --with-deps",
 		"e2e": "npm run playwright:install && playwright test",
 		"e2e:ci": "npm run playwright:install && playwright test --reporter=html",
 		"e2e:snapshots": "npm run playwright:install && playwright test --update-snapshots --reporter=list",
