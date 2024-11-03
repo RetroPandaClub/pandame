@@ -14,10 +14,11 @@
 		"postinstall": "npm run postinstall:copy-auth",
 		"test": "vitest",
 		"i18n": "vite-node scripts/i18n.ts && prettier --write ./src/lib/types/i18n.d.ts",
-		"e2e": "playwright test",
-		"e2e:ci": "playwright test --reporter=html",
-		"e2e:snapshots": "playwright test --update-snapshots --reporter=list",
-		"e2e:report": "playwright show-report"
+		"playwright:install": "playwright install --with-deps",
+		"e2e": "playwright:install && playwright test",
+		"e2e:ci": "playwright:install && playwright test --reporter=html",
+		"e2e:snapshots": "playwright:install && playwright test --update-snapshots --reporter=list",
+		"e2e:report": "playwright:install && playwright show-report"
 	},
 	"devDependencies": {
 		"@junobuild/config": "^0.0.16",
