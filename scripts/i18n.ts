@@ -8,7 +8,9 @@ const PATH_TO_EN_JSON: string = join(PATH_FROM_ROOT, 'lib', 'i18n', 'en.json');
 const PATH_TO_OUTPUT_DIR: string = join(PATH_FROM_ROOT, 'lib', 'types');
 const PATH_TO_OUTPUT: string = join(PATH_TO_OUTPUT_DIR, 'i18n.d.ts');
 
-type TranslationValues = { [key: string]: string | TranslationValues };
+interface TranslationValues {
+	[key: string]: string | TranslationValues;
+}
 
 /**
  * Generates TypeScript interfaces from the English translation file.

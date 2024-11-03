@@ -16,7 +16,7 @@
 
 	onMount(() => (unsubscribe = authSubscribe((user) => userStore.set(user))));
 
-	const automaticSignOut = () => console.log('Automatically signed out because session expired');
+	const automaticSignOut = () => console.warn('Automatically signed out because session expired');
 
 	onDestroy(() => unsubscribe?.());
 </script>
