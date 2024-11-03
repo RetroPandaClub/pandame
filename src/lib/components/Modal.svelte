@@ -76,6 +76,7 @@
 
 	const openModal = async () => {
 		showModal = true;
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 	};
 </script>
 

@@ -3,6 +3,7 @@ import js from '@eslint/js';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import ts from 'typescript-eslint';
+import importPlugin from 'eslint-plugin-import';
 
 export default ts.config(
 	js.configs.recommended,
@@ -20,7 +21,6 @@ export default ts.config(
 	},
 	{
 		files: ['**/*.svelte'],
-
 		languageOptions: {
 			parserOptions: {
 				parser: ts.parser
@@ -28,6 +28,53 @@ export default ts.config(
 		}
 	},
 	{
+		files: ['*.ts'],
+		rules: {
+			'prefer-const': 'error'
+		}
+	},
+	{
 		ignores: ['build/', '.svelte-kit/', 'dist/', 'static/']
+	},
+	{
+		rules: {
+			'@typescript-eslint/consistent-type-definitions': 'error',
+			'@typescript-eslint/no-inferrable-types': 'error',
+			// '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+			'@typescript-eslint/no-unused-vars': [
+				'warn',
+				{
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^_',
+					caughtErrorsIgnorePattern: '^_'
+				}
+			],
+			// '@typescript-eslint/prefer-nullish-coalescing': 'error',
+			// '@typescript-eslint/prefer-reduce-type-parameter': 'error',
+			'arrow-body-style': ['warn', 'as-needed'],
+			curly: 'error',
+			'no-console': ['error', { allow: ['error', 'warn'] }],
+			'no-continue': 'warn',
+			'no-delete-var': 'error',
+			'no-else-return': ['warn', { allowElseIf: false }],
+			'no-unused-vars': 'off',
+			'prefer-template': 'error',
+			'require-await': 'error'
+		}
+	},
+	{
+		plugins: {
+			import: importPlugin
+		},
+		rules: {
+			'import/no-duplicates': ['error', { 'prefer-inline': true }],
+			'import/no-relative-parent-imports': 'error'
+		}
+	},
+	{
+		files: ['scripts/**/*.ts'],
+		rules: {
+			'no-console': 'off'
+		}
 	}
 );
