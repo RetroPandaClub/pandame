@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Note } from '$lib/types/note';
 	import { type Doc, listDocs } from '@junobuild/core-peer';
 	import Delete from '$lib/components/Delete.svelte';
 	import { userNotSignedIn } from '$lib/derived/user.derived';
+	import type { Note } from '$lib/types/note';
 
 	let items: Doc<Note>[] = $state([]);
 

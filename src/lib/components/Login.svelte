@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
 	import { signIn } from '@junobuild/core-peer';
+	import Button from '$lib/components/Button.svelte';
 
 	const login = async () => {
 		await signIn();
