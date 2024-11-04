@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { setDoc, uploadFile } from '@junobuild/core-peer';
+	import { nanoid } from 'nanoid';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { userSignedIn } from '$lib/derived/user.derived';
-	import { setDoc, uploadFile } from '@junobuild/core-peer';
-	import { nanoid } from 'nanoid';
-	import type { Note } from '$lib/types/note';
 	import { userStore } from '$lib/stores/user.store';
+	import type { Note } from '$lib/types/note';
 
 	let showModal = $state(false);
 

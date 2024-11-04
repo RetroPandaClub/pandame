@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { initSatellite } from '@junobuild/core-peer';
-	import Footer from '$lib/components/Footer.svelte';
-	import Background from '$lib/components/Background.svelte';
-	// import '../app.css';
+	import type { Snippet } from 'svelte';
 	import Auth from '$lib/components/Auth.svelte';
+	import Background from '$lib/components/Background.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	// import '../app.css';
 
 	interface Props {
 		children: Snippet;

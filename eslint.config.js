@@ -11,6 +11,7 @@ export default ts.config(
 	...svelte.configs['flat/recommended'],
 	prettier,
 	...svelte.configs['flat/prettier'],
+	...svelte.configs['flat/recommended'],
 	{
 		languageOptions: {
 			globals: {
@@ -69,6 +70,13 @@ export default ts.config(
 		rules: {
 			'import/no-duplicates': ['error', { 'prefer-inline': true }],
 			'import/no-relative-parent-imports': 'error'
+		}
+	},
+	{
+		files: ['**/*.svelte', '*.svelte'],
+		rules: {
+			'import/order': ['error', { alphabetize: { order: 'asc' } }],
+			'import/no-duplicates': ['error', { 'prefer-inline': true }]
 		}
 	},
 	{
