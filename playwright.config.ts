@@ -1,4 +1,6 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
+
+const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 export default defineConfig({
 	webServer: {
@@ -6,5 +8,18 @@ export default defineConfig({
 		port: 4173
 	},
 
-	testDir: 'e2e'
+	testDir: 'e2e',
+
+	use: {
+		testIdAttribute: 'data-tid',
+		trace: 'on',
+		...(DEV && { headless: false })
+	},
+
+	projects: [
+		{
+			name: 'Google Chrome',
+			use: { ...devices['Desktop Chrome'] }
+		}
+	]
 });
