@@ -1,5 +1,5 @@
-import { nonNullish } from '@dfinity/utils';
 import { browser } from '$app/environment';
+import { nonNullish } from '@dfinity/utils';
 
 export const set = <T>({ key, value }: { key: string; value: T }) => {
 	try {

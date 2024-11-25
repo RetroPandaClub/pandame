@@ -94,21 +94,21 @@
 </Button>
 
 {#if showModal}
-	<div class="fixed inset-0 z-50 p-16 md:px-24 md:py-44 animate-fade" role="dialog">
+	<div class="fixed inset-0 z-50 animate-fade p-16 md:px-24 md:py-44" role="dialog">
 		<div class="relative w-full max-w-xl">
 			<textarea
-				class="form-control block w-full px-3 py-1.5 text-base font-normal m-0 resize-none border-black border-[3px] rounded-sm bg-white shadow-[5px_5px_0px_rgba(0,0,0,1)] focus:outline-none"
+				class="form-control m-0 block w-full resize-none rounded-sm border-[3px] border-black bg-white px-3 py-1.5 text-base font-normal shadow-[5px_5px_0px_rgba(0,0,0,1)] focus:outline-none"
 				rows={7}
 				placeholder="Your diary entry"
 				bind:value={inputText}
 				disabled={progress}
 			></textarea>
 
-			<div role="toolbar" class="flex justify-between items-center">
+			<div role="toolbar" class="flex items-center justify-between">
 				<div>
 					<button
 						aria-label="Attach a file to the entry"
-						class="flex gap-2 items-center hover:text-lavender-blue-600 active:text-lavender-blue-400"
+						class="flex items-center gap-2 hover:text-lavender-blue-600 active:text-lavender-blue-400"
 						onclick={openSelectFile}
 					>
 						<svg
@@ -124,14 +124,14 @@
 								/>
 							</g>
 						</svg>
-						<span class="truncate max-w-48">
+						<span class="max-w-48 truncate">
 							<small>{file !== undefined ? file.name : 'Attach file'}</small>
 						</span>
 					</button>
 
 					<input
 						type="file"
-						class="fixed right-0 -bottom-24 opacity-0"
+						class="fixed -bottom-24 right-0 opacity-0"
 						onchange={onChangeFile}
 						disabled={progress}
 						bind:this={inputFile}
@@ -140,16 +140,16 @@
 
 				{#if progress}
 					<div
-						class="my-8 animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-indigo-600 rounded-full"
+						class="text-indigo-600 my-8 inline-block h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent"
 						role="status"
 						aria-label="loading"
 					>
 						<span class="sr-only">Loading...</span>
 					</div>
 				{:else}
-					<div class="flex my-4">
+					<div class="my-4 flex">
 						<button
-							class="py-1 px-8 hover:text-lavender-blue-600 active:text-lavender-blue-400"
+							class="px-8 py-1 hover:text-lavender-blue-600 active:text-lavender-blue-400"
 							type="button"
 							onclick={() => (showModal = false)}
 						>
