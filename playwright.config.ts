@@ -20,6 +20,18 @@ export default defineConfig({
 		{
 			name: 'Google Chrome',
 			use: { ...devices['Desktop Chrome'] }
+		},
+		{
+			name: 'Mozilla Firefox',
+			use: { ...devices['Desktop Firefox'] }
+		},
+		{
+			name: 'Microsoft Edge',
+			use: { ...devices['Desktop Edge'] }
+		},
+		{
+			name: 'Apple Safari',
+			use: { ...devices['Desktop Safari'] }
 		}
 	]
 });
