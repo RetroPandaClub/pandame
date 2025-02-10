@@ -22,7 +22,7 @@
 		"e2e:report": "npm run playwright:install && playwright show-report"
 	},
 	"devDependencies": {
-		"@junobuild/config": "^0.0.17",
+		"@junobuild/config": "^0.1.0",
 		"@junobuild/vite-plugin": "^0.0.19",
 		"@playwright/test": "^1.50.1",
 		"@sveltejs/adapter-static": "^3.0.8",
