@@ -1,3 +1,7 @@
+.dfx/
+
+.eslintcache
+
 # Various IDEs and Editors
 .vscode/
 .idea/
@@ -20,3 +24,8 @@ vite.config.ts.timestamp-*
 static/workers
 
 target
+
+# Playwright E2E
+/playwright-report/
+/test-results/
+/playwright/.cache/

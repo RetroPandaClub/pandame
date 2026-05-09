@@ -1,0 +1,19 @@
+{
+	"extends": "./tsconfig.json",
+	"include": [
+		"./scripts/",
+		"./src/",
+		"./e2e/",
+		"./eslint.config.js",
+		"./juno.config.ts",
+		"./juno.dev.config.ts",
+		"./playwright.config.ts",
+		"./postcss.config.js",
+		"./svelte.config.js",
+		"./tailwind.config.ts",
+		"./vite.config.ts",
+		"./vitest.config.ts",
+		"./vitest.setup.ts"
+	],
+	"exclude": ["./node_modules/**"]
+}
