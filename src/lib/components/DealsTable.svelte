@@ -1,12 +1,11 @@
 <script lang="ts">
 	import DealCard from '$lib/components/DealCard.svelte';
-	import type { DealFilter } from '$lib/components/DealFilterChips.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import { dealsLoaded } from '$lib/derived/deals.derived';
 	import { DealStatuses } from '$lib/enums/deal-status';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Deal } from '$lib/types/deal';
+	import type { Deal, DealFilter } from '$lib/types/deal';
 	import { dealStatus, isTerminal } from '$lib/utils/deal.utils';
 
 	interface Props {

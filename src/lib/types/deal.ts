@@ -25,3 +25,8 @@ export type ConsentKey = keyof EscrowDid.Consent;
  * where the caller is neither party (e.g. a public claim preview).
  */
 export type DealSide = 'payer' | 'recipient' | 'unknown';
+
+/**
+ * Deal-list filter narrowing — used by the History page + DealsTable.
+ */
+export type DealFilter = 'all' | 'active' | 'settled' | 'refunded' | 'cancelled';
