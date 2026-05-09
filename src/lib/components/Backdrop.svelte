@@ -13,7 +13,7 @@
 >
 	{#if spinner}
 		<div
-			class="border-lavender-blue-600 h-12 w-12 animate-spin rounded-full border-[3px] border-solid border-t-transparent"
+			class="border-primary h-12 w-12 animate-spin rounded-full border-[3px] border-solid border-t-transparent"
 		></div>
 	{/if}
 </div>

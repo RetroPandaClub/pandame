@@ -20,7 +20,7 @@
 				<path
 					d="m101.31,0c0,55.96-45.36,101.32-101.31,101.32v119.07C121.72,220.39,220.39,121.72,220.39,0h0s-119.07,0-119.07,0Z"
 				></path>
-				<circle class="cls-1" cx="931.86" cy="68.14" r="68.14" fill="#7888ff"></circle>
+				<circle class="cls-1" cx="931.86" cy="68.14" r="68.14" fill="#632AE8"></circle>
 			</g>
 		</svg>
 		<small class="hidden md:block">Blockchainless Platform</small>
@@ -30,7 +30,7 @@
 		<a
 			href="https://juno.build"
 			aria-label="Go to Juno website and documentation"
-			class="hover:text-lavender-blue-500 active:text-lavender-blue-400"
+			class="hover:text-primary active:text-primary/80"
 			target="_blank"
 			rel="noopener noreferrer"
 		>
@@ -85,7 +85,7 @@
 		<a
 			href="https://github.com/junobuild/juno"
 			aria-label="Juno is open source on GitHub"
-			class="hover:text-lavender-blue-500 active:text-lavender-blue-400"
+			class="hover:text-primary active:text-primary/80"
 			target="_blank"
 			rel="noopener noreferrer"
 		>
@@ -107,7 +107,7 @@
 		<a
 			href="https://discord.gg/wHZ57Z2RAG"
 			aria-label="Join our channel on Discord to chat or ask questions"
-			class="hover:text-lavender-blue-500 active:text-lavender-blue-400"
+			class="hover:text-primary active:text-primary/80"
 			target="_blank"
 			rel="noopener noreferrer"
 		>
@@ -133,7 +133,7 @@
 		<a
 			href="https://twitter.com/junobuild"
 			aria-label="Follow Juno on X/Twitter"
-			class="hover:text-lavender-blue-500 active:text-lavender-blue-400"
+			class="hover:text-primary active:text-primary/80"
 			target="_blank"
 			rel="noopener noreferrer"
 		>

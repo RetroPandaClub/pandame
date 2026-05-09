@@ -51,7 +51,7 @@
 </script>
 
 <article
-	class="dark:border-lavender-blue-500 grid grid-cols-1 gap-3 rounded border-[3px] border-black bg-white p-4 shadow-[5px_5px_0px_rgba(0,0,0,1)] md:grid-cols-[1fr_auto] dark:bg-black dark:text-white dark:shadow-[5px_5px_0px_#7888FF]"
+	class="dark:border-primary grid grid-cols-1 gap-3 rounded border-[3px] border-black bg-white p-4 shadow-[5px_5px_0px_rgba(0,0,0,1)] md:grid-cols-[1fr_auto] dark:bg-black dark:text-white dark:shadow-[5px_5px_0px_#632AE8]"
 	data-tid="deal-row"
 >
 	<div class="space-y-2">

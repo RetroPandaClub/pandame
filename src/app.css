@@ -1,5 +1,44 @@
 @import 'tailwindcss';
 
+/*
+ * Design tokens for the PandaMe brand.
+ *
+ * Two palettes:
+ *  - Brand purple   (`#632AE8` primary, `#D5C4F9` light) — CTAs, headings, chips.
+ *  - Brand green    (`#1DBB8E` success, `#29E8B1` light) — confirmations, positive states.
+ *
+ * Plus neutral surfaces and a "Blu Night" body-text colour. App code should
+ * always reach for the **semantic** tokens (`bg-primary`, `text-default`,
+ * `border-soft`, …) instead of hex literals — see
+ * `docs/ai/frontend/stack-and-patterns.md#tailwind-v4--design-tokens`.
+ */
+
+@font-face {
+	font-family: 'Lato';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/lato-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Lato';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('/fonts/lato-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Lato';
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url('/fonts/lato-black.woff2') format('woff2');
+}
+
+/* Legacy brand font kept as a fallback so the JetBrains Mono assets in
+ * `static/fonts/` keep working until they're removed. */
 @font-face {
 	font-family: 'JetBrains Mono';
 	font-style: normal;
@@ -17,27 +56,73 @@
 @theme {
 	--color-*: initial;
 
+	/* Base */
 	--color-inherit: inherit;
 	--color-transparent: transparent;
 	--color-current: currentColor;
 	--color-black: rgb(0 0 0);
 	--color-white: rgb(255 255 255);
 
-	--color-lavender-blue-50: #f2f3ff;
-	--color-lavender-blue-100: #e4e7ff;
-	--color-lavender-blue-200: #c9cfff;
-	--color-lavender-blue-300: #aeb8ff;
-	--color-lavender-blue-400: #93a0ff;
-	--color-lavender-blue-500: #7888ff;
-	--color-lavender-blue-600: #606dcc;
-	--color-lavender-blue-700: #485299;
-	--color-lavender-blue-800: #303666;
-	--color-lavender-blue-900: #181b33;
+	/* Brand — purple */
+	--color-primary: #632ae8;
+	--color-primary-light: #d5c4f9;
 
+	/* Brand — green (success / positive) */
+	--color-success: #1dbb8e;
+	--color-success-light: #29e8b1;
+
+	/* Status */
+	--color-warning: #f3a712;
+	--color-danger: #e64545;
+
+	/* Surfaces */
+	--color-bg: #ffffff;
+	--color-bg-soft: #f4eefb;
+	--color-bg-inverse: #1a1736;
+
+	/* Text — "Blu Night" + variants */
+	--color-default: #1a1736;
+	--color-default-inverse: #ffffff;
+	--color-muted: #6b6884;
+	--color-subtle: #a39fbf;
+
+	/* Border */
+	--color-border: #d5c4f9;
+	--color-border-soft: #ece5fb;
+	--color-border-strong: #632ae8;
+
+	/* Typography — modular scale (base 16, ratio 1.25) */
 	--font-sans:
-		'JetBrains Mono', sans-serif, ui-sans-serif, system-ui, 'Apple Color Emoji', 'Segoe UI Emoji',
-		'Segoe UI Symbol', 'Noto Color Emoji';
+		'Lato', 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
+	--text-xxs: 0.625rem; /* 10 px */
+	--text-xxs--line-height: 1;
+	--text-body2: 0.8125rem; /* 13 px */
+	--text-body2--line-height: 1.32;
+	--text-body1: 1rem; /* 16 px */
+	--text-body1--line-height: 1.4;
+	--text-h6: 1.25rem; /* 20 px */
+	--text-h6--line-height: 1;
+	--text-h5: 1.5625rem; /* 25 px */
+	--text-h5--line-height: 1.2;
+	--text-h4: 1.9375rem; /* 31 px */
+	--text-h4--line-height: 1.32;
+	--text-h3: 2.4375rem; /* 39 px */
+	--text-h3--line-height: 1.6;
+	--text-h2: 3.0625rem; /* 49 px */
+	--text-h2--line-height: 1.6;
+	--text-h1: 3.8125rem; /* 61 px */
+	--text-h1--line-height: 1.6;
+
+	/* Radius — pill-shaped CTAs are the dominant pattern */
+	--radius-sm: 0.5rem; /* 8 px */
+	--radius-md: 0.75rem; /* 12 px */
+	--radius-lg: 1rem; /* 16 px */
+	--radius-xl: 1.25rem; /* 20 px */
+	--radius-pill: 9999px;
+
+	/* Animations */
 	--animate-fade: fadeIn 0.25s ease-in-out;
 
 	@keyframes fadeIn {

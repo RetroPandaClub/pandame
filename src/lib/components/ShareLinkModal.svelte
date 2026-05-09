@@ -65,7 +65,7 @@
 					width="220"
 					height="220"
 					alt={$i18n.share.qr_alt}
-					class="dark:border-lavender-blue-500 rounded border-[3px] border-black"
+					class="dark:border-primary rounded border-[3px] border-black"
 				/>
 			</div>
 		{/if}
