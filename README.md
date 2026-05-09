@@ -1,7 +1,9 @@
 # PandaMe
 
 PandaMe is a SvelteKit frontend for the standalone **Escrow** Rust
-canister at [`../escrow/`](../escrow/) (mainnet
+canister at
+[`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
+(checked out locally as `../escrow/`; mainnet
 `umxj5-niaaa-aaaae-af2sq-cai`). It lets a payer lock funds against a
 known recipient, share a tip link to anyone via QR / URL, and reclaim
 unclaimed deals after expiry — all from a single Internet Identity
@@ -60,7 +62,7 @@ entry point:
 - **Dispute mockup** (`/deals/[deal_id]/dispute`): visual preview of
   the v2 dispute flow (disabled inputs + warning banner) — the
   canister has no `Disputed` state yet (see
-  [`../escrow/src/escrow/README.md#future-expansion`](../escrow/src/escrow/README.md#future-expansion)).
+  [`AntonioVentilii/escrow#future-expansion`](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion)).
 - **ICP balance**: the header pill reads the caller's ICP balance
   from the NNS ledger (`ryjl3-tyaaa-aaaaa-aaaba-cai`).
 - **Authentication**: Internet Identity via `@junobuild/core`.
@@ -221,9 +223,9 @@ for the full local + CI deploy runbook.
 
 ## ✨ Links & Resources
 
-- [Escrow canister docs](../escrow/src/escrow/README.md) — deal
-  lifecycle, ICRC-7 NFT views, scaling roadmap.
-- [Tip flow walkthrough](../escrow/TIPS.md) — sequence diagrams for
+- [Escrow canister docs](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md)
+  — deal lifecycle, ICRC-7 NFT views, scaling roadmap.
+- [Tip flow walkthrough](https://github.com/AntonioVentilii/escrow/blob/main/TIPS.md) — sequence diagrams for
   the share-link flow.
 - [Juno documentation](https://juno.build)
 - [SvelteKit documentation](https://kit.svelte.dev/)

@@ -3,7 +3,8 @@ description: local + production deployment workflow for the PandaMe SvelteKit ap
 ---
 
 PandaMe is a **frontend-only** repo. The on-chain Escrow Rust canister
-lives in [`../escrow/`](../../../escrow/) (mainnet
+lives at [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
+(checked out locally as `../escrow/`; mainnet
 `umxj5-niaaa-aaaae-af2sq-cai`); pandame's only deploy target is the Juno
 satellite that hosts the static SvelteKit build.
 
@@ -50,7 +51,8 @@ This workflow covers the two flavours of deploy that pandame supports:
    [`Collection`](../../src/lib/constants/collections.constants.ts).
 
 5. (Optional) regenerate the candid bindings from upstream
-   [`../escrow/`](../../../escrow/) before starting:
+   [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
+   (locally `../escrow/`) before starting:
 
    ```bash
    npm run did
@@ -124,6 +126,6 @@ If CI is unavailable:
 - [`docs/ai/frontend/workflows/regenerate-bindings.md`](../../docs/ai/frontend/workflows/regenerate-bindings.md)
   — re-pull the escrow `.did` after an upstream change.
 - [`docs/ai/README.md`](../../docs/ai/README.md) — AI agent docs index.
-- [`../escrow/src/escrow/README.md`](../../../escrow/src/escrow/README.md)
-  — upstream canister docs (deal lifecycle, ICRC-7 NFT views, scaling
-  roadmap).
+- [`AntonioVentilii/escrow` upstream README](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md)
+  (locally `../escrow/src/escrow/README.md`) — upstream canister docs
+  (deal lifecycle, ICRC-7 NFT views, scaling roadmap).

@@ -2,9 +2,9 @@
 
 The escrow canister's TS bindings under `src/declarations/escrow/**` are
 **generated** from the upstream
-[`escrow.did`](../../../../../escrow/src/escrow/escrow.did) via
-`@icp-sdk/bindgen`. Re-run the pipeline whenever the upstream interface
-changes.
+[`escrow.did`](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/escrow.did)
+(locally `../escrow/src/escrow/escrow.did`) via `@icp-sdk/bindgen`.
+Re-run the pipeline whenever the upstream interface changes.
 
 ## When to re-run
 

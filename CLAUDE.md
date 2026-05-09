@@ -7,7 +7,7 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 > matching area README before touching code:
 >
 > - Frontend → [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)
-> - On-chain backend (escrow) → [`../escrow/src/escrow/README.md`](../escrow/src/escrow/README.md)
+> - On-chain backend (escrow) → [`AntonioVentilii/escrow` upstream](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md) (locally `../escrow/src/escrow/README.md`)
 
 ---
 
@@ -23,7 +23,8 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 - **Essential commands:** `npm run dev` · `npm run build` · `npm run check`
   · `npm run quality` · `npm run test` · `npm run e2e` ·
   `npm run did` (regenerate Candid bindings from upstream
-  [`../escrow/`](../escrow/)) · `npm run i18n` (regenerate the typed
+  [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow);
+  locally `../escrow/`) · `npm run i18n` (regenerate the typed
   dictionary).
 - **Identity:** principal source of truth is
   [`src/lib/services/identity.services.ts`](./src/lib/services/identity.services.ts).
@@ -42,7 +43,8 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 - **Dispute UI:** the Dispute button in
   [`DealActions.svelte`](./src/lib/components/DealActions.svelte) is a
   **stub** — the canister has no `Disputed` state yet (see
-  [`../escrow/src/escrow/README.md#future-expansion`](../escrow/src/escrow/README.md#future-expansion)).
+  [`AntonioVentilii/escrow#future-expansion`](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion);
+  locally `../escrow/src/escrow/README.md#future-expansion`).
 - **Theming:** the only theme today is `light` (set via
   `<html data-theme="light">`). A future dark theme is a single-file
   change — fill the `[data-theme='dark']` block in
@@ -69,8 +71,9 @@ Claude-specific runtime layer. Anything not contradicted here defers to
   - Adding a new dependency (npm).
   - Adding a new top-level folder under `src/` or `src/lib/`.
   - Touching the `escrow.did` source under
-    [`../escrow/src/escrow/`](../escrow/src/escrow/) — go work on the
-    escrow repo first, then come back here for `npm run did`.
+    [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow/tree/main/src/escrow)
+    (locally `../escrow/src/escrow/`) — go work on the escrow repo
+    first, then come back here for `npm run did`.
   - Modifying `juno.config.ts` / `juno.dev.config.ts`.
   - Touching anything under `.github/workflows/**` or
     `.github/actions/**`.

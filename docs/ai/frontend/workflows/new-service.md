@@ -55,8 +55,10 @@ If the upstream `escrow.did` already has the endpoint:
    npm run did
    ```
 
-   That re-downloads `../escrow/.../escrow.did` from upstream and
-   regenerates `src/declarations/escrow/**`.
+   That re-downloads `escrow.did` from
+   [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/escrow.did)
+   (locally `../escrow/src/escrow/escrow.did`) and regenerates
+   `src/declarations/escrow/**`.
 
 2. Add the method to
    [`escrow.canister.ts`](../../../../src/lib/canisters/escrow.canister.ts).

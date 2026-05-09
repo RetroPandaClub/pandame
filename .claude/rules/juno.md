@@ -6,7 +6,7 @@
 > - Reusability catalog (services / api / canisters): [`docs/ai/frontend/reusability.md`](../../docs/ai/frontend/reusability.md)
 > - Local deployment runbook: [`.agents/workflows/deployment.md`](../../.agents/workflows/deployment.md)
 > - Bindings regeneration: [`docs/ai/frontend/workflows/regenerate-bindings.md`](../../docs/ai/frontend/workflows/regenerate-bindings.md)
-> - Upstream escrow canister: [`../escrow/src/escrow/README.md`](../../../escrow/src/escrow/README.md), [`../escrow/TIPS.md`](../../../escrow/TIPS.md)
+> - Upstream escrow canister: [`AntonioVentilii/escrow` README](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md), [TIPS.md](https://github.com/AntonioVentilii/escrow/blob/main/TIPS.md) (locally `../escrow/src/escrow/README.md`, `../escrow/TIPS.md`)
 > - External docs: [Juno LLM Documentation](https://juno.build/llms-full.txt)
 >
 > This card is a Claude-only summary. If it disagrees with the docs
@@ -25,10 +25,11 @@ Pandame uses Juno for two things:
    [`juno.dev.config.ts`](../../juno.dev.config.ts).
 
 All **escrow** / ledger state lives in the standalone **Escrow** Rust
-canister ([`../escrow/`](../../../escrow/), mainnet
-`umxj5-niaaa-aaaae-af2sq-cai`). The frontend talks to it directly via
-a generated `@dfinity/agent` actor and to ICRC-1 / -2 ledgers via
-`@icp-sdk/canisters/ledger/icrc`. Don't push deal state into Juno.
+canister ([`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow);
+locally `../escrow/`; mainnet `umxj5-niaaa-aaaae-af2sq-cai`). The
+frontend talks to it directly via a generated `@dfinity/agent` actor
+and to ICRC-1 / -2 ledgers via `@icp-sdk/canisters/ledger/icrc`. Don't
+push deal state into Juno.
 
 ## Key SDK functions (`@junobuild/core`)
 
@@ -117,7 +118,7 @@ a generated `@dfinity/agent` actor and to ICRC-1 / -2 ledgers via
 ## Dispute UI is stubbed
 
 The `Disputed` lifecycle state is **not yet implemented in the canister**
-(see [`../escrow/src/escrow/README.md#future-expansion`](../../../escrow/src/escrow/README.md#future-expansion)).
+(see [`AntonioVentilii/escrow#future-expansion`](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion)).
 The `Dispute` button in
 [`DealActions.svelte`](../../src/lib/components/DealActions.svelte)
 navigates to
