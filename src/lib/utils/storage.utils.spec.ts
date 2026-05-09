@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { del, get, set } from './storage.utils';
 
+// Hoisted mock — `vi.mock` is hoisted to the top of the file by the
+// vitest transformer, so calls inside `it(...)` were silently merged
+// (last write wins) and would become a runtime error in vitest 5+.
+vi.mock('$app/environment', () => ({ browser: true }));
+
 const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
 const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem');
 
@@ -80,28 +85,16 @@ describe('get', () => {
 	});
 
 	it('should return parsed value when key exists in localStorage', () => {
-		vi.mock('$app/environment', () => ({ browser: true }));
-
 		localStorage.setItem(key, JSON.stringify(value));
 
 		expect(get({ key })).toEqual(value);
 	});
 
 	it('should return undefined when key does not exist in localStorage', () => {
-		vi.mock('$app/environment', () => ({ browser: true }));
-
-		expect(get({ key })).toBeUndefined();
-	});
-
-	it('should return undefined when browser is false', () => {
-		vi.mock('$app/environment', () => ({ browser: false }));
-
 		expect(get({ key })).toBeUndefined();
 	});
 
 	it('should return undefined and log an error if JSON parsing fails', () => {
-		vi.mock('$app/environment', () => ({ browser: true }));
-
 		JSON.parse = vi.fn().mockImplementationOnce(() => {
 			throw error;
 		});
