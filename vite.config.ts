@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [sveltekit(), juno({ container: true }), tailwindcss()],
+	plugins: [sveltekit(), juno(), tailwindcss()],
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations'),
@@ -17,6 +17,18 @@ export default defineConfig({
 	server: {
 		fs: {
 			allow: ['.']
+		},
+		// Forward IC HTTP gateway calls to the local Juno emulator's replica.
+		// The browser-side agent dials `window.location.origin` in dev (see
+		// `REPLICA_HOST` in `$lib/constants/app.constants.ts`), so its
+		// `/api/v2/...` requests must be proxied here. Mirrors the vici-app
+		// pattern; without it the agent ends up calling the SvelteKit dev
+		// server, which 404s every canister request.
+		proxy: {
+			'/api': {
+				target: 'http://localhost:5987',
+				changeOrigin: true
+			}
 		}
 	},
 	worker: {
