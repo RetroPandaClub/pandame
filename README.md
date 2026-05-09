@@ -138,8 +138,13 @@ mirrored in [`vite.config.ts`](./vite.config.ts)):
   [`.node-version`](./.node-version).
 - [Juno CLI](https://juno.build/docs/miscellaneous/cli) — for deploying
   to a satellite.
-- Optional: Docker — required by the local Juno emulator
-  (`juno dev start`).
+- Docker (or Podman) — required by the local Juno emulator
+  (`juno emulator start`).
+- The [`dfx`](https://internetcomputer.org/docs/current/developer-docs/setup/install/)
+  CLI and a Rust toolchain (`rustup target add wasm32-unknown-unknown`) —
+  required only the first time you set up a local replica, to build and
+  deploy the upstream escrow canister into the Juno emulator. See
+  [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md).
 
 ### Installation
 
@@ -165,24 +170,50 @@ mirrored in [`vite.config.ts`](./vite.config.ts)):
 
 ### Local development
 
-1. **Start the local Juno emulator** (requires Docker):
+The Juno emulator is a **fully self-contained local IC replica** — it
+does not proxy calls to mainnet. Internet Identity, the ICP ledger and
+the satellite that hosts pandame's `profiles` datastore all run inside
+the local Docker container. The escrow Rust canister is **not**
+pre-installed there, so a working local setup needs the upstream
+[`../escrow/`](../escrow/) repo built and deployed into the same local
+replica.
+
+1. **Start the local Juno emulator** (requires Docker / Podman):
 
    ```bash
-   juno dev start
+   juno emulator start
    ```
 
-2. **Start the dev server** in a new terminal:
+   The IC HTTP gateway is exposed on `http://127.0.0.1:5987`; the Juno
+   admin console on <http://localhost:5866>.
+
+2. **First run only — deploy the escrow canister into the local
+   replica.** Pandame's [`dfx.json`](./dfx.json) points `dfx` at the
+   emulator's gateway (`--network local`) so the escrow wasm built from
+   `../escrow/` lands inside the same replica the dashboard talks to:
+
+   ```bash
+   npm run dev:setup
+   ```
+
+   The script prints the assigned local canister ID; copy it into a
+   `.env.local` at the repo root as `VITE_ESCROW_CANISTER_ID=<id>`.
+
+3. **Start the dev server** in a new terminal:
 
    ```bash
    npm run dev
    ```
 
-   The app boots at <http://localhost:5173> and talks to the escrow
-   canister on mainnet (the agent dials `window.location.origin`,
-   which `juno dev` proxies). The Juno emulator hosts a single
-   datastore collection — `profiles` — for editable user metadata
-   (see [`juno.dev.config.ts`](./juno.dev.config.ts)). All deal /
-   ledger state still lives in the upstream canisters.
+   The app boots at <http://localhost:5173>. Vite proxies `/api/*` to
+   the Juno emulator, so the agent in the browser reaches the local
+   replica via the same origin as the dev server. The Juno satellite
+   hosts the `profiles` datastore for editable user metadata (see
+   [`juno.dev.config.ts`](./juno.dev.config.ts)).
+
+> Don't run `dfx start`. Pandame's `dfx.json` is wired to use the Juno
+> emulator's replica as its `local` network — running a separate
+> replica on port 4943 will collide and confuse you.
 
 ### Quality gates
 
@@ -199,20 +230,21 @@ npm run e2e       # playwright
 
 ## 🧞 Common Commands
 
-| Command           | Action                                                        |
-| :---------------- | :------------------------------------------------------------ |
-| `npm install`     | Install dependencies                                          |
-| `npm run dev`     | Start the dev server at `http://localhost:5173`               |
-| `juno dev start`  | Start the local Juno emulator (requires Docker)               |
-| `npm run build`   | Type-check and build the production site to `./build/`        |
-| `npm run preview` | Preview the production build locally                          |
-| `npm run check`   | Run `svelte-check`                                            |
-| `npm run quality` | Run `format` then `lint` in one shot                          |
-| `npm run test`    | Run the Vitest unit tests                                     |
-| `npm run e2e`     | Run the Playwright E2E suite                                  |
-| `npm run did`     | Re-pull `escrow.did` from upstream and regenerate TS bindings |
-| `npm run i18n`    | Regenerate the typed i18n dictionary                          |
-| `juno deploy`     | Deploy the build output to a Juno satellite                   |
+| Command               | Action                                                                                            |
+| :-------------------- | :------------------------------------------------------------------------------------------------ |
+| `npm install`         | Install dependencies                                                                              |
+| `npm run dev`         | Start the dev server at `http://localhost:5173`                                                   |
+| `juno emulator start` | Start the local Juno emulator (requires Docker / Podman)                                          |
+| `npm run dev:setup`   | Build & deploy the upstream escrow canister into the local Juno emulator (first-time local setup) |
+| `npm run build`       | Type-check and build the production site to `./build/`                                            |
+| `npm run preview`     | Preview the production build locally                                                              |
+| `npm run check`       | Run `svelte-check`                                                                                |
+| `npm run quality`     | Run `format` then `lint` in one shot                                                              |
+| `npm run test`        | Run the Vitest unit tests                                                                         |
+| `npm run e2e`         | Run the Playwright E2E suite                                                                      |
+| `npm run did`         | Re-pull `escrow.did` from upstream and regenerate TS bindings                                     |
+| `npm run i18n`        | Regenerate the typed i18n dictionary                                                              |
+| `juno deploy`         | Deploy the build output to a Juno satellite                                                       |
 
 ## 🚀 Deploy
 

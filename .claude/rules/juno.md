@@ -77,18 +77,35 @@ push deal state into Juno.
 
 ## Local development
 
-- **Emulator:** `juno dev start` (requires Docker).
-- **Vite plugin:** `@junobuild/vite-plugin` is wired in
-  [`vite.config.ts`](../../vite.config.ts) for env-var injection.
+- **Emulator:** `juno emulator start` (requires Docker or Podman). It
+  exposes the IC HTTP gateway on `http://127.0.0.1:5987` and the admin
+  console on <http://localhost:5866>. The emulator is a fully
+  self-contained local IC replica — it **does not** proxy to mainnet.
+- **Vite proxy:** [`vite.config.ts`](../../vite.config.ts) forwards
+  `/api/*` to `http://localhost:5987` so the agent's HTTP gateway calls
+  reach the emulator via the dev-server origin.
+- **Vite plugin:** `@junobuild/vite-plugin` is wired alongside the proxy
+  for env-var injection (resolves `satellite.ids.development` from
+  [`juno.config.ts`](../../juno.config.ts)).
 - **Tailwind v4:** the Vite plugin runs alongside `@tailwindcss/vite` —
   don't reorder the `plugins` array.
 - **Agent host:** in dev, `REPLICA_HOST` is `window.location.origin`
-  (lets `juno dev start` proxy mainnet calls). In prod it's
-  `https://icp-api.io`. See `$lib/constants/app.constants.ts`.
+  (so the Vite `/api` proxy can route the agent at the local replica).
+  In prod it's `https://icp-api.io`. See
+  [`$lib/constants/app.constants.ts`](../../src/lib/constants/app.constants.ts).
+- **Local escrow:** the upstream escrow canister at
+  [`../escrow/`](../../../escrow/) is **not** pre-installed in the
+  emulator. `npm run dev:setup` builds it via `cargo` and deploys it
+  with `dfx --network local` into the same Juno replica. The deployed
+  canister ID is read from `VITE_ESCROW_CANISTER_ID` (set in
+  `.env.local`). See
+  [`.agents/workflows/deployment.md`](../../.agents/workflows/deployment.md).
 
 > [!IMPORTANT]
-> Do **NOT** run `dfx start`. The Juno emulator is the only local
-> replica.
+> Do **NOT** run `dfx start`. Pandame's [`dfx.json`](../../dfx.json)
+> wires the `local` network at `http://127.0.0.1:5987` (the Juno
+> emulator's gateway) so dfx commands deploy into the emulator's
+> replica without standing up a second one.
 
 ## Bindings pipeline
 

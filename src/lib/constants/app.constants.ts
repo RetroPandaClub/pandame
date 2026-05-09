@@ -1,9 +1,13 @@
 import { isDev } from '$lib/env/app.env';
 
 /**
- * The IC HTTP gateway. In dev we let the agent talk to the same origin so
- * `juno dev start` can proxy mainnet calls; in production we hit the public
- * boundary node.
+ * The IC HTTP gateway. In dev we point the agent at the same origin as the
+ * dev server (`window.location.origin`) and rely on Vite's `/api` proxy to
+ * forward calls to the local Juno emulator's replica on `127.0.0.1:5987` —
+ * the emulator does NOT proxy to mainnet, it is a self-contained local
+ * replica. In production we hit the public boundary node directly. See
+ * `vite.config.ts` for the proxy and `.agents/workflows/deployment.md` for
+ * the full local-replica setup (escrow + ledger live in the same emulator).
  */
 export const REPLICA_HOST =
 	isDev() && typeof window !== 'undefined' ? window.location.origin : 'https://icp-api.io';

@@ -10,47 +10,79 @@ satellite that hosts the static SvelteKit build.
 
 This workflow covers the two flavours of deploy that pandame supports:
 
-- **Local emulator** — for iterating against a fresh Juno satellite
-  container on your machine. The escrow canister is still called on
-  mainnet (the agent dials `window.location.origin`, which `juno dev`
-  proxies).
+- **Local emulator** — for iterating against a fresh local IC replica
+  on your machine. The Juno emulator is **self-contained** (it does
+  not proxy to mainnet), so the upstream escrow canister at
+  [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
+  (checked out as `../escrow/`) needs to be built and deployed into
+  the emulator's replica via `dfx --network local`.
 - **Production** — push the built static site to the live satellite via
   GitHub Actions or the `juno` CLI.
 
 > [!IMPORTANT]
-> Do **NOT** run `dfx start`. The Juno emulator is the only local replica
-> pandame supports — running `dfx start` alongside it causes port +
-> CORS conflicts.
+> Do **NOT** run `dfx start`. Pandame's [`dfx.json`](../../dfx.json)
+> wires the `local` network at `http://127.0.0.1:5987` (the Juno
+> emulator's gateway) so dfx commands deploy into the emulator's
+> replica without standing up a second one. A separate dfx replica on
+> port 4943 collides with the emulator and confuses the agent's
+> `/api` proxy target.
 
 ## Local emulator
 
 1. Stop any other replicas / emulators on your machine.
-2. Start the Juno emulator (requires Docker):
+
+2. Start the Juno emulator (requires Docker or Podman):
 
    ```bash
-   juno dev start
+   juno emulator start
    ```
 
-3. In a new terminal, start the SvelteKit dev server:
+   The IC HTTP gateway is exposed on `http://127.0.0.1:5987`; the
+   emulator-side admin console at <http://localhost:5866>.
+
+3. **First run only — deploy the upstream escrow canister into the
+   local replica.** Requires the
+   [`../escrow/`](../../../escrow/) repo cloned as a sibling and a
+   working Rust toolchain (`rustup target add wasm32-unknown-unknown`):
+
+   ```bash
+   npm run dev:setup
+   ```
+
+   The script runs `cargo build` against `../escrow/` to produce
+   `escrow.wasm`, then `dfx deploy escrow --network local` to install
+   it in the Juno emulator's replica. It prints the assigned local
+   canister ID; add it to `.env.local` (gitignored):
+
+   ```bash
+   echo "VITE_ESCROW_CANISTER_ID=<id>" >> .env.local
+   ```
+
+4. In a new terminal, start the SvelteKit dev server:
 
    ```bash
    npm run dev
    ```
 
-   The app boots at <http://localhost:5173>. The emulator-side admin
-   console is at <http://localhost:5866>.
+   The app boots at <http://localhost:5173>. Vite's `/api/*` proxy
+   forwards agent calls to the Juno emulator on port 5987, so the
+   browser's agent reaches the local replica via the dev-server
+   origin.
 
-4. PandaMe provisions **one Juno datastore collection** locally —
+5. PandaMe provisions **one Juno datastore collection** locally —
    `profiles` — for editable user metadata (see
    [`juno.dev.config.ts`](../../juno.dev.config.ts):
-   `memory: 'stable'`, `read: 'public'`, `write: 'private'`). All
-   escrow / ledger state lives in the upstream canisters on mainnet
-   (`umxj5-niaaa-aaaae-af2sq-cai` for escrow,
-   `ryjl3-tyaaa-aaaaa-aaaba-cai` for ICP). When you ship a new
-   collection, add the matching rule block here and update
+   `memory: 'stable'`, `read: 'public'`, `write: 'private'`). The
+   local satellite ID is pinned in
+   [`juno.config.ts`](../../juno.config.ts) under
+   `satellite.ids.development` so the Juno SDK resolves it
+   deterministically. Escrow / ledger state lives in the canisters
+   inside the same emulator (locally) or on mainnet (in production).
+   When you ship a new datastore collection, add the matching rule
+   block in `juno.dev.config.ts` and update
    [`Collection`](../../src/lib/constants/collections.constants.ts).
 
-5. (Optional) regenerate the candid bindings from upstream
+6. (Optional) regenerate the candid bindings from upstream
    [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
    (locally `../escrow/`) before starting:
 
@@ -60,7 +92,7 @@ This workflow covers the two flavours of deploy that pandame supports:
 
    See [`docs/ai/frontend/workflows/regenerate-bindings.md`](../../docs/ai/frontend/workflows/regenerate-bindings.md).
 
-6. (Optional) Run the Vitest unit suite or Playwright E2E:
+7. (Optional) Run the Vitest unit suite or Playwright E2E:
 
    ```bash
    npm run test -- --run
@@ -110,13 +142,23 @@ If CI is unavailable:
 
 ## Troubleshooting
 
-- **Sign-in silently fails locally.** Run `npm run postinstall:copy-auth`
-  to re-sync `static/workers/` from `node_modules/@junobuild/core/dist/workers/`.
+- **Sign-in silently fails locally.** Most often:
+  (a) `juno emulator start` is not running, or
+  (b) `juno.config.ts` is missing `satellite.ids.development` and the
+  SDK resolves the production satellite ID against the local
+  replica, or
+  (c) the auth worker is stale — run `npm run postinstall:copy-auth`
+  to re-sync `static/workers/` from
+  `node_modules/@junobuild/core/dist/workers/`.
 - **`adapter-static` build warning about `index.html`.** Should be gone
   since `+layout.ts` sets `prerender = false`. If it reappears, somebody
   re-enabled prerender — revert.
-- **CORS / 404 on the emulator.** Make sure `dfx start` is not running.
-  Stop everything, then `juno dev start` only.
+- **CORS / 404 on the emulator.** Make sure `dfx start` is not running
+  on a separate replica. Stop everything, then `juno emulator start`
+  only — pandame's `dfx.json` already targets the emulator's gateway.
+- **`canister not found` (`IC0301`) calling escrow.** You haven't run
+  `npm run dev:setup` yet, or `VITE_ESCROW_CANISTER_ID` in `.env.local`
+  is stale. Re-deploy and copy the printed ID.
 
 ## See also
 
