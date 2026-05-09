@@ -47,6 +47,25 @@ interface I18nHistory {
 	filter_cancelled: string;
 }
 
+interface I18nDetail {
+	title: string;
+	share_cta: string;
+	counterparty_payer: string;
+	counterparty_recipient: string;
+	created_at: string;
+	funded_at: string;
+	settled_at: string;
+	refunded_at: string;
+	updated_at: string;
+	consent_payer: string;
+	consent_recipient: string;
+	escrow_account: string;
+	note_label: string;
+	loading: string;
+	not_found: string;
+	open_share: string;
+}
+
 interface I18nProfile {
 	title: string;
 	principal_label: string;
@@ -158,6 +177,7 @@ interface I18n {
 	welcome: I18nWelcome;
 	nav: I18nNav;
 	history: I18nHistory;
+	detail: I18nDetail;
 	profile: I18nProfile;
 	send: I18nSend;
 	deals: I18nDeals;

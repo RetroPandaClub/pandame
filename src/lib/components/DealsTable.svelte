@@ -44,7 +44,7 @@
 		<ul class="flex flex-col gap-3">
 			{#each visibleDeals as deal (deal.id)}
 				<li>
-					<DealCard {deal} />
+					<DealCard {deal} href={`/deals/${deal.id}`} />
 				</li>
 			{/each}
 		</ul>

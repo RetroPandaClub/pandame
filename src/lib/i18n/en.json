@@ -39,6 +39,24 @@
 		"filter_refunded": "Refunded",
 		"filter_cancelled": "Cancelled"
 	},
+	"detail": {
+		"title": "Deal {id}",
+		"share_cta": "Share claim link",
+		"counterparty_payer": "Payer",
+		"counterparty_recipient": "Recipient",
+		"created_at": "Created",
+		"funded_at": "Funded",
+		"settled_at": "Settled",
+		"refunded_at": "Refunded",
+		"updated_at": "Last updated",
+		"consent_payer": "Payer consent",
+		"consent_recipient": "Recipient consent",
+		"escrow_account": "Escrow account",
+		"note_label": "Note",
+		"loading": "Loading the deal…",
+		"not_found": "We couldn't find this deal under your principal.",
+		"open_share": "Open share link"
+	},
 	"profile": {
 		"title": "Profile",
 		"principal_label": "Principal",
