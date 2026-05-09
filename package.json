@@ -13,6 +13,7 @@
 		"format": "prettier --cache --write . && eslint . --cache --fix",
 		"quality": "npm run format && npm run lint",
 		"did": "./scripts/did.sh && npm run format && npm run lint",
+		"dev:setup": "./scripts/dev-setup.sh",
 		"postinstall:copy-auth": "node -e \"require('fs').cpSync('node_modules/@junobuild/core/dist/workers/', './static/workers', {recursive: true});\"",
 		"postinstall": "npm run postinstall:copy-auth",
 		"test": "vitest",

@@ -1,0 +1,27 @@
+{
+	"version": 1,
+	"networks": {
+		"local": {
+			"providers": ["http://127.0.0.1:5987"],
+			"type": "ephemeral"
+		}
+	},
+	"canisters": {
+		"escrow": {
+			"type": "custom",
+			"candid": "../escrow/src/escrow/escrow.did",
+			"wasm": "../escrow/target/wasm32-unknown-unknown/release/escrow.wasm",
+			"build": "scripts/build-escrow.sh",
+			"metadata": [
+				{
+					"name": "candid:service"
+				}
+			],
+			"remote": {
+				"id": {
+					"ic": "umxj5-niaaa-aaaae-af2sq-cai"
+				}
+			}
+		}
+	}
+}
