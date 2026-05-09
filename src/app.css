@@ -20,31 +20,37 @@
  */
 
 @font-face {
-	font-family: 'Lato';
+	font-family: 'Poppins';
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url('/fonts/lato-regular.woff2') format('woff2');
+	src: url('/fonts/poppins-regular.woff2') format('woff2');
 }
 
 @font-face {
-	font-family: 'Lato';
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('/fonts/poppins-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Poppins';
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
-	src: url('/fonts/lato-bold.woff2') format('woff2');
+	src: url('/fonts/poppins-bold.woff2') format('woff2');
 }
 
 @font-face {
-	font-family: 'Lato';
+	font-family: 'Poppins';
 	font-style: normal;
 	font-weight: 900;
 	font-display: swap;
-	src: url('/fonts/lato-black.woff2') format('woff2');
+	src: url('/fonts/poppins-black.woff2') format('woff2');
 }
 
-/* Legacy brand font kept as a fallback so the JetBrains Mono assets in
- * `static/fonts/` keep working until they're removed. */
 @font-face {
 	font-family: 'JetBrains Mono';
 	font-style: normal;
@@ -104,7 +110,7 @@
 
 	/* Typography — modular scale (base 16, ratio 1.25). Theme-independent. */
 	--font-sans:
-		'Lato', 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+		'Poppins', 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
 	--text-xxs: 0.625rem; /* 10 px */

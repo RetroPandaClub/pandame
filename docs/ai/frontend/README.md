@@ -39,7 +39,7 @@ it once per session.
 
 - **SvelteKit 2 + Svelte 5 (runes)**, TypeScript everywhere.
 - **Tailwind v4** wired via `@tailwindcss/vite`. The purple/green
-  brand palette, Lato (self-hosted), the modular type scale
+  brand palette, Poppins (self-hosted), the modular type scale
   (`text-{xxs,body2,body1,h6..h1}`), the `tall:` custom variant and
   the `animate-fade` keyframe live in
   [`src/app.css`](../../../src/app.css) via `@theme` +

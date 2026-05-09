@@ -77,7 +77,7 @@ entry point:
 - **Frontend**: [SvelteKit](https://kit.svelte.dev/) with
   **Svelte 5 (Runes)**.
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with a
-  purple-and-green brand palette + Lato + a modular type scale,
+  purple-and-green brand palette + Poppins + a modular type scale,
   declared via `@theme` in [`src/app.css`](./src/app.css). All
   brand-aware colours are wired through CSS variables on
   `[data-theme]` so dark mode is a one-file swap.

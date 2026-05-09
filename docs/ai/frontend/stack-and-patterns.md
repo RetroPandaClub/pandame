@@ -218,9 +218,10 @@ Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
 
 - **Typography** is the modular scale base 16 / ratio 1.25 — utilities
   are `text-{xxs,body2,body1,h6,h5,h4,h3,h2,h1}` with paired
-  `--text-*--line-height` tokens. Default font is **Lato** (self-hosted
-  woff2 in `static/fonts/`), with `JetBrains Mono` available as
-  `--font-mono` for principal / amount displays.
+  `--text-*--line-height` tokens. Default font is **Poppins**
+  (self-hosted woff2 in `static/fonts/`, weights 400 / 600 / 700 /
+  900), with `JetBrains Mono` available as `--font-mono` for
+  principal / amount displays.
 
 - **Radii** match the Figma's pill-heavy CTA pattern: `rounded-sm`
   (8 px), `rounded-md` (12 px), `rounded-lg` (16 px), `rounded-xl`
