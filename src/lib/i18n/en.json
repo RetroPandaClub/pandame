@@ -1,15 +1,10 @@
 {
 	"core": {
 		"text": {
-			"cancel": "Cancel",
-			"close": "Close",
-			"save": "Save",
-			"submit": "Submit",
 			"copy": "Copy",
 			"copied": "Copied!",
 			"done": "Done",
 			"loading": "Loading…",
-			"signed_in_as": "Signed in as",
 			"sign_in": "Sign in",
 			"sign_out": "Sign out",
 			"try_again": "Try again",
@@ -59,20 +54,14 @@
 		"counterparty_recipient": "Recipient",
 		"created_at": "Created",
 		"funded_at": "Funded",
-		"settled_at": "Settled",
-		"refunded_at": "Refunded",
-		"updated_at": "Last updated",
 		"consent_payer": "Payer consent",
 		"consent_recipient": "Recipient consent",
-		"escrow_account": "Escrow account",
 		"note_label": "Note",
 		"loading": "Loading the deal…",
-		"not_found": "We couldn't find this deal under your principal.",
-		"open_share": "Open share link"
+		"not_found": "We couldn't find this deal under your principal."
 	},
 	"profile": {
 		"title": "Profile",
-		"principal_label": "Principal",
 		"copy_principal": "Copy principal",
 		"edit_cta": "Edit profile",
 		"username_label": "Username",
@@ -80,13 +69,10 @@
 		"surname_label": "Surname",
 		"address_label": "Address",
 		"email_label": "Email",
-		"reliability_label": "Reliability",
-		"weight_label": "Weight",
 		"reliability_score": "Score",
 		"reliability_concluded": "Concluded deals",
 		"reliability_positive": "Positive outcomes",
 		"reliability_pending": "Not enough history yet",
-		"role_label": "Role",
 		"role_user": "User",
 		"role_arbitrator": "Arbitrator",
 		"role_admin": "Admin",
@@ -126,15 +112,8 @@
 		"create_cta": "Create a deal",
 		"empty_title": "No deals yet",
 		"empty_description": "Create your first escrow deal to lock funds against a recipient or share a tip link.",
-		"role": {
-			"payer": "payer",
-			"recipient": "recipient",
-			"unknown": "unknown"
-		},
 		"row": {
-			"untitled": "(untitled deal)",
 			"amount": "Amount",
-			"payer": "Payer",
 			"recipient": "Recipient",
 			"recipient_open": "open / share-link",
 			"expires": "Expires",
@@ -148,8 +127,7 @@
 			"accept": "Accept",
 			"reclaim": "Reclaim",
 			"dispute": "Dispute (soon)",
-			"dispute_tooltip": "Dispute resolution will land in a future canister upgrade.",
-			"dispute_notice_html": "Dispute resolution is on the roadmap. The escrow canister does not yet support a <code>Disputed</code> state — track progress in <a href=\"https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"underline\">the escrow repo</a>."
+			"dispute_tooltip": "Dispute resolution will land in a future canister upgrade."
 		},
 		"status": {
 			"created": "Created",
@@ -164,18 +142,7 @@
 		"title": "Create a deal",
 		"submit": "Create & fund",
 		"submitting": "Creating…",
-		"deal_title_label": "Title (optional)",
-		"deal_title_placeholder": "e.g. Coffee for Alice",
-		"note_label": "Note (optional)",
-		"note_placeholder": "Add a short message",
-		"recipient_label": "Recipient principal (optional)",
 		"recipient_placeholder": "Leave empty for a tip / share-link flow",
-		"recipient_invalid": "Not a valid principal.",
-		"amount_label_html": "Amount ({symbol})",
-		"amount_placeholder_html": "e.g. 0.5 — fee ≈ {fee_str}",
-		"amount_invalid": "Enter a positive amount.",
-		"expiry_label": "Expires at",
-		"expiry_invalid": "Expiry must be in the future.",
 		"mode_pay": "Pay",
 		"mode_receive": "Receive",
 		"currency_label": "Currency",
@@ -184,7 +151,6 @@
 		"tenor_label": "Tenor",
 		"votes_label": "Votes in case of dispute",
 		"votes_disabled_hint": "Dispute jury voting will land in a future canister upgrade.",
-		"summary_title": "Summary",
 		"summary_amount": "Amount",
 		"summary_fee": "Network fee",
 		"summary_total": "Total payment"
@@ -211,7 +177,6 @@
 		"recipient_open": "open / first-claimer wins",
 		"deal_field": "Deal",
 		"status_field": "Status",
-		"submit": "Accept deal",
-		"submitting": "Claiming…"
+		"submit": "Accept deal"
 	}
 }

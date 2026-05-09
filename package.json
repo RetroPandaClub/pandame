@@ -66,7 +66,6 @@
 		"@icp-sdk/core": "^5.4.0",
 		"@junobuild/core": "^5.4.0",
 		"@junobuild/schema": "^1.2.4",
-		"nanoid": "^5.1.11",
 		"qrcode": "^1.5.4"
 	}
 }

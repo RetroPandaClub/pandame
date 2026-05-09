@@ -4,15 +4,10 @@
 
 interface I18nCore {
 	text: {
-		cancel: string;
-		close: string;
-		save: string;
-		submit: string;
 		copy: string;
 		copied: string;
 		done: string;
 		loading: string;
-		signed_in_as: string;
 		sign_in: string;
 		sign_out: string;
 		try_again: string;
@@ -68,21 +63,15 @@ interface I18nDetail {
 	counterparty_recipient: string;
 	created_at: string;
 	funded_at: string;
-	settled_at: string;
-	refunded_at: string;
-	updated_at: string;
 	consent_payer: string;
 	consent_recipient: string;
-	escrow_account: string;
 	note_label: string;
 	loading: string;
 	not_found: string;
-	open_share: string;
 }
 
 interface I18nProfile {
 	title: string;
-	principal_label: string;
 	copy_principal: string;
 	edit_cta: string;
 	username_label: string;
@@ -90,13 +79,10 @@ interface I18nProfile {
 	surname_label: string;
 	address_label: string;
 	email_label: string;
-	reliability_label: string;
-	weight_label: string;
 	reliability_score: string;
 	reliability_concluded: string;
 	reliability_positive: string;
 	reliability_pending: string;
-	role_label: string;
 	role_user: string;
 	role_arbitrator: string;
 	role_admin: string;
@@ -139,11 +125,8 @@ interface I18nDeals {
 	create_cta: string;
 	empty_title: string;
 	empty_description: string;
-	role: { payer: string; recipient: string; unknown: string };
 	row: {
-		untitled: string;
 		amount: string;
-		payer: string;
 		recipient: string;
 		recipient_open: string;
 		expires: string;
@@ -158,7 +141,6 @@ interface I18nDeals {
 		reclaim: string;
 		dispute: string;
 		dispute_tooltip: string;
-		dispute_notice_html: string;
 	};
 	status: {
 		created: string;
@@ -174,18 +156,7 @@ interface I18nCreate {
 	title: string;
 	submit: string;
 	submitting: string;
-	deal_title_label: string;
-	deal_title_placeholder: string;
-	note_label: string;
-	note_placeholder: string;
-	recipient_label: string;
 	recipient_placeholder: string;
-	recipient_invalid: string;
-	amount_label_html: string;
-	amount_placeholder_html: string;
-	amount_invalid: string;
-	expiry_label: string;
-	expiry_invalid: string;
 	mode_pay: string;
 	mode_receive: string;
 	currency_label: string;
@@ -194,7 +165,6 @@ interface I18nCreate {
 	tenor_label: string;
 	votes_label: string;
 	votes_disabled_hint: string;
-	summary_title: string;
 	summary_amount: string;
 	summary_fee: string;
 	summary_total: string;
@@ -224,7 +194,6 @@ interface I18nClaim {
 	deal_field: string;
 	status_field: string;
 	submit: string;
-	submitting: string;
 }
 
 interface I18n {

@@ -45,7 +45,6 @@
 | `BottomNav`        | Sticky bottom-of-frame nav. Three snippet slots: `left`, `right`, `center` (centre is absolutely positioned `-top-7` for a raised IconButton).                                                                                 |
 | `BrandHeader`      | Purple full-bleed header with `title` + optional `subtitle`. Snippet slots `leading` / `trailing` (avatar, badges) and `children` (filter chips / tabs). Honours iOS safe-area-top.                                            |
 | `Button`           | Pill button. Variants: `primary` (filled), `secondary` (outlined), `ghost` (transparent). Sizes sm / md / lg. `loading` prop renders a spinner + sets `aria-busy`. `leading` / `trailing` snippet slots for inline icons.      |
-| `Card`             | Generic glass-card surface (title + children + footer snippet).                                                                                                                                                                |
 | `Chip`             | Small inline chip / badge / filter pill. Variants solid / outline / soft / success / warning / danger. Renders as `<button>` when `onclick` is supplied, plain `<span>` otherwise.                                             |
 | `Countdown`        | Live `<time>` element ticking every `updateMs` (default 1 s). Renders `h{H}:{MM}:{SS}` for sub-day, `{D}d {HH}h {MM}m` past 24 h. Swaps to `expiredLabel` + `text-danger` when the deadline passes.                            |
 | `EmptyState`       | Dashed-border "nothing here yet" placeholder, with optional snippet child.                                                                                                                                                     |
@@ -68,11 +67,9 @@
 | `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`. |
 | `DealCard`           | Single-deal preview card (header bar + amount + countdown). Optional `href` renders the card as an `<a>` for the detail route.                                      |
 | `DealFilterChips`    | All / Active / Settled / Refunded / Cancelled chip strip — bindable `value: DealFilter`.                                                                            |
-| `DealStatusBadge`    | Uppercase pill per `DealStatusName` (legacy variant kept for inline labels).                                                                                        |
 | `DealStatusDot`      | 24 px circular icon badge per status (check / cross / fund / refresh / open circle).                                                                                |
 | `DealsTable`         | List wrapper with loading / empty-state / `<ul>` + `filter` prop.                                                                                                   |
 | `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` to the underlying Button.                                                                              |
-| `Logout`             | Legacy sign-out icon button (prefer `LogoutConfirmModal`).                                                                                                          |
 | `LogoutConfirmModal` | Sign-out confirmation modal (Cancel / Yes, sign out).                                                                                                               |
 | `ReliabilityCard`    | 3-row reliability summary: score chip + concluded count + positive count.                                                                                           |
 | `RoleStubScreen`     | Shared layout for the v2 Arbitrator / Admin profile screens.                                                                                                        |

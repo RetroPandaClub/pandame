@@ -55,8 +55,6 @@ it once per session.
 - **`@icp-sdk/bindgen`** generates the TS bindings from the upstream
   `escrow.did` (driven by `npm run did`).
 - **`qrcode`** renders the share-link QR for the tip flow.
-- **`nanoid`** is used by `profile.services.ts` to mint client-side
-  document keys for the `profiles` collection.
 - **ESLint** flat config (see
   [`eslint.config.js`](../../../eslint.config.js)). Notable rules:
   `import/no-relative-parent-imports` is **`error`** under `src/**`,

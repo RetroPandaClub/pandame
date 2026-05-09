@@ -70,7 +70,6 @@ one fits.
 - `BottomNav.svelte` — sticky three-slot nav (left / right + raised centre).
 - `BrandHeader.svelte` — purple full-bleed header (title + leading / trailing / children slots).
 - `Button.svelte` — pill button (primary / secondary / ghost; sm / md / lg; loading state).
-- `Card.svelte` — glass-card surface with title + footer snippets.
 - `Chip.svelte` — small chip / badge / filter pill (solid / outline / soft / success / warning / danger).
 - `Countdown.svelte` — live `<time>` element ticking every second.
 - `EmptyState.svelte` — dashed "nothing here yet" placeholder.
@@ -91,11 +90,9 @@ one fits.
 - `DealActions.svelte` — context-aware action bar (Consent / Reject / Cancel / Accept / Reclaim / Dispute).
 - `DealCard.svelte` — single-deal preview (header bar + amount + countdown).
 - `DealFilterChips.svelte` — All / Active / Settled / Refunded / Cancelled chip strip.
-- `DealStatusBadge.svelte` — colored pill per `DealStatusName` (legacy uppercase variant).
 - `DealStatusDot.svelte` — 24 px circular status badge (icon + colour per status).
 - `DealsTable.svelte` — list wrapper (loading / empty / `<ul>` of `DealCard` links).
 - `Login.svelte` — Internet Identity sign-in button (forwards `fullWidth` / `size`).
-- `Logout.svelte` — sign-out icon button (legacy — prefer `LogoutConfirmModal`).
 - `LogoutConfirmModal.svelte` — sign-out confirmation modal.
 - `ReliabilityCard.svelte` — caller's reliability score (3-row card).
 - `RoleStubScreen.svelte` — shared Arbitrator / Admin v2 stub layout.
