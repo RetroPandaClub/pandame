@@ -24,6 +24,7 @@ interface I18nWelcome {
 	greeting_prefix: string;
 	greeting_suffix: string;
 	cta_caption: string;
+	cta_button: string;
 }
 
 interface I18nNav {

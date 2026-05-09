@@ -6,11 +6,19 @@
 	interface Props {
 		fullWidth?: boolean;
 		size?: 'sm' | 'md' | 'lg';
+		/**
+		 * Override the default `Sign in` label — e.g. the welcome screen
+		 * uses `Connect` since the user hasn't yet been told what
+		 * Internet Identity is.
+		 */
+		label?: string;
 	}
 
-	let { fullWidth = false, size = 'md' }: Props = $props();
+	let { fullWidth = false, size = 'md', label }: Props = $props();
 
 	let progress = $state(false);
+
+	let resolvedLabel = $derived(label ?? $i18n.core.text.sign_in);
 
 	const login = async () => {
 		progress = true;
@@ -25,5 +33,5 @@
 </script>
 
 <Button onclick={login} loading={progress} {fullWidth} {size}>
-	{$i18n.core.text.sign_in}
+	{resolvedLabel}
 </Button>

@@ -18,7 +18,8 @@
 	"welcome": {
 		"greeting_prefix": "Hi. We’re happy to see you on ",
 		"greeting_suffix": "!",
-		"cta_caption": "Connect your wallet"
+		"cta_caption": "Connect your wallet",
+		"cta_button": "Connect"
 	},
 	"nav": {
 		"aria_label": "Primary navigation",

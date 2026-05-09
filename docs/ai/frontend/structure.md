@@ -77,7 +77,7 @@ one fits.
 - `IconButton.svelte` — square / circular icon-only button (4 variants × 3 sizes).
 - `Modal.svelte` — generic dialog shell (title / children / footer + Esc to close).
 - `Money.svelte` — formatted token amount (signed / colorize / sm / md / lg).
-- `PandaMark.svelte` — brand illustration (dotted ring + emoji placeholder).
+- `PandaMark.svelte` — brand mark (panda silhouette in a lavender squircle, real artwork from `static/brand/panda.png`).
 - `Tabs.svelte` — generic segmented control `<T extends string>`.
 - `TextInput.svelte` — themed `<input>` with focus-ring + invalid wiring.
 - `VoteQuorumPicker.svelte` — three-circle radio picker (stubbed in v1).
