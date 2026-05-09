@@ -158,7 +158,7 @@
 			<Money amount={deal.amount} size="lg" />
 		</div>
 
-		<div class="border-border-soft bg-bg flex flex-col gap-3 rounded-xl border p-4">
+		<div class="border-border-soft bg-bg-elevated flex flex-col gap-3 rounded-xl border p-4">
 			<div class="flex items-baseline justify-between">
 				<dt class="text-body2 text-muted">{$i18n.deals.row.expires}</dt>
 				<dd><Countdown expiresAtNs={deal.expires_at_ns} /></dd>
@@ -179,7 +179,7 @@
 			{/if}
 		</div>
 
-		<div class="border-border-soft bg-bg flex flex-col gap-3 rounded-xl border p-4">
+		<div class="border-border-soft bg-bg-elevated flex flex-col gap-3 rounded-xl border p-4">
 			<div class="flex items-baseline justify-between">
 				<dt class="text-body2 text-muted">{$i18n.detail.counterparty_payer}</dt>
 				<dd class="text-body2 text-default font-mono">
@@ -211,7 +211,7 @@
 		</div>
 
 		{#if note !== undefined}
-			<div class="border-border-soft bg-bg flex flex-col gap-2 rounded-xl border p-4">
+			<div class="border-border-soft bg-bg-elevated flex flex-col gap-2 rounded-xl border p-4">
 				<dt class="text-body2 text-muted">{$i18n.detail.note_label}</dt>
 				<dd class="text-body1 text-default">{note}</dd>
 			</div>

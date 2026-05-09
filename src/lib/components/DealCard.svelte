@@ -71,14 +71,14 @@
 	<a
 		{href}
 		data-tid="deal-card"
-		class="border-border-soft bg-bg shadow-primary/5 hover:shadow-primary/10 block overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md"
+		class="border-border-soft bg-bg-elevated shadow-primary/5 hover:shadow-primary/10 block overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md"
 	>
 		{@render body()}
 	</a>
 {:else}
 	<article
 		data-tid="deal-card"
-		class="border-border-soft bg-bg shadow-primary/5 overflow-hidden rounded-xl border shadow-sm"
+		class="border-border-soft bg-bg-elevated shadow-primary/5 overflow-hidden rounded-xl border shadow-sm"
 	>
 		{@render body()}
 	</article>

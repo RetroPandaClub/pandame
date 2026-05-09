@@ -28,7 +28,7 @@
 <div
 	role="tablist"
 	aria-label={$i18n.profile.role_switch_aria}
-	class="rounded-pill border-border bg-bg inline-flex items-center border p-1"
+	class="rounded-pill border-border bg-bg-elevated inline-flex items-center border p-1"
 >
 	{#each ['user', 'arbitrator', 'admin'] as const as role (role)}
 		{@const active = current === role}

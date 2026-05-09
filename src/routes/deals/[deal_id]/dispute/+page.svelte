@@ -63,7 +63,7 @@
 			placeholder={$i18n.dispute.reason_placeholder}
 			rows={4}
 			disabled
-			class="border-border bg-bg text-body1 text-default placeholder:text-subtle focus:border-primary focus:ring-primary/30 w-full resize-none rounded-md border px-4 py-3 focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+			class="border-border bg-bg-elevated text-body1 text-default placeholder:text-subtle focus:border-primary focus:ring-primary/30 w-full resize-none rounded-md border px-4 py-3 focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 		></textarea>
 	</FormField>
 

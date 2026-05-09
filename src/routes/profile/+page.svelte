@@ -137,7 +137,9 @@
 	</div>
 
 	{#if $profileStore !== undefined}
-		<dl class="border-border-soft bg-bg text-body2 flex flex-col gap-2 rounded-xl border p-4">
+		<dl
+			class="border-border-soft bg-bg-elevated text-body2 flex flex-col gap-2 rounded-xl border p-4"
+		>
 			{#if $profileStore.data.email.length > 0}
 				<div class="flex items-baseline justify-between gap-3">
 					<dt class="text-muted">{$i18n.profile.email_label}</dt>

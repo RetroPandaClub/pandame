@@ -213,8 +213,12 @@ Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
   | `danger`        | `#E64545` | Errors, cancelled / rejected state.       |
 
   Surface / text / border tokens (full list in `src/app.css`):
-  `bg`, `bg-soft`, `bg-inverse`, `default`, `default-inverse`,
-  `muted`, `subtle`, `border`, `border-soft`, `border-strong`.
+  `bg` (off-white canvas, `#F7F7FA`), `bg-elevated` (`#FFFFFF`
+  cards / inputs / modals on top of the canvas), `bg-soft` (lavender
+  wash for the device-frame chrome), `bg-inverse` (Blu Night),
+  `default` (Blu Night text `#191C32`), `default-inverse` (white text
+  on brand fills), `muted`, `subtle`, `border`, `border-soft`,
+  `border-strong`.
 
 - **Typography** is the modular scale base 16 / ratio 1.25 — utilities
   are `text-{xxs,body2,body1,h6,h5,h4,h3,h2,h1}` with paired
@@ -223,9 +227,11 @@ Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
   900), with `JetBrains Mono` available as `--font-mono` for
   principal / amount displays.
 
-- **Radii** match the Figma's pill-heavy CTA pattern: `rounded-sm`
-  (8 px), `rounded-md` (12 px), `rounded-lg` (16 px), `rounded-xl`
-  (20 px), `rounded-pill` (9999 px).
+- **Radii** match the design system: `rounded-sm` (8 px),
+  `rounded-md` (12 px), `rounded-lg` (16 px), `rounded-xl` (20 px),
+  `rounded-button` (22 px — the canonical CTA radius, used by
+  `Button`), `rounded-pill` (9999 px — reserved for chips, badges,
+  filter strips, the BalanceBadge).
 
 - **No raw hex** (`bg-[#0f0]`), no inline `style="color:…"`, **no
   `text-white` / `bg-black` / `border-black` literals** in component
@@ -282,8 +288,11 @@ edge-to-edge on phones:
 </div>
 ```
 
-- Outer is `bg-bg-soft` (lavender wash); inner device frame is `bg-bg`
-  (white) with a soft purple shadow so it reads as a card on desktop.
+- Outer is `bg-bg-soft` (lavender wash for the desktop chrome
+  around the device); inner device frame is `bg-bg` (off-white
+  `#F7F7FA` canvas) with a soft purple shadow so it reads as a card
+  on desktop. Cards / inputs / modals on top of the canvas use
+  `bg-bg-elevated` (`#FFFFFF`).
 - The frame is a **flex column** so pages can use `mt-auto` to push
   content (e.g. a Sign-out button) to the bottom of the viewport.
 - The bottom-nav uses `sticky bottom-0` + `mt-auto` so it docks inside

@@ -9,7 +9,7 @@
 </script>
 
 <span
-	class="bg-bg text-default border-border-soft rounded-pill text-body2 inline-flex items-center gap-2 border px-3 py-1 font-bold"
+	class="bg-bg-elevated text-default border-border-soft rounded-pill text-body2 inline-flex items-center gap-2 border px-3 py-1 font-bold"
 	aria-label="Your ICP balance"
 	data-tid="balance-badge"
 >

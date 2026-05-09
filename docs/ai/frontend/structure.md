@@ -188,8 +188,8 @@ which carries an inline `eslint-disable-next-line`.
   See [stack-and-patterns.md](./stack-and-patterns.md#tailwind-v4--design-tokens).
 - Raw `text-white` / `bg-white` / `bg-black` / `border-black` in
   component markup — use the inverse / surface tokens
-  (`text-default-inverse`, `bg-bg`, `bg-bg-inverse`, `border-default`)
-  so dark mode flips correctly.
+  (`text-default-inverse`, `bg-bg`, `bg-bg-elevated`, `bg-bg-inverse`,
+  `border-default`) so dark mode flips correctly.
 - Tailwind `dark:` utility variants. Dark mode is wired via CSS-variable
   swap on `[data-theme='dark']` in [`src/app.css`](../../../src/app.css);
   per-utility `dark:` classes bypass that and break theme switching.

@@ -12,7 +12,7 @@
 </script>
 
 <nav
-	class="border-border-soft bg-bg sticky bottom-0 z-30 mt-auto border-t pb-[env(safe-area-inset-bottom)]"
+	class="border-border-soft bg-bg-elevated sticky bottom-0 z-30 mt-auto border-t pb-[env(safe-area-inset-bottom)]"
 	aria-label={ariaLabel}
 >
 	<div class="relative flex h-16 items-center justify-between px-10">

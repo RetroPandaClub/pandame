@@ -93,12 +93,13 @@
 	--color-danger: #e64545;
 
 	/* Surfaces */
-	--color-bg: #ffffff;
+	--color-bg: #f7f7fa;
+	--color-bg-elevated: #ffffff;
 	--color-bg-soft: #f4eefb;
-	--color-bg-inverse: #1a1736;
+	--color-bg-inverse: #191c32;
 
 	/* Text — "Blu Night" + variants */
-	--color-default: #1a1736;
+	--color-default: #191c32;
 	--color-default-inverse: #ffffff;
 	--color-muted: #6b6884;
 	--color-subtle: #a39fbf;
@@ -132,11 +133,14 @@
 	--text-h1: 3.8125rem; /* 61 px */
 	--text-h1--line-height: 1.6;
 
-	/* Radius — pill-shaped CTAs are the dominant pattern. Theme-independent. */
+	/* Radius — design-system tokens. Theme-independent.
+	 *  - `button` (22 px) is the canonical CTA radius.
+	 *  - `pill` (9999 px) is reserved for chips, badges, balance pills. */
 	--radius-sm: 0.5rem; /* 8 px */
 	--radius-md: 0.75rem; /* 12 px */
 	--radius-lg: 1rem; /* 16 px */
 	--radius-xl: 1.25rem; /* 20 px */
+	--radius-button: 1.375rem; /* 22 px */
 	--radius-pill: 9999px;
 
 	/* Animations */
@@ -176,11 +180,12 @@
 		--color-warning: #f3a712;
 		--color-danger: #e64545;
 
-		--color-bg: #ffffff;
+		--color-bg: #f7f7fa;
+		--color-bg-elevated: #ffffff;
 		--color-bg-soft: #f4eefb;
-		--color-bg-inverse: #1a1736;
+		--color-bg-inverse: #191c32;
 
-		--color-default: #1a1736;
+		--color-default: #191c32;
 		--color-default-inverse: #ffffff;
 		--color-muted: #6b6884;
 		--color-subtle: #a39fbf;
@@ -221,6 +226,7 @@
 		--color-danger:          …;
 
 		--color-bg:              …;
+		--color-bg-elevated:     …;
 		--color-bg-soft:         …;
 		--color-bg-inverse:      …;
 

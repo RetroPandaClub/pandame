@@ -54,7 +54,7 @@
 	disabled={isDisabled}
 	aria-label={ariaLabel}
 	aria-busy={loading || undefined}
-	class="rounded-pill inline-flex items-center justify-center gap-2 font-bold transition-colors {VARIANT[
+	class="rounded-button inline-flex items-center justify-center gap-2 font-semibold transition-colors {VARIANT[
 		variant
 	]} {SIZE[size]} {fullWidth ? 'w-full' : ''} {isDisabled ? 'cursor-not-allowed opacity-40' : ''}"
 >

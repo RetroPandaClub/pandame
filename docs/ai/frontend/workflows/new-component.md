@@ -92,7 +92,7 @@ the use case.
 </script>
 
 <article
-	class="bg-bg text-default border-border-soft shadow-primary/5 rounded-lg border p-4 shadow-md"
+	class="bg-bg-elevated text-default border-border-soft shadow-primary/5 rounded-lg border p-4 shadow-md"
 	class:bg-bg-soft={highlight}
 >
 	<h3 class="text-h6 font-bold">#{deal.id.toString()}</h3>

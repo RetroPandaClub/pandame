@@ -31,7 +31,7 @@
 	});
 </script>
 
-<div class="border-border-soft bg-bg flex flex-col gap-3 rounded-xl border p-4">
+<div class="border-border-soft bg-bg-elevated flex flex-col gap-3 rounded-xl border p-4">
 	<div class="flex items-center justify-between">
 		<span class="text-body2 text-muted">{$i18n.profile.reliability_score}</span>
 		{#if score === undefined}

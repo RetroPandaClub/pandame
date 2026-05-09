@@ -51,7 +51,7 @@
 	aria-describedby={ariaDescribedby}
 	aria-label={ariaLabel}
 	aria-invalid={invalid || undefined}
-	class="bg-bg text-body1 text-default placeholder:text-subtle focus:border-primary focus:ring-primary/30 w-full rounded-md border px-4 py-3 focus:ring-2 focus:outline-none {invalid
+	class="bg-bg-elevated text-body1 text-default placeholder:text-subtle focus:border-primary focus:ring-primary/30 w-full rounded-md border px-4 py-3 focus:ring-2 focus:outline-none {invalid
 		? 'border-danger focus:border-danger focus:ring-danger/30'
 		: 'border-border'} {mono ? 'font-mono' : ''} {disabled ? 'cursor-not-allowed opacity-60' : ''}"
 />

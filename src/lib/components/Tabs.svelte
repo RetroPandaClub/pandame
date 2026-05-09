@@ -34,7 +34,7 @@
 			disabled={tab.disabled}
 			onclick={select(tab.id)}
 			class="rounded-pill text-body2 px-6 py-2 font-bold transition-colors {active
-				? 'bg-bg text-primary shadow-sm'
+				? 'bg-bg-elevated text-primary shadow-sm'
 				: 'text-default-inverse/90 hover:text-default-inverse'} {tab.disabled
 				? 'cursor-not-allowed opacity-40'
 				: ''}"

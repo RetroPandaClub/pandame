@@ -31,7 +31,7 @@
 		secondary:
 			'bg-transparent border-2 border-primary text-primary hover:bg-primary/10 active:bg-primary/20',
 		ghost: 'bg-transparent text-default hover:bg-primary/10 active:bg-primary/20',
-		floating: 'bg-bg text-default border border-border-soft shadow-lg shadow-primary/15'
+		floating: 'bg-bg-elevated text-default border border-border-soft shadow-lg shadow-primary/15'
 	};
 
 	const SIZE: Record<Size, string> = {

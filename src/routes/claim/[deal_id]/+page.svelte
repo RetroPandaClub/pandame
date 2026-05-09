@@ -160,7 +160,7 @@
 		</div>
 	{:else if preview !== undefined}
 		<div
-			class="border-border-soft bg-bg shadow-primary/5 flex flex-col gap-3 rounded-xl border p-5 shadow-sm"
+			class="border-border-soft bg-bg-elevated shadow-primary/5 flex flex-col gap-3 rounded-xl border p-5 shadow-sm"
 		>
 			<header class="flex items-start justify-between gap-3">
 				<h2 class="text-h6 text-default font-bold">{title}</h2>
