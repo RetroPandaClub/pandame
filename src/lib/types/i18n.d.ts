@@ -31,6 +31,34 @@ interface I18nWelcome {
 	cta_caption: string;
 }
 
+interface I18nNav {
+	aria_label: string;
+	home: string;
+	send: string;
+	profile: string;
+}
+
+interface I18nHistory {
+	title: string;
+	filter_all: string;
+	filter_active: string;
+	filter_settled: string;
+	filter_refunded: string;
+	filter_cancelled: string;
+}
+
+interface I18nProfile {
+	title: string;
+	principal_label: string;
+	copy_principal: string;
+}
+
+interface I18nSend {
+	title: string;
+	coming_soon_title: string;
+	coming_soon_description: string;
+}
+
 interface I18nDeals {
 	create_cta: string;
 	empty_title: string;
@@ -116,6 +144,10 @@ interface I18n {
 	core: I18nCore;
 	layout: I18nLayout;
 	welcome: I18nWelcome;
+	nav: I18nNav;
+	history: I18nHistory;
+	profile: I18nProfile;
+	send: I18nSend;
 	deals: I18nDeals;
 	create: I18nCreate;
 	share: I18nShare;

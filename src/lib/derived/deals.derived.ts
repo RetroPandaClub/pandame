@@ -21,3 +21,13 @@ export const refundedDeals = derived(
 	dealsStore,
 	(deals) => deals?.filter((deal) => dealStatus(deal) === DealStatuses.Refunded) ?? []
 );
+
+export const cancelledDeals = derived(
+	dealsStore,
+	(deals) =>
+		deals?.filter((deal) => {
+			const status = dealStatus(deal);
+
+			return status === DealStatuses.Cancelled || status === DealStatuses.Rejected;
+		}) ?? []
+);

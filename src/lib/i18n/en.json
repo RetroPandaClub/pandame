@@ -25,6 +25,30 @@
 		"greeting_suffix": "!",
 		"cta_caption": "Connect your wallet"
 	},
+	"nav": {
+		"aria_label": "Primary navigation",
+		"home": "Home",
+		"send": "Send",
+		"profile": "Profile"
+	},
+	"history": {
+		"title": "History",
+		"filter_all": "All",
+		"filter_active": "Active",
+		"filter_settled": "Settled",
+		"filter_refunded": "Refunded",
+		"filter_cancelled": "Cancelled"
+	},
+	"profile": {
+		"title": "Profile",
+		"principal_label": "Principal",
+		"copy_principal": "Copy principal"
+	},
+	"send": {
+		"title": "Send",
+		"coming_soon_title": "Coming soon",
+		"coming_soon_description": "Direct send / receive lands in a future release. For now, use the deal flow on the home tab."
+	},
 	"deals": {
 		"create_cta": "Create a deal",
 		"empty_title": "No deals yet",

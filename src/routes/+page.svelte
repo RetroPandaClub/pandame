@@ -1,9 +1,12 @@
 <script lang="ts">
+	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
+	import Avatar from '$lib/components/Avatar.svelte';
 	import BalanceBadge from '$lib/components/BalanceBadge.svelte';
+	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import CreateDealModal from '$lib/components/CreateDealModal.svelte';
+	import DealFilterChips, { type DealFilter } from '$lib/components/DealFilterChips.svelte';
 	import DealsTable from '$lib/components/DealsTable.svelte';
-	import Logout from '$lib/components/Logout.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import WelcomeScreen from '$lib/components/WelcomeScreen.svelte';
 	import { userSignedIn } from '$lib/derived/user.derived';
@@ -12,10 +15,13 @@
 	import { balanceStore } from '$lib/stores/balance.store';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { userStore } from '$lib/stores/user.store';
 	import type { Deal } from '$lib/types/deal';
+	import { shortPrincipal } from '$lib/utils/format.utils';
 
 	let createOpen = $state(false);
 	let shareDeal: Deal | undefined = $state(undefined);
+	let filter: DealFilter = $state('all');
 
 	const reloadDeals = async () => {
 		if (!$userSignedIn) {
@@ -44,6 +50,10 @@
 		reloadDeals();
 		shareDeal = deal;
 	};
+
+	let principalLabel = $derived(
+		$userStore?.key !== undefined ? shortPrincipal($userStore.key) : ''
+	);
 </script>
 
 <svelte:window onjunoExampleReload={reloadDeals} />
@@ -51,36 +61,34 @@
 {#if !$userSignedIn}
 	<WelcomeScreen />
 {:else}
-	<section class="flex flex-1 flex-col gap-6 px-6 pt-[max(env(safe-area-inset-top),1.5rem)] pb-10">
-		<header class="flex items-center justify-between">
-			<h1 class="text-h5 text-default font-bold">{$i18n.layout.title}</h1>
+	<BrandHeader title={$i18n.history.title}>
+		{#snippet trailing()}
+			<span class="text-body2 font-bold text-white underline-offset-2 hover:underline">
+				{principalLabel}
+			</span>
+			<Avatar fallback={principalLabel} size="md" alt={principalLabel} />
+		{/snippet}
+
+		<DealFilterChips bind:value={filter} />
+	</BrandHeader>
+
+	<section class="flex flex-1 flex-col gap-4 px-6 pt-6 pb-28">
+		<div class="flex items-center justify-between">
 			<BalanceBadge />
-		</header>
-
-		<Button
-			onclick={() => {
-				createOpen = true;
-			}}
-		>
-			{$i18n.deals.create_cta}
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				height="20"
-				viewBox="0 -960 960 960"
-				width="20"
-				fill="currentColor"
-				aria-hidden="true"
+			<Button
+				size="sm"
+				onclick={() => {
+					createOpen = true;
+				}}
 			>
-				<path d="M417-417H166v-126h251v-251h126v251h251v126H543v251H417v-251Z" />
-			</svg>
-		</Button>
-
-		<DealsTable />
-
-		<div class="mt-auto pt-6">
-			<Logout />
+				{$i18n.deals.create_cta}
+			</Button>
 		</div>
+
+		<DealsTable {filter} />
 	</section>
+
+	<AppBottomNav />
 {/if}
 
 <CreateDealModal open={createOpen} onclose={() => (createOpen = false)} oncreated={onCreated} />
