@@ -11,11 +11,15 @@
 
 	let { src, alt = '', fallback = '', size = 'md', ariaLabel }: Props = $props();
 
+	// Sizes mirror the Figma usage: 32 (status dot), 48 (BrandHeader
+	// trailing — matches `159:1128 / 166:403`), 76 (bot avatar in
+	// chat bubbles), 134 (big profile avatar overlapping the
+	// purple→white seam — `83:84 / 71:302`).
 	const SIZE: Record<Size, string> = {
 		sm: 'h-8 w-8 text-body2',
-		md: 'h-11 w-11 text-body1',
-		lg: 'h-14 w-14 text-h6',
-		xl: 'h-20 w-20 text-h5'
+		md: 'h-12 w-12 text-body1',
+		lg: 'h-[76px] w-[76px] text-h6',
+		xl: 'h-[134px] w-[134px] text-h4'
 	};
 
 	let initials = $derived(
