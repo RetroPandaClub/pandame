@@ -116,7 +116,7 @@
 			type="button"
 			onclick={onDispute}
 			disabled={progress}
-			class="rounded-sm border-[3px] border-dashed border-black/40 px-3 py-1 text-sm font-semibold opacity-70 hover:opacity-100 dark:border-white/40 dark:text-white"
+			class="border-border-soft text-default text-body2 rounded-md border-2 border-dashed px-3 py-1 font-bold opacity-70 hover:opacity-100"
 			title={$i18n.deals.actions.dispute_tooltip}
 			data-tid="dispute-stub"
 		>

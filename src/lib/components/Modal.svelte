@@ -29,7 +29,7 @@
 		aria-label={title}
 	>
 		<div
-			class="dark:border-primary relative z-10 w-full max-w-xl rounded-sm border-[3px] border-black bg-white p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)] dark:bg-black dark:text-white dark:shadow-[8px_8px_0px_#632AE8]"
+			class="bg-bg text-default border-border-soft shadow-primary/10 relative z-10 w-full max-w-xl rounded-xl border p-6 shadow-2xl"
 		>
 			{#if title !== undefined}
 				<header class="mb-4 flex items-center justify-between">

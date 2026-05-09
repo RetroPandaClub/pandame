@@ -52,7 +52,7 @@
 {:else}
 	<BrandHeader title={$i18n.history.title}>
 		{#snippet trailing()}
-			<span class="text-body2 font-bold text-white underline-offset-2 hover:underline">
+			<span class="text-default-inverse text-body2 font-bold underline-offset-2 hover:underline">
 				{principalLabel}
 			</span>
 			<Avatar fallback={principalLabel} size="md" alt={principalLabel} />

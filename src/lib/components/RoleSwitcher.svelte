@@ -38,7 +38,7 @@
 			aria-selected={active}
 			onclick={select(role)}
 			class="rounded-pill text-body2 px-3 py-1 font-bold transition-colors {active
-				? 'bg-primary text-white'
+				? 'bg-primary text-default-inverse'
 				: 'text-default hover:bg-primary/10'}"
 		>
 			{role === 'user'

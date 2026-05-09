@@ -15,12 +15,12 @@
 	let { children, variant = 'soft', leading, trailing, ariaLabel, onclick }: Props = $props();
 
 	const VARIANT: Record<Variant, string> = {
-		solid: 'bg-primary text-white',
+		solid: 'bg-primary text-default-inverse',
 		outline: 'bg-transparent border border-border text-default',
 		soft: 'bg-primary-light text-default',
-		success: 'bg-success text-white',
-		warning: 'bg-warning text-white',
-		danger: 'bg-danger text-white'
+		success: 'bg-success text-default-inverse',
+		warning: 'bg-warning text-default-inverse',
+		danger: 'bg-danger text-default-inverse'
 	};
 
 	let interactive = $derived(onclick !== undefined);

@@ -10,11 +10,11 @@
 
 	const STATUS = {
 		[DealStatuses.Created]: { class: 'bg-primary-light text-default', icon: 'circle' },
-		[DealStatuses.Funded]: { class: 'bg-primary text-white', icon: 'fund' },
-		[DealStatuses.Settled]: { class: 'bg-success text-white', icon: 'check' },
-		[DealStatuses.Refunded]: { class: 'bg-warning text-white', icon: 'refresh' },
-		[DealStatuses.Cancelled]: { class: 'bg-muted text-white', icon: 'cross' },
-		[DealStatuses.Rejected]: { class: 'bg-danger text-white', icon: 'cross' }
+		[DealStatuses.Funded]: { class: 'bg-primary text-default-inverse', icon: 'fund' },
+		[DealStatuses.Settled]: { class: 'bg-success text-default-inverse', icon: 'check' },
+		[DealStatuses.Refunded]: { class: 'bg-warning text-default-inverse', icon: 'refresh' },
+		[DealStatuses.Cancelled]: { class: 'bg-muted text-default-inverse', icon: 'cross' },
+		[DealStatuses.Rejected]: { class: 'bg-danger text-default-inverse', icon: 'cross' }
 	} as const;
 
 	let s = $derived(STATUS[status]);

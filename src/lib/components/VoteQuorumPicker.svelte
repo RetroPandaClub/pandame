@@ -50,7 +50,7 @@
 			{disabled}
 			onclick={select(option.id)}
 			class="flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 text-center transition-colors {active
-				? 'border-primary bg-primary text-white'
+				? 'border-primary bg-primary text-default-inverse'
 				: 'border-primary-light bg-primary-light/40 text-default'} {disabled
 				? 'cursor-not-allowed opacity-60'
 				: 'hover:border-primary'}"

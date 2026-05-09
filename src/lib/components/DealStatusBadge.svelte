@@ -10,11 +10,11 @@
 
 	const STATUS_CLASS: Record<DealStatusName, string> = {
 		[DealStatuses.Created]: 'bg-primary-light text-default',
-		[DealStatuses.Funded]: 'bg-primary text-white',
-		[DealStatuses.Settled]: 'bg-success text-white',
+		[DealStatuses.Funded]: 'bg-primary text-default-inverse',
+		[DealStatuses.Settled]: 'bg-success text-default-inverse',
 		[DealStatuses.Refunded]: 'bg-primary-light text-default',
-		[DealStatuses.Cancelled]: 'bg-white text-default',
-		[DealStatuses.Rejected]: 'bg-white text-default'
+		[DealStatuses.Cancelled]: 'bg-bg text-default',
+		[DealStatuses.Rejected]: 'bg-bg text-default'
 	};
 
 	let className = $derived(STATUS_CLASS[status]);
@@ -37,7 +37,7 @@
 </script>
 
 <span
-	class="inline-flex items-center rounded-sm border-2 border-black px-2 py-0.5 text-xs font-semibold tracking-wide uppercase {className}"
+	class="border-border-soft rounded-pill text-xxs inline-flex items-center border px-2 py-0.5 font-bold tracking-wide uppercase {className}"
 >
 	{label}
 </span>

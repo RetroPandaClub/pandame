@@ -9,7 +9,7 @@
 <div
 	class:backdrop-blur-sm={spinner}
 	class:backdrop-blur-xl={!spinner}
-	class="fixed inset-0 z-40 flex items-center justify-center bg-white/30"
+	class="bg-default/30 fixed inset-0 z-40 flex items-center justify-center"
 >
 	{#if spinner}
 		<div

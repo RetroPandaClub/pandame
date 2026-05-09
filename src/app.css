@@ -9,8 +9,14 @@
  *
  * Plus neutral surfaces and a "Blu Night" body-text colour. App code should
  * always reach for the **semantic** tokens (`bg-primary`, `text-default`,
- * `border-soft`, …) instead of hex literals — see
- * `docs/ai/frontend/stack-and-patterns.md#tailwind-v4--design-tokens`.
+ * `border-soft`, …) instead of hex literals.
+ *
+ * THEMING — see the `@layer base` block below. Every brand-aware token is
+ * a CSS custom property declared on `[data-theme='light']` (the default).
+ * To add a dark mode, fill in the `[data-theme='dark']` block; the
+ * `@media (prefers-color-scheme: dark)` rule already routes system
+ * preference through the same selector when the user hasn't explicitly
+ * chosen a theme.
  */
 
 @font-face {
@@ -56,12 +62,17 @@
 @theme {
 	--color-*: initial;
 
-	/* Base */
+	/* Static (theme-independent) base tokens — never override. */
 	--color-inherit: inherit;
 	--color-transparent: transparent;
 	--color-current: currentColor;
 	--color-black: rgb(0 0 0);
 	--color-white: rgb(255 255 255);
+
+	/* Brand-aware tokens. The values declared in `@theme` are the
+	 * Tailwind compile-time defaults; the `:root` / `[data-theme]`
+	 * blocks below override them at runtime so theme switching works
+	 * without a rebuild. */
 
 	/* Brand — purple */
 	--color-primary: #632ae8;
@@ -91,7 +102,7 @@
 	--color-border-soft: #ece5fb;
 	--color-border-strong: #632ae8;
 
-	/* Typography — modular scale (base 16, ratio 1.25) */
+	/* Typography — modular scale (base 16, ratio 1.25). Theme-independent. */
 	--font-sans:
 		'Lato', 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -115,7 +126,7 @@
 	--text-h1: 3.8125rem; /* 61 px */
 	--text-h1--line-height: 1.6;
 
-	/* Radius — pill-shaped CTAs are the dominant pattern */
+	/* Radius — pill-shaped CTAs are the dominant pattern. Theme-independent. */
 	--radius-sm: 0.5rem; /* 8 px */
 	--radius-md: 0.75rem; /* 12 px */
 	--radius-lg: 1rem; /* 16 px */
@@ -136,3 +147,92 @@
 }
 
 @custom-variant tall (@media (min-height: 800px));
+
+@layer base {
+	/* ----------------------------------------------------------------
+	 * Light theme (current default).
+	 *
+	 * The `<html data-theme="light">` attribute (set in `app.html`) is
+	 * the authoritative selector. The naked `:root` rule duplicates
+	 * the values so a missing `data-theme` attribute still renders
+	 * correctly.
+	 * ---------------------------------------------------------------- */
+	:root,
+	[data-theme='light'] {
+		color-scheme: light;
+
+		--color-primary: #632ae8;
+		--color-primary-light: #d5c4f9;
+
+		--color-success: #1dbb8e;
+		--color-success-light: #29e8b1;
+
+		--color-warning: #f3a712;
+		--color-danger: #e64545;
+
+		--color-bg: #ffffff;
+		--color-bg-soft: #f4eefb;
+		--color-bg-inverse: #1a1736;
+
+		--color-default: #1a1736;
+		--color-default-inverse: #ffffff;
+		--color-muted: #6b6884;
+		--color-subtle: #a39fbf;
+
+		--color-border: #d5c4f9;
+		--color-border-soft: #ece5fb;
+		--color-border-strong: #632ae8;
+	}
+
+	/* ----------------------------------------------------------------
+	 * Dark theme — placeholder.
+	 *
+	 * Fill the values in the `[data-theme='dark']` block below to
+	 * enable a dark theme. Components already drive their colours
+	 * exclusively through the semantic tokens above, so no component
+	 * change is needed once the values land.
+	 *
+	 * The `@media (prefers-color-scheme: dark)` rule routes the system
+	 * preference through `[data-theme='dark']` only when the user
+	 * hasn't explicitly chosen a theme — so an explicit
+	 * `data-theme="light"` always wins over OS dark mode (and vice
+	 * versa once we expose a toggle).
+	 * ---------------------------------------------------------------- */
+	[data-theme='dark'] {
+		color-scheme: dark;
+
+		/* TODO(theme): set the dark values for every brand-aware token.
+		 * Until they're filled in, the cascade falls back to the light
+		 * defaults from `@theme` so the app stays usable. */
+		/*
+		--color-primary:         …;
+		--color-primary-light:   …;
+
+		--color-success:         …;
+		--color-success-light:   …;
+
+		--color-warning:         …;
+		--color-danger:          …;
+
+		--color-bg:              …;
+		--color-bg-soft:         …;
+		--color-bg-inverse:      …;
+
+		--color-default:         …;
+		--color-default-inverse: …;
+		--color-muted:           …;
+		--color-subtle:          …;
+
+		--color-border:          …;
+		--color-border-soft:     …;
+		--color-border-strong:   …;
+		*/
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme='light']) {
+			/* Re-apply every override from `[data-theme='dark']` here
+			 * once the dark theme is real. */
+		}
+	}
+}

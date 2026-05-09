@@ -56,7 +56,7 @@
 	{#if shareUrl === undefined}
 		<p>{$i18n.share.no_share_needed}</p>
 	{:else}
-		<p class="text-sm opacity-75">{$i18n.share.description}</p>
+		<p class="text-muted text-body2">{$i18n.share.description}</p>
 
 		{#if qrDataUrl !== undefined}
 			<div class="flex justify-center">
@@ -65,18 +65,18 @@
 					width="220"
 					height="220"
 					alt={$i18n.share.qr_alt}
-					class="dark:border-primary rounded border-[3px] border-black"
+					class="border-border-soft bg-bg rounded-lg border p-2"
 				/>
 			</div>
 		{/if}
 
 		<label class="block">
-			<span class="text-sm font-semibold">{$i18n.share.link_label}</span>
+			<span class="text-default text-body2 font-bold">{$i18n.share.link_label}</span>
 			<input
 				type="text"
 				readonly
 				value={shareUrl}
-				class="mt-1 w-full rounded-sm border-[3px] border-black bg-white px-3 py-1.5 font-mono text-xs dark:bg-black dark:text-white"
+				class="bg-bg-soft text-default border-border-soft text-xxs mt-1 w-full rounded-md border px-3 py-2 font-mono"
 				aria-label={$i18n.share.link_aria}
 				data-tid="share-link-input"
 			/>

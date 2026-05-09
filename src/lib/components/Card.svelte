@@ -11,7 +11,7 @@
 </script>
 
 <article
-	class="dark:border-primary rounded border-[3px] border-black bg-white p-4 shadow-[5px_5px_0px_rgba(0,0,0,1)] dark:bg-black dark:text-white dark:shadow-[5px_5px_0px_#632AE8]"
+	class="bg-bg text-default border-border-soft shadow-primary/5 rounded-lg border p-4 shadow-md"
 >
 	{#if title !== undefined}
 		<header class="mb-2 text-lg font-semibold">{title}</header>

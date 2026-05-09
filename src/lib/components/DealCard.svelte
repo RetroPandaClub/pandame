@@ -51,7 +51,7 @@
 </script>
 
 {#snippet body()}
-	<header class="bg-primary flex items-center justify-between px-4 py-2 text-white">
+	<header class="bg-primary text-default-inverse flex items-center justify-between px-4 py-2">
 		<span class="text-body1 font-bold">{title}</span>
 		<DealStatusDot {status} />
 	</header>

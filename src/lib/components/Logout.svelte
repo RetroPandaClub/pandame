@@ -6,7 +6,7 @@
 <button
 	type="button"
 	onclick={() => signOut()}
-	class="hover:text-primary active:text-primary/80 mt-24 flex items-center gap-2 dark:text-white"
+	class="text-default hover:text-primary active:text-primary/80 mt-24 flex items-center gap-2"
 >
 	<svg
 		xmlns="http://www.w3.org/2000/svg"

@@ -226,15 +226,45 @@ Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
   (8 px), `rounded-md` (12 px), `rounded-lg` (16 px), `rounded-xl`
   (20 px), `rounded-pill` (9999 px).
 
-- **No raw hex** (`bg-[#0f0]`), no inline `style="color:…"`. Arbitrary
-  values are tolerated for non-colour props (e.g.
+- **No raw hex** (`bg-[#0f0]`), no inline `style="color:…"`, **no
+  `text-white` / `bg-black` / `border-black` literals** in component
+  markup — those bypass the theme. Use the inverse tokens
+  (`text-default-inverse`, `bg-bg-inverse`) when you need the
+  light-on-brand pattern (e.g. `bg-primary text-default-inverse`).
+  Arbitrary values are tolerated for non-colour props (e.g.
   `shadow-[5px_5px_0px_rgba(0,0,0,1)]`) but prefer a named token when
   you can.
 - **Class order** is auto-sorted by `prettier-plugin-tailwindcss`. Don't
   bikeshed it.
-- **Variants & responsive:** prefer Tailwind variants (`md:`, `dark:`,
-  `tall:`) over JS branches. Pandame is **mobile-first** — design at
+- **Variants & responsive:** prefer Tailwind variants (`md:`, `tall:`)
+  over JS branches. Don't add `dark:` overrides — dark mode is wired via
+  CSS-variable swap on `[data-theme='dark']` (see [Theming
+  &amp; dark-mode readiness](#theming--dark-mode-readiness) below), not
+  via per-utility variants. Pandame is **mobile-first** — design at
   375 × 812 (iPhone 13 mini) and let `md:` / `lg:` add desktop polish.
+
+### Theming & dark-mode readiness
+
+Every brand-aware token is declared **twice** in
+[`src/app.css`](../../../src/app.css):
+
+1. As a **compile-time default** inside `@theme { … }` so Tailwind
+   generates the utilities (`bg-primary`, `text-default`, …) that
+   resolve to `var(--color-*)` at runtime.
+2. As a **runtime value** inside `:root, [data-theme='light'] { … }` so
+   the cascade can be flipped without a rebuild.
+
+A future dark theme is a **single-file change**: fill in the values in
+the `[data-theme='dark']` block (already scaffolded with a commented
+template) and the `@media (prefers-color-scheme: dark)` rule that
+mirrors them when the user hasn't picked a theme. No component touches
+the literal palette, so no component needs to change.
+
+Today `<html data-theme="light">` is hard-coded in
+[`src/app.html`](../../../src/app.html); the toggle / preference store
+will be added with the dark theme. While building light-mode UI, **just
+use the semantic tokens** — the moment a `text-default` lands on top of
+a `bg-bg`, it'll swap correctly the day dark values arrive.
 
 ## Mobile-first device frame
 

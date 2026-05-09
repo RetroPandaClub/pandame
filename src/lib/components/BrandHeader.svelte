@@ -14,7 +14,7 @@
 </script>
 
 <header
-	class="bg-primary pt-[max(env(safe-area-inset-top),1rem)] pb-6 text-white"
+	class="bg-primary text-default-inverse pt-[max(env(safe-area-inset-top),1rem)] pb-6"
 	aria-label={ariaLabel ?? title}
 >
 	<div class="flex items-center justify-between gap-3 px-6">

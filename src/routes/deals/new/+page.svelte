@@ -148,7 +148,7 @@
 	{/snippet}
 
 	{#snippet trailing()}
-		<span class="text-body2 font-bold text-white">{principalLabel}</span>
+		<span class="text-default-inverse text-body2 font-bold">{principalLabel}</span>
 		<Avatar fallback={principalLabel} size="md" alt={principalLabel} />
 	{/snippet}
 

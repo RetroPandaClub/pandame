@@ -11,11 +11,11 @@
 </script>
 
 <section
-	class="dark:border-primary/40 my-8 flex flex-col items-center gap-3 rounded border-[3px] border-dashed border-black/30 p-8 text-center dark:text-white"
+	class="border-border-soft text-default my-8 flex flex-col items-center gap-3 rounded-lg border-2 border-dashed p-8 text-center"
 >
-	<h3 class="text-lg font-semibold">{title}</h3>
+	<h3 class="text-h6 font-bold">{title}</h3>
 	{#if description !== undefined}
-		<p class="max-w-md text-sm opacity-75">{description}</p>
+		<p class="text-muted text-body2 max-w-md">{description}</p>
 	{/if}
 	{#if children}
 		<div class="mt-2">

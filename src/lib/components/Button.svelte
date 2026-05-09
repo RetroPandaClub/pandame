@@ -33,7 +33,7 @@
 	}: Props = $props();
 
 	const VARIANT: Record<Variant, string> = {
-		primary: 'bg-primary text-white hover:bg-primary/90 active:bg-primary/80',
+		primary: 'bg-primary text-default-inverse hover:bg-primary/90 active:bg-primary/80',
 		secondary:
 			'bg-transparent border-2 border-primary text-primary hover:bg-primary/10 active:bg-primary/20',
 		ghost: 'bg-transparent text-primary hover:bg-primary/10 active:bg-primary/20'

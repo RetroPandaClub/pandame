@@ -43,6 +43,14 @@ Claude-specific runtime layer. Anything not contradicted here defers to
   [`DealActions.svelte`](./src/lib/components/DealActions.svelte) is a
   **stub** — the canister has no `Disputed` state yet (see
   [`../escrow/src/escrow/README.md#future-expansion`](../escrow/src/escrow/README.md#future-expansion)).
+- **Theming:** the only theme today is `light` (set via
+  `<html data-theme="light">`). A future dark theme is a single-file
+  change — fill the `[data-theme='dark']` block in
+  [`src/app.css`](./src/app.css). Components must use the semantic
+  tokens (`bg-bg`, `text-default`, `text-default-inverse`, …) — **no
+  raw `text-white`/`bg-black`/`border-black` literals and no `dark:`
+  utility variants** (those bypass the variable swap). See
+  [`docs/ai/frontend/stack-and-patterns.md#theming--dark-mode-readiness`](./docs/ai/frontend/stack-and-patterns.md#theming--dark-mode-readiness).
 
 ---
 
