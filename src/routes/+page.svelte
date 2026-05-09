@@ -3,9 +3,9 @@
 	import Button from '$lib/components/Button.svelte';
 	import CreateDealModal from '$lib/components/CreateDealModal.svelte';
 	import DealsTable from '$lib/components/DealsTable.svelte';
-	import Login from '$lib/components/Login.svelte';
 	import Logout from '$lib/components/Logout.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
+	import WelcomeScreen from '$lib/components/WelcomeScreen.svelte';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { myBalance } from '$lib/services/balance.services';
 	import { listMyDeals } from '$lib/services/deal.services';
@@ -49,15 +49,7 @@
 <svelte:window onjunoExampleReload={reloadDeals} />
 
 {#if !$userSignedIn}
-	<section
-		class="flex min-h-[100dvh] flex-col items-center justify-center gap-6 px-6 py-10 text-center"
-	>
-		<h1 class="text-h4 text-default font-bold">
-			{$i18n.layout.title}
-		</h1>
-		<p class="text-muted">{$i18n.claim.signin_description}</p>
-		<Login />
-	</section>
+	<WelcomeScreen />
 {:else}
 	<section class="flex flex-1 flex-col gap-6 px-6 pt-[max(env(safe-area-inset-top),1.5rem)] pb-10">
 		<header class="flex items-center justify-between">

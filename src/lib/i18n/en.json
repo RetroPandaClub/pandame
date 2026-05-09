@@ -18,8 +18,12 @@
 		}
 	},
 	"layout": {
-		"title": "PandaMe",
-		"tagline_html": "A trustless escrow on the <a href=\"https://internetcomputer.org\" rel=\"noopener noreferrer\" target=\"_blank\" class=\"underline\">Internet Computer</a>. Lock funds against a known counterparty, share a tip link with anyone, or reclaim what's yours after expiry — all from a single Juno-powered Internet Identity session."
+		"title": "PandaMe"
+	},
+	"welcome": {
+		"greeting_prefix": "Hi. We’re happy to see you on ",
+		"greeting_suffix": "!",
+		"cta_caption": "Connect your wallet"
 	},
 	"deals": {
 		"create_cta": "Create a deal",

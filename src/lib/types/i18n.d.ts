@@ -23,7 +23,12 @@ interface I18nCore {
 
 interface I18nLayout {
 	title: string;
-	tagline_html: string;
+}
+
+interface I18nWelcome {
+	greeting_prefix: string;
+	greeting_suffix: string;
+	cta_caption: string;
 }
 
 interface I18nDeals {
@@ -110,6 +115,7 @@ interface I18n {
 	lang: Languages;
 	core: I18nCore;
 	layout: I18nLayout;
+	welcome: I18nWelcome;
 	deals: I18nDeals;
 	create: I18nCreate;
 	share: I18nShare;
