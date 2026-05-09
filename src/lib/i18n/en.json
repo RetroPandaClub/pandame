@@ -24,6 +24,7 @@
 	"nav": {
 		"aria_label": "Primary navigation",
 		"home": "Home",
+		"transitions": "Transitions",
 		"send": "Send",
 		"profile": "Profile"
 	},

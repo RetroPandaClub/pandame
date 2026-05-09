@@ -30,6 +30,7 @@ interface I18nWelcome {
 interface I18nNav {
 	aria_label: string;
 	home: string;
+	transitions: string;
 	send: string;
 	profile: string;
 }
