@@ -1,21 +1,23 @@
-name: Auto Update i18n
+name: Update E2E Snapshots
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    paths:
-      - 'src/lib/i18n/*'
-      - 'src/lib/types/i18n.d.ts'
+  workflow_dispatch:
 
 permissions: {}
 
 jobs:
-  auto_update:
+  update_snapshots:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
 
     steps:
+      - name: Fail if branch is main
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          echo "This workflow should not be triggered on main"
+          exit 1
+
       - name: Generate GitHub App token
         id: app-token
         if: vars.BOT_APP_ID != '' && vars.BOT_APP_INSTALLATION_ID != ''
@@ -25,32 +27,25 @@ jobs:
           private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token || github.token }}
           persist-credentials: false
 
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Run i18n script
-        run: npm run i18n
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
 
-      - name: Check for changes
-        id: check_changes
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changes_detected=true" >> $GITHUB_OUTPUT
-          else
-            echo "changes_detected=false" >> $GITHUB_OUTPUT
-          fi
+      - name: Run Playwright snapshot update
+        run: npm run e2e:snapshots
 
-      - name: Commit i18n
-        if: steps.check_changes.outputs.changes_detected == 'true' && steps.app-token.outputs.token != ''
+      - name: Commit Playwright updated snapshots
+        if: steps.app-token.outputs.token != ''
         uses: ./.github/actions/add-and-commit
         with:
-          message: '🤖 Updated i18n files'
+          add: e2e
+          message: '🤖 Update snapshots'
           token: ${{ steps.app-token.outputs.token }}

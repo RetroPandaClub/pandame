@@ -1,4 +1,4 @@
-name: 'PR checks'
+name: PR checks
 
 on:
   pull_request:
@@ -9,14 +9,18 @@ on:
       - synchronize
       - labeled
 
+permissions: {}
+
 jobs:
   check-pr-title:
     name: 'check-pr-title:required'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     env:
       TITLE: ${{ github.event.pull_request.title }}
     steps:
-      - name: 'Check PR Title'
+      - name: Check PR Title
         run: |
           if [[ "$TITLE" =~ ^(feat|fix|chore|build|ci|docs|style|refactor|perf|test)(\([-a-zA-Z0-9,]+\))?\!?\: ]]; then
               echo "PR Title passes"

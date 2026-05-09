@@ -3,9 +3,69 @@
 
 version: 2
 updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore(github-actions): '
+    cooldown:
+      default-days: 7
+
   - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: weekly
+    commit-message:
+      prefix: 'chore(npm-deps): '
+      prefix-development: 'chore(npm-deps-dev): '
+    cooldown:
+      default-days: 7
     allow:
-      - dependency-type: development
+      - dependency-type: all
+    open-pull-requests-limit: 10
+    groups:
+      lint-kit:
+        patterns:
+          - '@types/eslint'
+          - 'eslint'
+          - 'eslint-config-prettier'
+          - 'eslint-plugin-import'
+          - 'eslint-plugin-svelte'
+          - 'typescript-eslint'
+          - 'globals'
+      prettier-kit:
+        patterns:
+          - 'prettier'
+          - 'prettier-plugin-organize-imports'
+          - 'prettier-plugin-svelte'
+          - 'prettier-plugin-tailwindcss'
+      svelte-kit:
+        patterns:
+          - 'svelte'
+          - 'svelte-check'
+          - '@sveltejs/adapter-static'
+          - '@sveltejs/kit'
+          - '@sveltejs/vite-plugin-svelte'
+      tailwind-kit:
+        patterns:
+          - 'tailwindcss'
+          - '@tailwindcss/postcss'
+          - '@tailwindcss/vite'
+      vitest-kit:
+        patterns:
+          - 'vitest'
+          - 'vite-node'
+          - 'jsdom'
+          - '@testing-library/jest-dom'
+      playwright-kit:
+        patterns:
+          - 'playwright'
+          - '@playwright/test'
+      juno-kit:
+        patterns:
+          - '@junobuild/config'
+          - '@junobuild/vite-plugin'
+          - '@junobuild/core'
+          - '@junobuild/functions'
+          - '@junobuild/schema'
