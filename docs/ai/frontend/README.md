@@ -9,7 +9,7 @@ it once per session.
 ## Pre-flight checklist (every change)
 
 - [ ] I read [`AGENTS.md`](../../../AGENTS.md) and the
-      [10 commandments](../../../AGENTS.md#2-the-10-commandments-read-before-every-change).
+      [11 commandments](../../../AGENTS.md#2-the-11-commandments-read-before-every-change).
 - [ ] I know which folder my code belongs in — see
       [`structure.md`](./structure.md).
 - [ ] I checked [`reusability.md`](./reusability.md) for an existing
@@ -38,25 +38,32 @@ it once per session.
 ## Stack at a glance
 
 - **SvelteKit 2 + Svelte 5 (runes)**, TypeScript everywhere.
-- **Tailwind v4** wired via `@tailwindcss/vite`. The lavender-blue
-  palette, the `JetBrains Mono` font, the `tall:` custom variant and
+- **Tailwind v4** wired via `@tailwindcss/vite`. The purple/green
+  brand palette, Lato (self-hosted), the modular type scale
+  (`text-{xxs,body2,body1,h6..h1}`), the `tall:` custom variant and
   the `animate-fade` keyframe live in
   [`src/app.css`](../../../src/app.css) via `@theme` +
-  `@custom-variant`. No `tailwind.config.ts`.
-- **`@junobuild/core`** for Internet Identity sign-in.
+  `@custom-variant`. Brand-aware colours resolve through CSS
+  variables on `[data-theme]` so dark mode is a one-file swap. No
+  `tailwind.config.ts`.
+- **`@junobuild/core`** for Internet Identity sign-in **and** for
+  the editable `profiles` datastore collection (see
+  [`juno.dev.config.ts`](../../../juno.dev.config.ts) +
+  [`profile.services.ts`](../../../src/lib/services/profile.services.ts)).
 - **`@dfinity/agent` + `@icp-sdk/canisters`** for talking to the escrow
   canister and the ICP ledger.
 - **`@icp-sdk/bindgen`** generates the TS bindings from the upstream
   `escrow.did` (driven by `npm run did`).
 - **`qrcode`** renders the share-link QR for the tip flow.
-- **`nanoid`** is in the tree (legacy) — not used in the current code.
+- **`nanoid`** is used by `profile.services.ts` to mint client-side
+  document keys for the `profiles` collection.
 - **ESLint** flat config (see
   [`eslint.config.js`](../../../eslint.config.js)). Notable rules:
   `import/no-relative-parent-imports` is **`error`** under `src/**`,
   `import/no-duplicates`, `import/order` (alphabetical),
   `svelte/require-each-key`. `svelte/no-navigation-without-resolve` is
   intentionally `off` (we have external `<a href>` URLs).
-- **Vitest 3** with `jsdom` for unit tests. **Playwright** for E2E
+- **Vitest 4** with `jsdom` for unit tests. **Playwright** for E2E
   across desktop + mobile + tablet devices.
 - **Path aliases** (declared in
   [`svelte.config.js`](../../../svelte.config.js) and mirrored in
@@ -73,18 +80,23 @@ it once per session.
 
 ```
 src/
-├── app.{css,html,d.ts}     Tailwind theme, HTML shell, ambient types
+├── app.{css,html,d.ts}     Tailwind theme, HTML shell (data-theme="light"), ambient types
 ├── custom-events.d.ts      Juno DOM events typing
 ├── routes/
-│   ├── +layout.svelte      Brand + auth shell
-│   ├── +page.svelte        Dashboard
-│   └── claim/[deal_id]/    Public QR / share-link claim flow
+│   ├── +layout.svelte      Mobile-first phone-frame shell, mounts <Auth />
+│   ├── +layout.ts          ssr=false, prerender=false (SPA fallback)
+│   ├── +page.svelte        / — History dashboard / WelcomeScreen
+│   ├── deals/{new,[id],[id]/dispute}/+page.svelte
+│   ├── profile/{,,edit,arbitrator,admin}/+page.svelte
+│   ├── send/+page.svelte
+│   └── claim/[deal_id]/+page.svelte    Public QR / share-link claim flow
 ├── declarations/           Generated Candid bindings (DO NOT hand-edit)
 └── lib/
     ├── actors/             Shared agent / actor manager
     ├── api/                Identity-passing facades (`*.api.ts`)
     ├── canisters/          `Canister<S>` wrappers (`*.canister.ts`)
     ├── components/         UI components (flat — no feature folders today)
+    │   └── icons/          Inline-SVG icon components
     ├── constants/          App-wide constants & lookup tables
     ├── derived/            Derived stores
     ├── enums/              const-object enums
@@ -103,13 +115,17 @@ Full taxonomy and naming conventions: [`structure.md`](./structure.md).
 A 10x change is small, focused, and reuses what's there. Recent merged
 PRs to learn from (from `git log` on `main`):
 
-- `feat(canisters,services,stores): add escrow + ICP ledger client layer`
-  — single layered addition, every file fits an existing bucket.
-- `feat(ui,routes): replace notes scaffold with the escrow deals dashboard`
-  — single concern (UI rewrite), drops the obsolete code in the same
-  commit.
-- `chore(declarations): add candid bindings pipeline + escrow .did`
-  — single piece of infra, minimal blast radius.
+- `feat(profile): persist user-editable profile via Juno datastore` —
+  one cohesive addition (type + service + store + derived + UI),
+  every file fits an existing bucket, datastore collection wired in
+  `juno.dev.config.ts` in the same commit.
+- `feat(ui,routes): turn create-deal into a full-screen /deals/new
+flow` — single concern (UI rewrite), drops the previous modal in
+  the same commit.
+- `chore(theme): wire dark/light theming on data-theme attribute` —
+  single piece of infra (CSS variable indirection + cleanup of
+  per-component `dark:` overrides + doc updates), no behaviour
+  change in light mode.
 
 If your PR doesn't look like one of those (single verb, single concern,
 small diff), reconsider scope before continuing.

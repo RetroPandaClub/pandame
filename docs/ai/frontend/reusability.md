@@ -100,6 +100,7 @@ Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 | `identity.services` | Principal source of truth (`getIdentity`, `getIdentityOrAnonymous`, `safeGetIdentityOnce`).                                                                                                 |
 | `deal.services`     | Deal lifecycle orchestration (`createAndFundDeal`, `acceptDeal`, `consentDeal`, `rejectDeal`, `cancelDeal`, `reclaimDeal`, `listMyDeals`, `getDeal`, `getClaimableDeal`, `getReliability`). |
 | `balance.services`  | `myBalance({ token? })` — caller's principal default subaccount on the chosen ledger (defaults to ICP).                                                                                     |
+| `profile.services`  | Editable `UserProfile` persistence in the Juno `profiles` datastore (`getProfile`, `upsertProfile`, `ensureProfile`).                                                                       |
 
 ### API + canisters — `$lib/api/`, `$lib/canisters/`
 
@@ -117,29 +118,37 @@ Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 
 ### Stores & derived
 
-| Module          | Where           | Purpose                                                                                        |
-| --------------- | --------------- | ---------------------------------------------------------------------------------------------- |
-| `user.store`    | `$lib/stores/`  | Authenticated Juno user (`User \| null \| undefined`).                                         |
-| `i18n.store`    | `$lib/stores/`  | Active locale + typed dictionary (`$i18n.*`).                                                  |
-| `deals.store`   | `$lib/stores/`  | Cached deal list with `set` / `upsert` / `remove` / `reset`.                                   |
-| `balance.store` | `$lib/stores/`  | Caller's ICP balance (e8s).                                                                    |
-| `user.derived`  | `$lib/derived/` | `userSignedIn` / `userNotSignedIn` predicates.                                                 |
-| `deals.derived` | `$lib/derived/` | `dealsLoaded`, `dealsCount`, `activeDeals`, `settledDeals`, `refundedDeals`, `cancelledDeals`. |
+| Module            | Where           | Purpose                                                                                        |
+| ----------------- | --------------- | ---------------------------------------------------------------------------------------------- |
+| `user.store`      | `$lib/stores/`  | Authenticated Juno user (`User \| null \| undefined`).                                         |
+| `i18n.store`      | `$lib/stores/`  | Active locale + typed dictionary (`$i18n.*`).                                                  |
+| `deals.store`     | `$lib/stores/`  | Cached deal list with `set` / `upsert` / `remove` / `reset`.                                   |
+| `balance.store`   | `$lib/stores/`  | Caller's ICP balance (e8s).                                                                    |
+| `profile.store`   | `$lib/stores/`  | Caller's `Doc<UserProfile> \| undefined` (lazy-loaded by `ensureProfile`).                     |
+| `user.derived`    | `$lib/derived/` | `userSignedIn` / `userNotSignedIn` predicates.                                                 |
+| `deals.derived`   | `$lib/derived/` | `dealsLoaded`, `dealsCount`, `activeDeals`, `settledDeals`, `refundedDeals`, `cancelledDeals`. |
+| `profile.derived` | `$lib/derived/` | `profileLoaded`, `profileDisplayName`.                                                         |
 
 ### Constants — `$lib/constants/`
 
-| File                  | Notes                                                                  |
-| --------------------- | ---------------------------------------------------------------------- |
-| `app.constants`       | `REPLICA_HOST`, `ZERO`, ms / ns time scales, `II_MAX_TIME_TO_LIVE_NS`. |
-| `canisters.constants` | `ESCROW_CANISTER_ID`, `ICP_LEDGER_CANISTER_ID`.                        |
-| `tokens.constants`    | `ICP_TOKEN`, `SUPPORTED_TOKENS` list.                                  |
-| `routes.constants`    | `CLAIM_ROUTE`, `SHARE_URL` builders for the QR / share-link flow.      |
+| File                    | Notes                                                                  |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `app.constants`         | `REPLICA_HOST`, `ZERO`, ms / ns time scales, `II_MAX_TIME_TO_LIVE_NS`. |
+| `canisters.constants`   | `ESCROW_CANISTER_ID`, `ICP_LEDGER_CANISTER_ID`.                        |
+| `tokens.constants`      | `ICP_TOKEN`, `SUPPORTED_TOKENS` list.                                  |
+| `routes.constants`      | `CLAIM_ROUTE`, `SHARE_URL` builders for the QR / share-link flow.      |
+| `collections.constants` | `Collection.PROFILES` — Juno datastore collection key registry.        |
 
 ### Enums — `$lib/enums/`
 
 | File          | Notes                                                                           |
 | ------------- | ------------------------------------------------------------------------------- |
 | `deal-status` | `DealStatuses` / `ConsentStates` const objects + `TERMINAL_DEAL_STATUSES` list. |
+
+(The `Collection` const-object enum lives in
+`$lib/constants/collections.constants.ts`, not in `$lib/enums/`, because
+it pairs the key with the Juno collection name — keep it next to the
+related constants so the enum file stays purely about lifecycle states.)
 
 ### Common utils — `$lib/utils/`
 
@@ -155,6 +164,7 @@ Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 | ----------- | ------------------------------------------------------------------------------------------------------- |
 | `canister`  | `CanisterIdText` (zod via `@junobuild/schema`) + `CreateCanisterOptions<T>`.                            |
 | `deal`      | Re-exports `Deal` / `ClaimableDeal` / `DealError` / `DealStatusKey` / `ConsentKey`; defines `DealSide`. |
+| `profile`   | `UserProfile` interface + `emptyProfile` factory (shape stored in the `profiles` collection).           |
 | `token`     | App-side `Token` shape.                                                                                 |
 | `user`      | Re-exports the `@junobuild/core` `User` type.                                                           |
 | `languages` | Supported locale codes.                                                                                 |

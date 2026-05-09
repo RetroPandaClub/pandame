@@ -10,7 +10,7 @@ Playwright for end-to-end. Both are wired into CI via
 
 ### Stack
 
-- **Runner:** [Vitest 3](https://vitest.dev/).
+- **Runner:** [Vitest 4](https://vitest.dev/).
 - **Environment:** `jsdom` (configured in
   [`vitest.config.ts`](../../../vitest.config.ts)).
 - **Setup file:** [`vitest.setup.ts`](../../../vitest.setup.ts) —

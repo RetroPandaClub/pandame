@@ -5,7 +5,7 @@
 > - Folder taxonomy + naming: [`docs/ai/frontend/structure.md`](../../docs/ai/frontend/structure.md)
 > - Patterns: [`docs/ai/frontend/stack-and-patterns.md`](../../docs/ai/frontend/stack-and-patterns.md)
 > - Reusability catalog: [`docs/ai/frontend/reusability.md`](../../docs/ai/frontend/reusability.md)
-> - 10 commandments: [`AGENTS.md`](../../AGENTS.md#2-the-10-commandments-read-before-every-change)
+> - 11 commandments: [`AGENTS.md`](../../AGENTS.md#2-the-11-commandments-read-before-every-change)
 >
 > This card is a Claude-only summary. If it disagrees with the docs
 > above, the docs above win.
@@ -17,13 +17,17 @@
   functions / shared components.
 - **Modularity.** Components are small, focused, decoupled.
 - **Component reuse:** prioritise reusing components from
-  `$lib/components/` (`Button`, `Modal`, `Backdrop`, `Background`, …) —
-  see the catalog in
+  `$lib/components/` (primitives like `Button`, `IconButton`, `Chip`,
+  `FormField`, `Tabs`, `Modal`, `Backdrop`, `BrandHeader`,
+  `BottomNav`, …) — see the full catalog in
   [`reusability.md`](../../docs/ai/frontend/reusability.md).
-- **Theme variables:** use the lavender-blue palette + base colours from
-  the `@theme` block in [`src/app.css`](../../src/app.css) via Tailwind
-  utilities (`bg-lavender-blue-500`, `text-lavender-blue-400`, …) —
-  never hard-coded hex.
+- **Theme variables:** use the semantic tokens from the `@theme`
+  block in [`src/app.css`](../../src/app.css) via Tailwind utilities
+  (`bg-primary`, `text-default`, `text-default-inverse`,
+  `border-border-soft`, …) — never hard-coded hex, never raw
+  `bg-white` / `text-white` / `border-black`. Brand-aware tokens
+  resolve through CSS variables on `[data-theme]` so dark mode is a
+  one-file swap; per-utility `dark:` variants are banned.
 - **State management:** for cross-view state, follow the patterns in
   `$lib/stores/` and `$lib/derived/`.
 - **File size:** avoid gigantic files. If a component grows past ~300
@@ -74,7 +78,9 @@ Use **kebab-case** (or single-word) with a functional dot-suffix:
 ## Naming conventions
 
 - **Terminology:** keep names consistent with the existing inventory
-  (`note`, `image`, `user`, `i18n`).
+  (`deal`, `payer`, `recipient`, `claim`, `consent`, `profile`,
+  `user`, `i18n`). Time variables end in `_ms` (business logic) or
+  `_ns` (canister boundary fields).
 - **Booleans:** prefer affirmative names (`isOpen`, `hasFooter`,
   `userSignedIn`).
 
@@ -107,10 +113,14 @@ Use **kebab-case** (or single-word) with a functional dot-suffix:
 
 ## Routing
 
-- Pandame is a **single-page SPA** with a public dynamic route at
-  `/claim/[deal_id]?code=…` for the QR / share-link flow. Don't add
-  more SvelteKit routes — mount new views as components inside the
-  existing pages.
+- Pandame is a **multi-route mobile-first SPA**. Authenticated routes:
+  `/`, `/deals/{new,[id],[id]/dispute}`, `/profile/{,,edit,arbitrator,
+admin}`, `/send`. Public route: `/claim/[deal_id]?code=…` for the QR
+  / share-link flow. Full route table in
+  [`docs/ai/frontend/structure.md`](../../docs/ai/frontend/structure.md#top-level-src).
+- Don't add new SvelteKit routes without a deliberate reason — surface
+  the ask first.
 - `+layout.ts` sets `ssr = false` and `prerender = false` so
-  `adapter-static` emits a SPA fallback (deeply-linked `/claim/...`
-  URLs work). Don't change those flags without a deliberate reason.
+  `adapter-static` emits a SPA fallback (deeply-linked routes like
+  `/claim/...` and `/deals/[id]` work). Don't change those flags
+  without a deliberate reason.

@@ -28,7 +28,7 @@ src/
 │   │
 │   ├── profile/
 │   │   ├── +page.svelte                   /profile             User profile
-│   │   ├── edit/+page.svelte              /profile/edit        Edit form (disabled v2)
+│   │   ├── edit/+page.svelte              /profile/edit        Edit form (Juno `profiles` collection)
 │   │   ├── arbitrator/+page.svelte        /profile/arbitrator  Stub (v2)
 │   │   └── admin/+page.svelte             /profile/admin       Stub (v2)
 │   │

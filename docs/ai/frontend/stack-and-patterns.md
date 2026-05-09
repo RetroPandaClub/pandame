@@ -313,18 +313,18 @@ Pandame ships several mobile-first routes wrapped in the shared device
 frame (see [structure.md](./structure.md#top-level-src) for the full
 tree):
 
-| Route                      | What                                                         |
-| -------------------------- | ------------------------------------------------------------ |
-| `/`                        | Logged-out → `WelcomeScreen`; logged-in → History dashboard. |
-| `/deals/new`               | Create-deal full-screen flow with Pay/Receive tabs.          |
-| `/deals/[deal_id]`         | Per-deal detail with the lifecycle action bar.               |
-| `/deals/[deal_id]/dispute` | Dispute mockup (v2 stub — disabled inputs + warning banner). |
-| `/profile`                 | User profile (avatar + reliability + sign-out).              |
-| `/profile/edit`            | Edit form (v2 stub — disabled inputs).                       |
-| `/profile/arbitrator`      | Arbitrator dashboard preview (v2 stub).                      |
-| `/profile/admin`           | Admin console preview (v2 stub).                             |
-| `/send`                    | Direct send/receive (v2 stub).                               |
-| `/claim/[deal_id]?code=…`  | Public claim page for the QR / share-link flow.              |
+| Route                      | What                                                                |
+| -------------------------- | ------------------------------------------------------------------- |
+| `/`                        | Logged-out → `WelcomeScreen`; logged-in → History dashboard.        |
+| `/deals/new`               | Create-deal full-screen flow with Pay/Receive tabs.                 |
+| `/deals/[deal_id]`         | Per-deal detail with the lifecycle action bar.                      |
+| `/deals/[deal_id]/dispute` | Dispute mockup (v2 stub — disabled inputs + warning banner).        |
+| `/profile`                 | User profile (avatar + reliability + sign-out).                     |
+| `/profile/edit`            | Editable user metadata persisted to the Juno `profiles` collection. |
+| `/profile/arbitrator`      | Arbitrator dashboard preview (v2 stub).                             |
+| `/profile/admin`           | Admin console preview (v2 stub).                                    |
+| `/send`                    | Direct send/receive (v2 stub).                                      |
+| `/claim/[deal_id]?code=…`  | Public claim page for the QR / share-link flow.                     |
 
 `src/routes/+layout.ts` sets `ssr = false` and `prerender = false`
 (SPA fallback via `adapter-static`). Deeply-linked routes work because
@@ -349,8 +349,9 @@ the typed shape is generated into
   `npm run i18n` → use `$i18n.section.key` in your component.
 - **No raw English in components** for new copy — go through `$i18n`.
 - **Interpolation** is done by the call site via `String#replace` (see
-  `CreateDealModal.svelte` for the `{symbol}` / `{fee_str}` pattern).
-  We don't ship a runtime ICU formatter today.
+  [`/deals/new/+page.svelte`](../../../src/routes/deals/new/+page.svelte)
+  for the `{symbol}` / `{fee_str}` pattern). We don't ship a runtime
+  ICU formatter today.
 - See [`workflows/i18n.md`](./workflows/i18n.md) for the full flow.
 
 ## Custom DOM events

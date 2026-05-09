@@ -6,9 +6,12 @@ the use case.
 
 ## Steps
 
-1. **Search first.** `Grep` / `Glob` `$lib/components/*.svelte` to confirm
-   nothing already does what you need. Pandame's component set is small
-   (10 files); skim it before adding.
+1. **Search first.** `Grep` / `Glob` `$lib/components/*.svelte` (plus
+   `$lib/components/icons/*.svelte` for icons) to confirm nothing
+   already does what you need. The catalog is split into **primitives**
+   and **composed** components in
+   [`../reusability.md`](../reusability.md#primitives--libcomponents) —
+   skim it before adding.
 2. **Pick the name.** PascalCase, descriptive, no `Component` / `Widget`
    suffix. Reflects role, not appearance (`NoteList`, not `BluePanel`).
 3. **Place it.** Pandame's `$lib/components/` is flat today — don't
@@ -38,15 +41,19 @@ the use case.
      prop.
 
 5. **Compose, don't reinvent.** Build on the existing primitives —
-   `Button`, `Modal`, `Card`, `Backdrop`, `Background`, `EmptyState`,
-   `BalanceBadge`, `DealStatusBadge`, `DealActions` — before inventing
-   new shapes. Re-use icons that already live inside sibling components
-   instead of inlining a fourth copy.
+   `Button`, `IconButton`, `Chip`, `Avatar`, `FormField`, `TextInput`,
+   `Tabs`, `BrandHeader`, `BottomNav`, `Card`, `Modal`, `Backdrop`,
+   `Money`, `Countdown`, `EmptyState`, `PandaMark`, `VoteQuorumPicker`
+   — before inventing new shapes. Reach for an icon under
+   `$lib/components/icons/` instead of inlining yet another SVG.
 6. **Style with the project's tokens.** Look at the closest neighbour's
-   classes. Use the lavender-blue palette + base colours via the matching
-   Tailwind utilities (`bg-lavender-blue-500`, `text-lavender-blue-400`,
-   …). No raw hex. See
-   [`../stack-and-patterns.md#tailwind-v4--design-tokens`](../stack-and-patterns.md#tailwind-v4--design-tokens).
+   classes. Use the **semantic** Tailwind utilities (`bg-primary`,
+   `text-default`, `text-default-inverse`, `border-border-soft`,
+   `text-success`, …). **No raw hex**, no `bg-white`/`text-white`/
+   `border-black` literals, no Tailwind `dark:` variants — they all
+   bypass the `[data-theme]` swap. See
+   [`../stack-and-patterns.md#tailwind-v4--design-tokens`](../stack-and-patterns.md#tailwind-v4--design-tokens)
+   and [`#theming--dark-mode-readiness`](../stack-and-patterns.md#theming--dark-mode-readiness).
 7. **a11y.** Real `<button>` / `<a>` elements. Labels on every input.
    Decorative icons `aria-hidden="true"`, icon-only buttons get an
    `aria-label`. See [`../a11y.md`](../a11y.md).
@@ -85,22 +92,28 @@ the use case.
 </script>
 
 <article
-	class="rounded border-[3px] border-black bg-white p-3 shadow-[5px_5px_0px_rgba(0,0,0,1)] dark:bg-black dark:text-white"
-	class:bg-lavender-blue-50={highlight}
+	class="bg-bg text-default border-border-soft shadow-primary/5 rounded-lg border p-4 shadow-md"
+	class:bg-bg-soft={highlight}
 >
-	<h3 class="font-semibold">#{deal.id.toString()}</h3>
+	<h3 class="text-h6 font-bold">#{deal.id.toString()}</h3>
 	<Button onclick={onSelect}>{$i18n.deals.actions.accept}</Button>
 </article>
 ```
 
 ## Common mistakes (don't)
 
-- A new `<button>` markup that duplicates `Button.svelte`.
-- Hard-coded colour (`bg-[#0f0]`) instead of the lavender-blue palette.
+- A new `<button>` markup that duplicates `Button.svelte` /
+  `IconButton.svelte`.
+- Hard-coded colour (`bg-[#0f0]`) or raw `text-white` / `bg-white` /
+  `border-black` instead of the semantic tokens.
+- Tailwind `dark:` utility variants — dark mode is wired via the
+  `[data-theme]` CSS-variable swap in
+  [`src/app.css`](../../../../src/app.css), not per utility.
 - Hard-coded English copy instead of `$i18n.*`.
 - A wrapper that only re-exports another component.
 - Logic in the markup that should be a `$derived`.
 - Reading from a store deep inside the markup instead of a top-level
   `$derived` / store reference.
 - Missing key in `{#each}`.
-- Inlining the same SVG icon a third time — extract it.
+- Inlining the same SVG icon a third time — extract it into
+  `$lib/components/icons/<Name>Icon.svelte`.

@@ -30,18 +30,22 @@ Pattern: `verb(scope)?: description` — scope optional but encouraged.
 Single word or comma-separated list of affected areas. Use the existing
 vocabulary so it shows up grouped in changelogs:
 
-- `notes`, `images`, `auth`, `i18n`, `ui`, `e2e`, `npm-deps`,
-  `npm-deps-dev`, `github-actions`, `ai` (for `docs/ai/**` updates).
+- `ui`, `routes`, `layout`, `theme`, `profile`, `auth`, `i18n`,
+  `services`, `stores`, `canisters`, `declarations`, `e2e`,
+  `npm-deps`, `npm-deps-dev`, `github-actions`, `ai` (for
+  `docs/ai/**` updates).
 
 If you introduce a new scope, keep it short and lowercase, no spaces.
 
 ### Breaking changes
 
-If your change breaks the public datastore shape (`Note`, `User`, `images`
-collection layout), mark the title with `!`:
+If your change breaks the public datastore shape (`UserProfile`, the
+`profiles` collection rules in `juno.dev.config.ts`, or the on-chain
+escrow `.did` mirror under `$declarations/escrow/**`), mark the title
+with `!`:
 
 ```
-feat(notes)!: rename `text` field to `body`
+feat(profile)!: rename `display_name` field to `username`
 ```
 
 …and add a `BREAKING CHANGE:` block in the body explaining the migration.

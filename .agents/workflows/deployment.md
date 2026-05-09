@@ -39,11 +39,15 @@ This workflow covers the two flavours of deploy that pandame supports:
    The app boots at <http://localhost:5173>. The emulator-side admin
    console is at <http://localhost:5866>.
 
-4. PandaMe ships **no Juno datastore / storage collections** — the
-   empty config block in
-   [`juno.dev.config.ts`](../../juno.dev.config.ts) keeps `juno dev`
-   happy without provisioning any state. All persistent data lives in
-   the escrow canister on mainnet.
+4. PandaMe provisions **one Juno datastore collection** locally —
+   `profiles` — for editable user metadata (see
+   [`juno.dev.config.ts`](../../juno.dev.config.ts):
+   `memory: 'stable'`, `read: 'public'`, `write: 'private'`). All
+   escrow / ledger state lives in the upstream canisters on mainnet
+   (`umxj5-niaaa-aaaae-af2sq-cai` for escrow,
+   `ryjl3-tyaaa-aaaaa-aaaba-cai` for ICP). When you ship a new
+   collection, add the matching rule block here and update
+   [`Collection`](../../src/lib/constants/collections.constants.ts).
 
 5. (Optional) regenerate the candid bindings from upstream
    [`../escrow/`](../../../escrow/) before starting:

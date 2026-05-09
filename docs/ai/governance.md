@@ -46,7 +46,7 @@ declaring done.
 
 Before opening / merging, self-review against:
 
-- [10 commandments](../../AGENTS.md#2-the-10-commandments-read-before-every-change)
+- [11 commandments](../../AGENTS.md#2-the-11-commandments-read-before-every-change)
 - [PR conventions](./pr-and-ci.md)
 - [Reusability catalog](./frontend/reusability.md) — flag duplication you
   re-introduced.

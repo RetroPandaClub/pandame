@@ -5,7 +5,10 @@ canister at [`../escrow/`](../escrow/) (mainnet
 `umxj5-niaaa-aaaae-af2sq-cai`). It lets a payer lock funds against a
 known recipient, share a tip link to anyone via QR / URL, and reclaim
 unclaimed deals after expiry — all from a single Internet Identity
-session powered by [Juno](https://juno.build).
+session powered by [Juno](https://juno.build). The UI is a mobile-first
+"phone frame" (max-width 420 px, centred on tablet / desktop) wired to
+a purple-and-green design system that's CSS-variable-themed and ready
+to flip to dark mode in one file.
 
 ## 📖 Project Guidelines & AI Agent Docs
 
@@ -32,20 +35,38 @@ entry point:
 
 ## ⚙️ What's inside
 
-- **Escrow dashboard**: list, create, fund, accept, consent, reject,
-  cancel and reclaim deals against the upstream Escrow Rust canister.
-- **Tip / share-link flow**: deals without a bound recipient generate a
-  cryptographic claim code; the dashboard renders a copyable URL + QR
-  pointing at `/claim/{deal_id}?code={claim_code}`.
+- **History dashboard** (`/`): logged-out shows a connect-wallet
+  welcome screen; logged-in lists every deal the caller is on, with
+  filter chips (All / Active / Settled / Refunded / Cancelled) and a
+  raised "Create" button in the bottom nav.
+- **Create deal flow** (`/deals/new`): full-screen Pay/Receive tabs
+  for amount, currency (ICP today), counterparty principal, expiry,
+  plus a stubbed dispute-jury picker. Triggers
+  `create_deal → icrc2_approve(amount + fee) → fund_deal` end-to-end.
+- **Deal detail** (`/deals/[deal_id]`): live amount, countdown to
+  expiry, counterparty + consent state, lifecycle action bar
+  (Consent / Reject / Cancel / Accept / Reclaim).
+- **Tip / share-link flow**: deals without a bound recipient generate
+  a cryptographic claim code; the post-create modal renders a QR + a
+  copyable URL pointing at `/claim/{deal_id}?code={claim_code}`.
 - **Public claim page** (`/claim/[deal_id]`): previews the deal via
   `get_claimable_deal`, prompts II sign-in if needed, then runs
   `accept_deal` to release funds.
-- **ICP balance**: the dashboard reads the caller's ICP balance from
-  the NNS ledger (`ryjl3-tyaaa-aaaaa-aaaba-cai`).
-- **Authentication**: Internet Identity via `@junobuild/core`.
-- **Dispute affordances**: stubbed (the canister has no `Disputed`
-  state yet — see
+- **Profile** (`/profile`, `/profile/edit`): editable user metadata
+  (username / name / address / email) persisted in a Juno datastore
+  collection (`profiles`), plus a reliability summary read from the
+  escrow canister. `/profile/arbitrator` and `/profile/admin` ship
+  as visual stubs for v2.
+- **Dispute mockup** (`/deals/[deal_id]/dispute`): visual preview of
+  the v2 dispute flow (disabled inputs + warning banner) — the
+  canister has no `Disputed` state yet (see
   [`../escrow/src/escrow/README.md#future-expansion`](../escrow/src/escrow/README.md#future-expansion)).
+- **ICP balance**: the header pill reads the caller's ICP balance
+  from the NNS ledger (`ryjl3-tyaaa-aaaaa-aaaba-cai`).
+- **Authentication**: Internet Identity via `@junobuild/core`.
+- **Theming**: every brand colour resolves through CSS variables, so
+  a dark theme is a single-file change in
+  [`src/app.css`](./src/app.css). Today only the `light` theme ships.
 - **i18n scaffolding**: typed dictionary generated from
   `src/lib/i18n/*.json` via `npm run i18n`.
 
@@ -53,9 +74,11 @@ entry point:
 
 - **Frontend**: [SvelteKit](https://kit.svelte.dev/) with
   **Svelte 5 (Runes)**.
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with the
-  lavender-blue palette declared via `@theme` in
-  [`src/app.css`](./src/app.css).
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with a
+  purple-and-green brand palette + Lato + a modular type scale,
+  declared via `@theme` in [`src/app.css`](./src/app.css). All
+  brand-aware colours are wired through CSS variables on
+  `[data-theme]` so dark mode is a one-file swap.
 - **Auth**: [Juno](https://juno.build/) +
   [Internet Identity](https://identity.ic0.app/).
 - **IC client**: [`@dfinity/agent`](https://github.com/dfinity/agent-js),
@@ -75,19 +98,23 @@ entry point:
 src/
 ├── app.{css,html,d.ts}     Theme tokens, base HTML, ambient types
 ├── custom-events.d.ts      Custom Juno DOM events typing
-├── routes/                 SvelteKit shell (single dashboard + /claim/[deal_id])
+├── routes/                 SvelteKit shell — multiple mobile-first routes:
+│                             /, /claim/[id], /deals/{new,[id],[id]/dispute},
+│                             /profile/{,,edit,arbitrator,admin}, /send
 ├── declarations/           Generated Candid bindings (`npm run did`)
 └── lib/
     ├── actors/             Shared agent / actor manager
     ├── api/                Identity-passing facades (`*.api.ts`)
     ├── canisters/          `Canister<S>` wrappers (`*.canister.ts`)
-    ├── components/         Svelte components (DealsTable, CreateDealModal, …)
+    ├── components/         Svelte components (Button, BrandHeader, DealCard,
+    │                         AppBottomNav, ShareLinkModal, …) +
+    │                         components/icons/ (single-path SVGs)
     ├── constants/          App-wide constants & lookup tables
     ├── derived/            Derived stores
     ├── enums/              const-object enums
     ├── env/                Vite env wrappers
     ├── i18n/               Translation dictionaries (one JSON per locale)
-    ├── services/           Side-effectful orchestration (deal / balance / identity)
+    ├── services/           Side-effectful orchestration (deal / balance / profile / identity)
     ├── stores/             Writable / readable Svelte stores
     ├── types/              TS interfaces / types (incl. generated `i18n.d.ts`)
     └── utils/              Pure helpers (`*.utils.ts` + colocated `.spec.ts`)
@@ -150,8 +177,10 @@ mirrored in [`vite.config.ts`](./vite.config.ts)):
 
    The app boots at <http://localhost:5173> and talks to the escrow
    canister on mainnet (the agent dials `window.location.origin`,
-   which `juno dev` proxies). PandaMe ships no Juno datastore
-   collections — only II auth.
+   which `juno dev` proxies). The Juno emulator hosts a single
+   datastore collection — `profiles` — for editable user metadata
+   (see [`juno.dev.config.ts`](./juno.dev.config.ts)). All deal /
+   ledger state still lives in the upstream canisters.
 
 ### Quality gates
 

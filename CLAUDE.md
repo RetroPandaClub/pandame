@@ -79,7 +79,7 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 
 ## Coding rules (Claude-specific addenda)
 
-These are on top of the [10 commandments](./AGENTS.md#2-the-10-commandments-read-before-every-change):
+These are on top of the [11 commandments](./AGENTS.md#2-the-11-commandments-read-before-every-change):
 
 - **Read before edit.** Always read a file (or its relevant range) at
   least once before modifying it. The `Read` / `Grep` tools are cheap.

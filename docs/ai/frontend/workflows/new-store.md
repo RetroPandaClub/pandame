@@ -18,9 +18,10 @@ by a simple component-local `$state` rune.
 
 1. **Search first.** `Grep` `$lib/stores/` for a near-fit. Pandame's
    stores today are `user.store.ts`, `i18n.store.ts`, `deals.store.ts`,
-   and `balance.store.ts` — extend one of them if it's a related
-   concern (e.g. another auth-derived value goes on `user.store`,
-   another deal-shaped collection on `deals.store`).
+   `balance.store.ts`, and `profile.store.ts` — extend one of them if
+   it's a related concern (e.g. another auth-derived value goes on
+   `user.store`, another deal-shaped collection on `deals.store`,
+   editable user metadata on `profile.store`).
 2. **Pick the name.** `<concept>.store.ts` (kebab-case, lowercase). The
    exported store name follows `camelCase` and ends in `Store` —
    `userStore`, `i18nStore`. Keep both names in sync.

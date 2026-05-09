@@ -28,12 +28,16 @@ escrow logic lives upstream and pandame talks to it directly via
 | CI / infra                 | `.github/workflows/`, `.github/actions/`        | YAML                                      | Restricted                 |
 | **Escrow canister (Rust)** | **`../escrow/`**                                | Rust (canister)                           | **External repo — see §4** |
 
-The platform mounts as a single SvelteKit page (`/`) plus one public dynamic
-route (`/claim/[deal_id]?code=…`) for the QR / share-link flow.
+The platform is a multi-route SvelteKit SPA with a mobile-first "phone
+frame" shell. Authenticated routes live under `/`, `/deals/{new,[id],
+[id]/dispute}`, `/profile/{,,edit,arbitrator,admin}`, `/send`; the
+public dynamic route is `/claim/[deal_id]?code=…` for the QR / share-link
+flow. The full route table lives in
+[`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md#top-level-src).
 
 ---
 
-## 2. The 10 commandments (read before every change)
+## 2. The 11 commandments (read before every change)
 
 1. **Always idiomatic.** Use the conventions of the surrounding code (this
    repo's style), not the ones from your training data.

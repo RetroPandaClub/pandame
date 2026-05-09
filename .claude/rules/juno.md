@@ -14,13 +14,21 @@
 
 ## Overview
 
-Pandame uses Juno for **Internet Identity sign-in only** — no
-satellite serverless code, no datastore / storage collections. All
-persistent state lives in the standalone **Escrow** Rust canister
-([`../escrow/`](../../../escrow/), mainnet
-`umxj5-niaaa-aaaae-af2sq-cai`). The frontend talks to it directly via a
-generated `@dfinity/agent` actor and to ICRC-1 / -2 ledgers via
-`@icp-sdk/canisters/ledger/icrc`.
+Pandame uses Juno for two things:
+
+1. **Internet Identity sign-in** (no other auth provider).
+2. **One datastore collection — `profiles`** — that stores
+   editable user metadata (username / name / address / email) keyed
+   by principal. See
+   [`profile.services.ts`](../../src/lib/services/profile.services.ts),
+   [`Collection.PROFILES`](../../src/lib/constants/collections.constants.ts),
+   [`juno.dev.config.ts`](../../juno.dev.config.ts).
+
+All **escrow** / ledger state lives in the standalone **Escrow** Rust
+canister ([`../escrow/`](../../../escrow/), mainnet
+`umxj5-niaaa-aaaae-af2sq-cai`). The frontend talks to it directly via
+a generated `@dfinity/agent` actor and to ICRC-1 / -2 ledgers via
+`@icp-sdk/canisters/ledger/icrc`. Don't push deal state into Juno.
 
 ## Key SDK functions (`@junobuild/core`)
 
@@ -110,9 +118,23 @@ generated `@dfinity/agent` actor and to ICRC-1 / -2 ledgers via
 
 The `Disputed` lifecycle state is **not yet implemented in the canister**
 (see [`../escrow/src/escrow/README.md#future-expansion`](../../../escrow/src/escrow/README.md#future-expansion)).
-The `Dispute (soon)` button in
+The `Dispute` button in
 [`DealActions.svelte`](../../src/lib/components/DealActions.svelte)
-opens an inline notice that points at the upstream roadmap. When the
-canister grows the state, replace the stub with a real flow and update
+navigates to
+[`/deals/[deal_id]/dispute`](../../src/routes/deals/%5Bdeal_id%5D/dispute/+page.svelte),
+a visual mockup with a "v2" warning banner, disabled inputs and a
+disabled `VoteQuorumPicker`. When the canister grows the
+`Disputed` state + dispute-jury params, replace the mockup with a real
+flow and update
 [`docs/ai/frontend/reusability.md`](../../docs/ai/frontend/reusability.md)
 in the same PR.
+
+## Profile collection is real
+
+`profile.services.ts` reads / writes the `profiles` Juno collection
+through `@junobuild/core`'s `getDoc` / `setDoc`. The collection key
+is `Collection.PROFILES` (string `'profiles'`) and rules in
+[`juno.dev.config.ts`](../../juno.dev.config.ts) are
+`memory: 'stable'`, `read: 'public'`, `write: 'private'`. If you change
+the schema, mirror it in [`src/lib/types/profile.ts`](../../src/lib/types/profile.ts)
+and re-run the local emulator to pick up the new rules.
