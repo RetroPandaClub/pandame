@@ -35,6 +35,21 @@ interface I18nNav {
 	profile: string;
 }
 
+interface I18nHome {
+	title: string;
+	opening_chip: string;
+	bot_greeting: string;
+	bot_pay_or_receive: string;
+	bot_wizard_or_expert: string;
+	choice_create: string;
+	choice_history: string;
+	choice_pay: string;
+	choice_receive: string;
+	choice_guided: string;
+	choice_expert: string;
+	help_label: string;
+}
+
 interface I18nHistory {
 	title: string;
 	filter_all: string;
@@ -204,6 +219,7 @@ interface I18n {
 	layout: I18nLayout;
 	welcome: I18nWelcome;
 	nav: I18nNav;
+	home: I18nHome;
 	history: I18nHistory;
 	dispute: I18nDispute;
 	detail: I18nDetail;

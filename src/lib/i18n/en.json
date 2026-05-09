@@ -28,6 +28,20 @@
 		"send": "Send",
 		"profile": "Profile"
 	},
+	"home": {
+		"title": "Home",
+		"opening_chip": "Hello!",
+		"bot_greeting": "Hello. Welcome to PandaMe! What would you like to do?",
+		"bot_pay_or_receive": "Sure, do you pay or receive?",
+		"bot_wizard_or_expert": "Do you continue with the wizard or switch to the Expert version?",
+		"choice_create": "Create new deals",
+		"choice_history": "See your deals",
+		"choice_pay": "Pay",
+		"choice_receive": "Receive",
+		"choice_guided": "Guided",
+		"choice_expert": "Expert",
+		"help_label": "Do you need help?"
+	},
 	"history": {
 		"title": "History",
 		"filter_all": "All",
