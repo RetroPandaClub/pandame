@@ -11,6 +11,7 @@
 		rejectDeal
 	} from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { userStore } from '$lib/stores/user.store';
 	import type { Deal, DealSide } from '$lib/types/deal';
 	import { consentState, dealStatus, sideOf } from '$lib/utils/deal.utils';
@@ -96,19 +97,19 @@
 
 <div class="flex flex-wrap items-center gap-2">
 	{#if canConsent}
-		<Button onclick={onConsent} disabled={progress}>Consent</Button>
+		<Button onclick={onConsent} disabled={progress}>{$i18n.deals.actions.consent}</Button>
 	{/if}
 	{#if canReject}
-		<Button onclick={onReject} disabled={progress}>Reject</Button>
+		<Button onclick={onReject} disabled={progress}>{$i18n.deals.actions.reject}</Button>
 	{/if}
 	{#if canCancel}
-		<Button onclick={onCancel} disabled={progress}>Cancel</Button>
+		<Button onclick={onCancel} disabled={progress}>{$i18n.deals.actions.cancel}</Button>
 	{/if}
 	{#if canAccept}
-		<Button onclick={onAccept} disabled={progress}>Accept</Button>
+		<Button onclick={onAccept} disabled={progress}>{$i18n.deals.actions.accept}</Button>
 	{/if}
 	{#if canReclaim}
-		<Button onclick={onReclaim} disabled={progress}>Reclaim</Button>
+		<Button onclick={onReclaim} disabled={progress}>{$i18n.deals.actions.reclaim}</Button>
 	{/if}
 	{#if canDispute}
 		<button
@@ -116,10 +117,10 @@
 			onclick={onDispute}
 			disabled={progress}
 			class="rounded-sm border-[3px] border-dashed border-black/40 px-3 py-1 text-sm font-semibold opacity-70 hover:opacity-100 dark:border-white/40 dark:text-white"
-			title="Dispute resolution will land in a future canister upgrade."
+			title={$i18n.deals.actions.dispute_tooltip}
 			data-tid="dispute-stub"
 		>
-			Dispute (soon)
+			{$i18n.deals.actions.dispute}
 		</button>
 	{/if}
 </div>
@@ -135,16 +136,8 @@
 		class="mt-2 rounded-sm border-2 border-dashed border-black/40 p-3 text-xs dark:border-white/40 dark:text-white"
 		role="note"
 	>
-		Dispute resolution is on the roadmap (Product.docx §Evaluation). The escrow canister does not
-		yet support a <code>Disputed</code> state — track progress in
-		<a
-			href="https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="underline"
-		>
-			the escrow repo</a
-		>.
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html $i18n.deals.actions.dispute_notice_html}
 	</div>
 {/if}
 

@@ -4,6 +4,7 @@
 	import Auth from '$lib/components/Auth.svelte';
 	import Background from '$lib/components/Background.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	// eslint-disable-next-line import/no-relative-parent-imports
 	import '../app.css';
 
@@ -19,6 +20,8 @@
 				auth: true
 			}
 		});
+
+		await i18n.init();
 	};
 
 	$effect(() => {
@@ -28,19 +31,11 @@
 
 <div class="relative isolate min-h-[100dvh]">
 	<main class="tall:min-h-[calc(100dvh-128px)] mx-auto max-w-screen-2xl px-8 py-16 md:px-24">
-		<h1 class="text-5xl font-bold tracking-tight md:pt-24 md:text-6xl dark:text-white">PandaMe</h1>
-		<p class="py-4 md:max-w-lg dark:text-white">
-			A trustless escrow on the
-			<a
-				href="https://internetcomputer.org"
-				rel="noopener noreferrer"
-				target="_blank"
-				class="underline"
-			>
-				Internet Computer
-			</a>. Lock funds against a known counterparty, share a tip link with anyone, or reclaim what's
-			yours after expiry — all from a single Juno-powered Internet Identity session.
-		</p>
+		<h1 class="text-5xl font-bold tracking-tight md:pt-24 md:text-6xl dark:text-white">
+			{$i18n.layout.title}
+		</h1>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		<p class="py-4 md:max-w-lg dark:text-white">{@html $i18n.layout.tagline_html}</p>
 
 		<Auth>
 			{@render children()}

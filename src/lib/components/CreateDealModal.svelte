@@ -5,6 +5,7 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { createAndFundDeal } from '$lib/services/deal.services';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal } from '$lib/types/deal';
 	import { formatTokenAmount, msToNs, parseTokenAmount } from '$lib/utils/format.utils';
 
@@ -26,6 +27,7 @@
 	let error: string | undefined = $state(undefined);
 
 	let token = ICP_TOKEN;
+	let feeStr = formatTokenAmount(token.fee, token);
 
 	let amount = $derived(parseTokenAmount(amountText, token));
 	let recipient = $derived(parsePrincipal(recipientText));
@@ -39,6 +41,11 @@
 			expiresAtNs !== undefined &&
 			expiresAtMs > Date.now() &&
 			(recipientText.trim().length === 0 || recipient !== undefined)
+	);
+
+	let amountLabel = $derived($i18n.create.amount_label_html.replace('{symbol}', token.symbol));
+	let amountPlaceholder = $derived(
+		$i18n.create.amount_placeholder_html.replace('{fee_str}', feeStr)
 	);
 
 	const submit = async () => {
@@ -109,13 +116,13 @@
 			onclose();
 		}
 	}}
-	title="Create a deal"
+	title={$i18n.create.title}
 >
 	<label class="block">
-		<span class="text-sm font-semibold">Title (optional)</span>
+		<span class="text-sm font-semibold">{$i18n.create.deal_title_label}</span>
 		<input
 			type="text"
-			placeholder="e.g. Coffee for Alice"
+			placeholder={$i18n.create.deal_title_placeholder}
 			bind:value={title}
 			disabled={progress}
 			class="mt-1 w-full rounded-sm border-[3px] border-black bg-white px-3 py-1.5 dark:bg-black dark:text-white"
@@ -124,10 +131,10 @@
 	</label>
 
 	<label class="block">
-		<span class="text-sm font-semibold">Note (optional)</span>
+		<span class="text-sm font-semibold">{$i18n.create.note_label}</span>
 		<textarea
 			rows={3}
-			placeholder="Add a short message"
+			placeholder={$i18n.create.note_placeholder}
 			bind:value={note}
 			disabled={progress}
 			class="mt-1 w-full resize-none rounded-sm border-[3px] border-black bg-white px-3 py-1.5 dark:bg-black dark:text-white"
@@ -136,38 +143,38 @@
 	</label>
 
 	<label class="block">
-		<span class="text-sm font-semibold">Recipient principal (optional)</span>
+		<span class="text-sm font-semibold">{$i18n.create.recipient_label}</span>
 		<input
 			type="text"
-			placeholder="Leave empty for a tip / share-link flow"
+			placeholder={$i18n.create.recipient_placeholder}
 			bind:value={recipientText}
 			disabled={progress}
 			class="mt-1 w-full rounded-sm border-[3px] border-black bg-white px-3 py-1.5 font-mono text-sm dark:bg-black dark:text-white"
 			data-tid="create-deal-recipient"
 		/>
 		{#if recipientText.trim().length > 0 && recipient === undefined}
-			<small class="text-red-600">Not a valid principal.</small>
+			<small class="text-red-600">{$i18n.create.recipient_invalid}</small>
 		{/if}
 	</label>
 
 	<label class="block">
-		<span class="text-sm font-semibold">Amount ({token.symbol})</span>
+		<span class="text-sm font-semibold">{amountLabel}</span>
 		<input
 			type="text"
 			inputmode="decimal"
-			placeholder={`e.g. 0.5 — fee ≈ ${formatTokenAmount(token.fee, token)}`}
+			placeholder={amountPlaceholder}
 			bind:value={amountText}
 			disabled={progress}
 			class="mt-1 w-full rounded-sm border-[3px] border-black bg-white px-3 py-1.5 dark:bg-black dark:text-white"
 			data-tid="create-deal-amount"
 		/>
 		{#if amountText.length > 0 && (amount === undefined || amount <= 0n)}
-			<small class="text-red-600">Enter a positive amount.</small>
+			<small class="text-red-600">{$i18n.create.amount_invalid}</small>
 		{/if}
 	</label>
 
 	<label class="block">
-		<span class="text-sm font-semibold">Expires at</span>
+		<span class="text-sm font-semibold">{$i18n.create.expiry_label}</span>
 		<input
 			type="datetime-local"
 			bind:value={expiresAtLocal}
@@ -176,7 +183,7 @@
 			data-tid="create-deal-expiry"
 		/>
 		{#if expiresAtMs <= Date.now()}
-			<small class="text-red-600">Expiry must be in the future.</small>
+			<small class="text-red-600">{$i18n.create.expiry_invalid}</small>
 		{/if}
 	</label>
 
@@ -187,9 +194,9 @@
 	{/if}
 
 	{#snippet footer()}
-		<Button onclick={onclose} disabled={progress}>Cancel</Button>
+		<Button onclick={onclose} disabled={progress}>{$i18n.core.text.cancel}</Button>
 		<Button onclick={submit} disabled={!valid || progress}>
-			{progress ? 'Creating…' : 'Create & fund'}
+			{progress ? $i18n.create.submitting : $i18n.create.submit}
 		</Button>
 	{/snippet}
 </Modal>

@@ -4,8 +4,9 @@
 	import DealActions from '$lib/components/DealActions.svelte';
 	import DealStatusBadge from '$lib/components/DealStatusBadge.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { userStore } from '$lib/stores/user.store';
-	import type { Deal } from '$lib/types/deal';
+	import type { Deal, DealSide } from '$lib/types/deal';
 	import { dealStatus, sideOf } from '$lib/utils/deal.utils';
 	import { formatTokenAmount, nsToDate, shortPrincipal } from '$lib/utils/format.utils';
 
@@ -16,15 +17,25 @@
 	let { deal }: Props = $props();
 
 	let principal = $derived(parsePrincipal($userStore?.key));
-	let mySide = $derived(sideOf(deal, principal));
+	let mySide: DealSide = $derived(sideOf(deal, principal));
 
 	let status = $derived(dealStatus(deal));
-	let title = $derived(fromNullable(deal.title) ?? '(untitled deal)');
+	let title = $derived(fromNullable(deal.title) ?? $i18n.deals.row.untitled);
 	let note = $derived(fromNullable(deal.note));
 	let payer = $derived(fromNullable(deal.payer));
 	let recipient = $derived(fromNullable(deal.recipient));
 	let amountStr = $derived(formatTokenAmount(deal.amount, ICP_TOKEN));
 	let expiresAt = $derived(nsToDate(deal.expires_at_ns));
+	let mySideLabel = $derived.by(() => {
+		switch (mySide) {
+			case 'payer':
+				return $i18n.deals.role.payer;
+			case 'recipient':
+				return $i18n.deals.role.recipient;
+			default:
+				return $i18n.deals.role.unknown;
+		}
+	});
 
 	function parsePrincipal(text: string | undefined): Principal | undefined {
 		if (text === undefined || text.length === 0) {
@@ -55,24 +66,26 @@
 		{/if}
 
 		<dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-			<dt class="opacity-60">Amount</dt>
+			<dt class="opacity-60">{$i18n.deals.row.amount}</dt>
 			<dd class="text-right font-mono">{amountStr}</dd>
 
-			<dt class="opacity-60">Payer</dt>
-			<dd class="text-right font-mono">{payer ? shortPrincipal(payer) : '—'}</dd>
-
-			<dt class="opacity-60">Recipient</dt>
+			<dt class="opacity-60">{$i18n.deals.row.payer}</dt>
 			<dd class="text-right font-mono">
-				{recipient ? shortPrincipal(recipient) : 'open / share-link'}
+				{payer ? shortPrincipal(payer) : $i18n.deals.row.none}
 			</dd>
 
-			<dt class="opacity-60">Expires</dt>
+			<dt class="opacity-60">{$i18n.deals.row.recipient}</dt>
+			<dd class="text-right font-mono">
+				{recipient ? shortPrincipal(recipient) : $i18n.deals.row.recipient_open}
+			</dd>
+
+			<dt class="opacity-60">{$i18n.deals.row.expires}</dt>
 			<dd class="text-right">
 				<time datetime={expiresAt.toISOString()}>{expiresAt.toLocaleString()}</time>
 			</dd>
 
-			<dt class="opacity-60">Your role</dt>
-			<dd class="text-right capitalize">{mySide}</dd>
+			<dt class="opacity-60">{$i18n.deals.row.your_role}</dt>
+			<dd class="text-right capitalize">{mySideLabel}</dd>
 		</dl>
 	</div>
 

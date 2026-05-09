@@ -2,20 +2,103 @@
 	"core": {
 		"text": {
 			"cancel": "Cancel",
-			"next": "Next",
-			"save": "Save",
-			"back": "Back",
-			"done": "Done",
 			"close": "Close",
-			"refresh": "Refresh",
-			"name": "Name",
-			"symbol": "Symbol",
-			"decimals": "Decimals",
-			"amount": "Amount",
-			"max": "Max",
-			"more": "More",
-			"reject": "Reject",
-			"approve": "Approve"
+			"save": "Save",
+			"submit": "Submit",
+			"copy": "Copy",
+			"copied": "Copied!",
+			"done": "Done",
+			"loading": "Loading…",
+			"signed_in_as": "Signed in as",
+			"sign_in": "Sign in",
+			"sign_out": "Sign out",
+			"try_again": "Try again",
+			"back_to_dashboard": "← Back to your dashboard",
+			"open_dashboard": "Open your dashboard"
 		}
+	},
+	"layout": {
+		"title": "PandaMe",
+		"tagline_html": "A trustless escrow on the <a href=\"https://internetcomputer.org\" rel=\"noopener noreferrer\" target=\"_blank\" class=\"underline\">Internet Computer</a>. Lock funds against a known counterparty, share a tip link with anyone, or reclaim what's yours after expiry — all from a single Juno-powered Internet Identity session."
+	},
+	"deals": {
+		"create_cta": "Create a deal",
+		"empty_title": "No deals yet",
+		"empty_description": "Create your first escrow deal to lock funds against a recipient or share a tip link.",
+		"role": {
+			"payer": "payer",
+			"recipient": "recipient",
+			"unknown": "unknown"
+		},
+		"row": {
+			"untitled": "(untitled deal)",
+			"amount": "Amount",
+			"payer": "Payer",
+			"recipient": "Recipient",
+			"recipient_open": "open / share-link",
+			"expires": "Expires",
+			"your_role": "Your role",
+			"none": "—"
+		},
+		"actions": {
+			"consent": "Consent",
+			"reject": "Reject",
+			"cancel": "Cancel",
+			"accept": "Accept",
+			"reclaim": "Reclaim",
+			"dispute": "Dispute (soon)",
+			"dispute_tooltip": "Dispute resolution will land in a future canister upgrade.",
+			"dispute_notice_html": "Dispute resolution is on the roadmap (Product.docx §Evaluation). The escrow canister does not yet support a <code>Disputed</code> state — track progress in <a href=\"https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"underline\">the escrow repo</a>."
+		},
+		"status": {
+			"created": "Created",
+			"funded": "Funded",
+			"settled": "Settled",
+			"refunded": "Refunded",
+			"cancelled": "Cancelled",
+			"rejected": "Rejected"
+		}
+	},
+	"create": {
+		"title": "Create a deal",
+		"submit": "Create & fund",
+		"submitting": "Creating…",
+		"deal_title_label": "Title (optional)",
+		"deal_title_placeholder": "e.g. Coffee for Alice",
+		"note_label": "Note (optional)",
+		"note_placeholder": "Add a short message",
+		"recipient_label": "Recipient principal (optional)",
+		"recipient_placeholder": "Leave empty for a tip / share-link flow",
+		"recipient_invalid": "Not a valid principal.",
+		"amount_label_html": "Amount ({symbol})",
+		"amount_placeholder_html": "e.g. 0.5 — fee ≈ {fee_str}",
+		"amount_invalid": "Enter a positive amount.",
+		"expiry_label": "Expires at",
+		"expiry_invalid": "Expiry must be in the future."
+	},
+	"share": {
+		"title": "Share your deal",
+		"description": "Send this link or QR code to the recipient. They can claim the funds at any time before the deal expires.",
+		"no_share_needed": "This deal has a known recipient — no share link is needed.",
+		"qr_alt": "QR code linking to the claim page",
+		"link_label": "Share link",
+		"link_aria": "Share link URL"
+	},
+	"claim": {
+		"title": "Claim your deal",
+		"missing_code": "No claim code in the URL — if this deal is bound to your principal you can still accept it; otherwise ask the sender for the full link.",
+		"signin_title": "Sign in to continue",
+		"signin_description": "PandaMe needs to know your principal before it can release the funds to you.",
+		"load_error_title": "Couldn't load this deal",
+		"settled_title": "Settled!",
+		"settled_description": "The funds have been released to your principal.",
+		"preview_title_fallback": "Deal preview",
+		"loading_preview": "Loading deal preview…",
+		"recipient_bound": "already bound",
+		"recipient_open": "open / first-claimer wins",
+		"deal_field": "Deal",
+		"status_field": "Status",
+		"submit": "Accept deal",
+		"submitting": "Claiming…"
 	}
 }

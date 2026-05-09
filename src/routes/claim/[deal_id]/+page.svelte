@@ -10,6 +10,7 @@
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { acceptDeal, getClaimableDeal } from '$lib/services/deal.services';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { userStore } from '$lib/stores/user.store';
 	import type { ClaimableDeal, Deal } from '$lib/types/deal';
 	import { dealStatus } from '$lib/utils/deal.utils';
@@ -76,7 +77,7 @@
 	let title = $derived.by((): string | undefined => {
 		const p = preview;
 
-		return p === undefined ? undefined : (fromNullable(p.title) ?? '(untitled deal)');
+		return p === undefined ? undefined : (fromNullable(p.title) ?? $i18n.deals.row.untitled);
 	});
 
 	let note = $derived.by((): string | undefined => {
@@ -101,75 +102,70 @@
 </script>
 
 <svelte:head>
-	<title>Claim a deal · PandaMe</title>
+	<title>{$i18n.claim.title} · {$i18n.layout.title}</title>
 </svelte:head>
 
 <section class="mx-auto mt-12 max-w-xl space-y-6 dark:text-white">
 	<header class="space-y-2">
-		<a href="/" class="text-sm underline">← Back to your dashboard</a>
-		<h1 class="text-3xl font-bold">Claim your deal</h1>
+		<a href="/" class="text-sm underline">{$i18n.core.text.back_to_dashboard}</a>
+		<h1 class="text-3xl font-bold">{$i18n.claim.title}</h1>
 		{#if claimCode === undefined}
-			<p class="text-sm opacity-75">
-				No claim code in the URL — if this deal is bound to your principal you can still accept it;
-				otherwise ask the sender for the full link.
-			</p>
+			<p class="text-sm opacity-75">{$i18n.claim.missing_code}</p>
 		{/if}
 	</header>
 
 	{#if !$userSignedIn}
-		<Card title="Sign in to continue">
-			<p class="text-sm">
-				PandaMe needs to know your principal before it can release the funds to you.
-			</p>
+		<Card title={$i18n.claim.signin_title}>
+			<p class="text-sm">{$i18n.claim.signin_description}</p>
 			{#snippet footer()}
 				<Login />
 			{/snippet}
 		</Card>
 	{:else if loadError !== undefined}
-		<Card title="Couldn't load this deal">
+		<Card title={$i18n.claim.load_error_title}>
 			<p class="text-sm text-red-700">{loadError}</p>
 			{#snippet footer()}
-				<Button onclick={reload}>Try again</Button>
+				<Button onclick={reload}>{$i18n.core.text.try_again}</Button>
 			{/snippet}
 		</Card>
 	{:else if claimed !== undefined}
-		<Card title="Settled!">
-			<p>The funds have been released to your principal.</p>
+		<Card title={$i18n.claim.settled_title}>
+			<p>{$i18n.claim.settled_description}</p>
 			<dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-				<dt class="opacity-60">Amount</dt>
+				<dt class="opacity-60">{$i18n.deals.row.amount}</dt>
 				<dd class="text-right font-mono">{formatTokenAmount(claimed.amount, ICP_TOKEN)}</dd>
-				<dt class="opacity-60">Status</dt>
+				<dt class="opacity-60">{$i18n.claim.status_field}</dt>
 				<dd class="text-right">
 					<DealStatusBadge status={dealStatus(claimed)} />
 				</dd>
-				<dt class="opacity-60">Deal</dt>
+				<dt class="opacity-60">{$i18n.claim.deal_field}</dt>
 				<dd class="text-right">#{claimed.id.toString()}</dd>
 			</dl>
 			{#snippet footer()}
-				<a href="/" class="underline">Open your dashboard</a>
+				<a href="/" class="underline">{$i18n.core.text.open_dashboard}</a>
 			{/snippet}
 		</Card>
 	{:else if preview !== undefined}
-		<Card title={title ?? 'Deal preview'}>
+		<Card title={title ?? $i18n.claim.preview_title_fallback}>
 			{#if note !== undefined}
 				<p class="text-sm opacity-80">{note}</p>
 			{/if}
 			<dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-				<dt class="opacity-60">Amount</dt>
+				<dt class="opacity-60">{$i18n.deals.row.amount}</dt>
 				<dd class="text-right font-mono">{amountStr}</dd>
-				<dt class="opacity-60">Status</dt>
+				<dt class="opacity-60">{$i18n.claim.status_field}</dt>
 				<dd class="text-right">
 					<DealStatusBadge status={dealStatus(preview)} />
 				</dd>
-				<dt class="opacity-60">Expires</dt>
+				<dt class="opacity-60">{$i18n.deals.row.expires}</dt>
 				<dd class="text-right">
 					{#if expiresAt !== undefined}
 						<time datetime={expiresAt.toISOString()}>{expiresAt.toLocaleString()}</time>
 					{/if}
 				</dd>
-				<dt class="opacity-60">Recipient</dt>
+				<dt class="opacity-60">{$i18n.deals.row.recipient}</dt>
 				<dd class="text-right">
-					{preview.is_recipient_bound ? 'already bound' : 'open / first-claimer wins'}
+					{preview.is_recipient_bound ? $i18n.claim.recipient_bound : $i18n.claim.recipient_open}
 				</dd>
 			</dl>
 
@@ -181,16 +177,17 @@
 
 			{#snippet footer()}
 				<small class="mr-auto text-xs opacity-60">
-					Signed in as {$userStore?.key}
+					{$i18n.core.text.signed_in_as}
+					{$userStore?.key}
 				</small>
 				<Logout />
 				<Button onclick={claim} disabled={progress}>
-					{progress ? 'Claiming…' : 'Accept deal'}
+					{progress ? $i18n.claim.submitting : $i18n.claim.submit}
 				</Button>
 			{/snippet}
 		</Card>
 	{:else}
-		<p class="text-sm opacity-75">Loading deal preview…</p>
+		<p class="text-sm opacity-75">{$i18n.claim.loading_preview}</p>
 	{/if}
 </section>
 

@@ -4,6 +4,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { SHARE_URL } from '$lib/constants/routes.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		open: boolean;
@@ -51,14 +52,11 @@
 	};
 </script>
 
-<Modal {open} {onclose} title="Share your deal">
+<Modal {open} {onclose} title={$i18n.share.title}>
 	{#if shareUrl === undefined}
-		<p>This deal has a known recipient — no share link is needed.</p>
+		<p>{$i18n.share.no_share_needed}</p>
 	{:else}
-		<p class="text-sm opacity-75">
-			Send this link or QR code to the recipient. They can claim the funds at any time before the
-			deal expires.
-		</p>
+		<p class="text-sm opacity-75">{$i18n.share.description}</p>
 
 		{#if qrDataUrl !== undefined}
 			<div class="flex justify-center">
@@ -66,20 +64,20 @@
 					src={qrDataUrl}
 					width="220"
 					height="220"
-					alt="QR code linking to the claim page"
+					alt={$i18n.share.qr_alt}
 					class="dark:border-lavender-blue-500 rounded border-[3px] border-black"
 				/>
 			</div>
 		{/if}
 
 		<label class="block">
-			<span class="text-sm font-semibold">Share link</span>
+			<span class="text-sm font-semibold">{$i18n.share.link_label}</span>
 			<input
 				type="text"
 				readonly
 				value={shareUrl}
 				class="mt-1 w-full rounded-sm border-[3px] border-black bg-white px-3 py-1.5 font-mono text-xs dark:bg-black dark:text-white"
-				aria-label="Share link URL"
+				aria-label={$i18n.share.link_aria}
 				data-tid="share-link-input"
 			/>
 		</label>
@@ -88,9 +86,9 @@
 	{#snippet footer()}
 		{#if shareUrl !== undefined}
 			<Button onclick={copy}>
-				{copied ? 'Copied!' : 'Copy link'}
+				{copied ? $i18n.core.text.copied : $i18n.core.text.copy}
 			</Button>
 		{/if}
-		<Button onclick={onclose}>Done</Button>
+		<Button onclick={onclose}>{$i18n.core.text.done}</Button>
 	{/snippet}
 </Modal>

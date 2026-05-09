@@ -9,6 +9,7 @@
 	import { listMyDeals } from '$lib/services/deal.services';
 	import { balanceStore } from '$lib/stores/balance.store';
 	import { dealsStore } from '$lib/stores/deals.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal } from '$lib/types/deal';
 
 	let createOpen = $state(false);
@@ -52,7 +53,7 @@
 				createOpen = true;
 			}}
 		>
-			Create a deal
+			{$i18n.deals.create_cta}
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				height="20"
