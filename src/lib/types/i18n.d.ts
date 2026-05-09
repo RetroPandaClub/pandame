@@ -47,6 +47,20 @@ interface I18nHistory {
 	filter_cancelled: string;
 }
 
+interface I18nDispute {
+	title: string;
+	intro: string;
+	evidence_label: string;
+	evidence_hint: string;
+	votes_label: string;
+	reason_label: string;
+	reason_placeholder: string;
+	open_cta: string;
+	cancel_cta: string;
+	stub_banner_title: string;
+	stub_banner_description: string;
+}
+
 interface I18nDetail {
 	title: string;
 	share_cta: string;
@@ -211,6 +225,7 @@ interface I18n {
 	welcome: I18nWelcome;
 	nav: I18nNav;
 	history: I18nHistory;
+	dispute: I18nDispute;
 	detail: I18nDetail;
 	profile: I18nProfile;
 	logout_confirm: I18nLogout_confirm;

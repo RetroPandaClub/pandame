@@ -39,6 +39,19 @@
 		"filter_refunded": "Refunded",
 		"filter_cancelled": "Cancelled"
 	},
+	"dispute": {
+		"title": "Open a dispute",
+		"intro": "If you and your counterparty disagree on whether the deal was fulfilled, you can escalate to a jury of arbitrators. Each arbitrator votes; the majority decision releases or refunds the funds.",
+		"evidence_label": "Upload evidence",
+		"evidence_hint": "PDF, JPG or PNG · 10 MB max",
+		"votes_label": "Jury size",
+		"reason_label": "What went wrong?",
+		"reason_placeholder": "Describe the dispute in a few sentences.",
+		"open_cta": "Open dispute",
+		"cancel_cta": "Back to deal",
+		"stub_banner_title": "v2 mock-up preview",
+		"stub_banner_description": "This screen is a visual preview. The escrow canister doesn't yet expose a Disputed lifecycle / jury voting API; nothing is sent to the chain."
+	},
 	"detail": {
 		"title": "Deal {id}",
 		"share_cta": "Share claim link",
@@ -127,7 +140,7 @@
 			"reclaim": "Reclaim",
 			"dispute": "Dispute (soon)",
 			"dispute_tooltip": "Dispute resolution will land in a future canister upgrade.",
-			"dispute_notice_html": "Dispute resolution is on the roadmap (Product.docx §Evaluation). The escrow canister does not yet support a <code>Disputed</code> state — track progress in <a href=\"https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"underline\">the escrow repo</a>."
+			"dispute_notice_html": "Dispute resolution is on the roadmap. The escrow canister does not yet support a <code>Disputed</code> state — track progress in <a href=\"https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"underline\">the escrow repo</a>."
 		},
 		"status": {
 			"created": "Created",

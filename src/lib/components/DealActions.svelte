@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Principal } from '@icp-sdk/core/principal';
+	import { goto } from '$app/navigation';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { ConsentStates, DealStatuses } from '$lib/enums/deal-status';
@@ -79,8 +80,7 @@
 	const onAccept = () => wrap('acceptDeal', () => acceptDeal({ dealId: deal.id }));
 	const onReclaim = () => wrap('reclaimDeal', () => reclaimDeal({ dealId: deal.id }));
 
-	let disputeNotice = $state(false);
-	const onDispute = () => (disputeNotice = true);
+	const onDispute = () => goto(`/deals/${deal.id}/dispute`);
 
 	function parsePrincipal(text: string | undefined): Principal | undefined {
 		if (text === undefined || text.length === 0) {
@@ -126,19 +126,12 @@
 </div>
 
 {#if error !== undefined}
-	<p class="mt-2 rounded-sm border-2 border-red-600 bg-red-50 p-2 text-xs text-red-700">
+	<p
+		class="border-danger bg-danger/10 text-body2 text-danger mt-2 rounded-md border p-2"
+		role="alert"
+	>
 		{error}
 	</p>
-{/if}
-
-{#if disputeNotice}
-	<div
-		class="mt-2 rounded-sm border-2 border-dashed border-black/40 p-3 text-xs dark:border-white/40 dark:text-white"
-		role="note"
-	>
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-		{@html $i18n.deals.actions.dispute_notice_html}
-	</div>
 {/if}
 
 {#if progress}
