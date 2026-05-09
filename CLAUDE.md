@@ -7,26 +7,42 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 > matching area README before touching code:
 >
 > - Frontend → [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)
+> - On-chain backend (escrow) → [`../escrow/src/escrow/README.md`](../escrow/src/escrow/README.md)
 
 ---
 
 ## Project memory (quick reference)
 
-- **What this is:** SvelteKit + Juno notes/images starter. Svelte 5 runes,
-  Tailwind v4, `@junobuild/core` for auth + datastore, Internet Identity
-  for sign-in.
+- **What this is:** SvelteKit + Juno frontend for the standalone Escrow
+  Rust canister (`umxj5-niaaa-aaaae-af2sq-cai`, mainnet). Svelte 5 runes,
+  Tailwind v4, `@junobuild/core` for II auth, `@dfinity/agent` +
+  `@icp-sdk/canisters` for talking to the escrow + ICP ledger.
+- **Default settlement token:** ICP (`ryjl3-tyaaa-aaaaa-aaaba-cai`,
+  8 decimals, fee 10_000 e8s). Defined in
+  [`$lib/constants/tokens.constants.ts`](./src/lib/constants/tokens.constants.ts).
 - **Essential commands:** `npm run dev` · `npm run build` · `npm run check`
   · `npm run quality` · `npm run test` · `npm run e2e` ·
-  `npm run i18n` (regenerate the typed dictionary).
-- **Auth:** sign in / out via [`Login.svelte`](./src/lib/components/Login.svelte)
-  / [`Logout.svelte`](./src/lib/components/Logout.svelte); the auth state
-  lives in [`user.store.ts`](./src/lib/stores/user.store.ts) and is fed by
-  `onAuthStateChange` inside [`Auth.svelte`](./src/lib/components/Auth.svelte).
-- **Routing:** single SvelteKit route. The `+page.svelte` mounts
-  [`Table`](./src/lib/components/Table.svelte) (notes list) +
-  [`Modal`](./src/lib/components/Modal.svelte) (create note).
+  `npm run did` (regenerate Candid bindings from upstream
+  [`../escrow/`](../escrow/)) · `npm run i18n` (regenerate the typed
+  dictionary).
+- **Identity:** principal source of truth is
+  [`src/lib/services/identity.services.ts`](./src/lib/services/identity.services.ts).
+  Use `getIdentityOrAnonymous` for public reads (the `/claim` preview)
+  and `safeGetIdentityOnce` for authenticated actions.
+- **Auth:** subscribe to `onAuthStateChange` only inside
+  [`Auth.svelte`](./src/lib/components/Auth.svelte) — every other
+  component reads from
+  [`userStore`](./src/lib/stores/user.store.ts) /
+  [`userSignedIn`](./src/lib/derived/user.derived.ts).
+- **Routing:** single SvelteKit page (`src/routes/+page.svelte`) plus
+  `/claim/[deal_id]` for the share-link flow. No nav-store; if/when one
+  is needed, surface a question first.
 - **Local replica:** Juno emulator only (`juno dev start`). **Never** run
   `dfx start`.
+- **Dispute UI:** the Dispute button in
+  [`DealActions.svelte`](./src/lib/components/DealActions.svelte) is a
+  **stub** — the canister has no `Disputed` state yet (see
+  [`../escrow/src/escrow/README.md#future-expansion`](../escrow/src/escrow/README.md#future-expansion)).
 
 ---
 
@@ -43,9 +59,13 @@ Claude-specific runtime layer. Anything not contradicted here defers to
   policy — better one extra question than a sprawling PR. Especially
   before:
   - Adding a new dependency (npm).
-  - Adding a new top-level folder under `src/`.
-  - Modifying `juno.config.ts` / `juno.dev.config.ts` collection rules.
-  - Touching anything under `.github/workflows/**` or `.github/actions/**`.
+  - Adding a new top-level folder under `src/` or `src/lib/`.
+  - Touching the `escrow.did` source under
+    [`../escrow/src/escrow/`](../escrow/src/escrow/) — go work on the
+    escrow repo first, then come back here for `npm run did`.
+  - Modifying `juno.config.ts` / `juno.dev.config.ts`.
+  - Touching anything under `.github/workflows/**` or
+    `.github/actions/**`.
 
 ---
 
@@ -66,8 +86,11 @@ These are on top of the [10 commandments](./AGENTS.md#2-the-10-commandments-read
 
   In one shot: `npm run quality` (format + lint).
 
+  If you regenerated bindings (`npm run did`), commit the regenerated
+  `src/declarations/escrow/**` together with the calling code change.
+
 - **Reuse over rebuild.** Before creating a new `.svelte` / `.utils.ts`
-  / `.store.ts`, search for an existing one. See
+  / `.services.ts` / `.store.ts`, search for an existing one. See
   [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md).
 - **No new dependencies** without explicit user approval (`package.json`).
 - **No new top-level folders** under `src/` or `src/lib/`. The taxonomy
@@ -76,7 +99,9 @@ These are on top of the [10 commandments](./AGENTS.md#2-the-10-commandments-read
 - **Comments are for _why_, not _what_.** No narrating comments
   ("// fetch the user"). Only write a comment if it captures intent,
   trade-off, or an invariant the code can't express.
-- **No relative parent imports under `src/**`** — use `$lib`, `$routes`or`$root`aliases (eslint enforces`import/no-relative-parent-imports`).
+- **No relative parent imports under `src/**`** — use `$lib`, `$routes`,
+`$root` or `$declarations`aliases (eslint enforces`import/no-relative-parent-imports`). The single tolerated exception
+is the side-effect CSS import in `+layout.svelte`.
 - **i18n discipline.** New user-visible copy goes through `$i18n.*` keys —
   see [`docs/ai/frontend/workflows/i18n.md`](./docs/ai/frontend/workflows/i18n.md).
 - **Never push force / amend pushed commits / rewrite shared history.**

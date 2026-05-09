@@ -43,10 +43,15 @@
 
 Use **kebab-case** (or single-word) with a functional dot-suffix:
 
+- **Canister wrappers:** `name.canister.ts`
+- **API facades:** `name.api.ts`
+- **Services:** `name.services.ts`
 - **Stores:** `name.store.ts`
 - **Derived:** `name.derived.ts`
 - **Utils:** `name.utils.ts` (+ colocated `name.utils.spec.ts`)
+- **Constants:** `name.constants.ts`
 - **Types:** `name.ts` in `$lib/types/`
+- **Enums:** `name.ts` in `$lib/enums/`
 
 ## Documentation & testing
 
@@ -80,15 +85,32 @@ Use **kebab-case** (or single-word) with a functional dot-suffix:
   read [`userStore`](../../src/lib/stores/user.store.ts) or the
   [`userSignedIn` / `userNotSignedIn`](../../src/lib/derived/user.derived.ts)
   derived stores — never re-subscribe.
+- For service-layer calls, use `safeGetIdentityOnce` /
+  `getIdentityOrAnonymous` from
+  [`identity.services.ts`](../../src/lib/services/identity.services.ts).
 - `signIn` requires the provider object: `signIn({ internet_identity: {} })`.
 - `signOut` accepts `SignOutOptions` — wrap it in an arrow function when
   passing to `onclick`: `onclick={() => signOut()}`.
 
+## Talking to the escrow canister
+
+- Components → services (`$lib/services/*.services.ts`) → api facades
+  (`$lib/api/*.api.ts`) → canister wrappers (`$lib/canisters/*.canister.ts`)
+  → `@dfinity/agent` actor.
+- Never call `EscrowCanister.create` / `IcrcLedgerCanister.create` /
+  `getAgent` from a component.
+- Generated `EscrowDid` types come through `$lib/types/deal.ts` —
+  don't import from `$declarations` outside of `$lib/{api,canisters}/`.
+- The canonical create-fund flow is **always**
+  `create_deal` → `icrc2_approve(amount + fee)` → `fund_deal` (see
+  `createAndFundDeal` in `$lib/services/deal.services.ts`).
+
 ## Routing
 
-- Pandame is a **single-route SPA** (`+page.svelte` mounts everything).
-  Don't add new SvelteKit routes — mount new views as components inside
-  the existing page.
+- Pandame is a **single-page SPA** with a public dynamic route at
+  `/claim/[deal_id]?code=…` for the QR / share-link flow. Don't add
+  more SvelteKit routes — mount new views as components inside the
+  existing pages.
 - `+layout.ts` sets `ssr = false` and `prerender = false` so
-  `adapter-static` emits a SPA fallback. Don't change those flags
-  without a deliberate reason.
+  `adapter-static` emits a SPA fallback (deeply-linked `/claim/...`
+  URLs work). Don't change those flags without a deliberate reason.

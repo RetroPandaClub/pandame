@@ -57,17 +57,20 @@ Before opening / merging, self-review against:
 These paths are **protected**. Agents may read them, but must not modify
 them without an explicit ask in the user prompt.
 
-| Path                                                          | Reason                                                                   | Owner            |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------- |
-| `.github/workflows/**`                                        | CI integrity. Only `ci(...)` PRs touch these.                            | repo maintainers |
-| `.github/CODEOWNERS`, `.github/actions/**`                    | Review routing & action policy.                                          | repo maintainers |
-| `.github/dependabot.yml`                                      | Dependency update policy.                                                | repo maintainers |
-| `package.json` (deps), `package-lock.json`                    | New / upgraded dependencies require explicit approval.                   | repo maintainers |
-| `juno.config.ts`, `juno.dev.config.ts`                        | Collection rules + satellite IDs. Schema drift breaks data + auth.       | repo maintainers |
-| `eslint.config.js`, `.prettierrc`, `tsconfig*.json`           | Lint / format / TS policy.                                               | repo maintainers |
-| `static/workers/**`                                           | Synced from `@junobuild/core` by `npm run postinstall`. Don't hand-edit. | —                |
-| `src/lib/types/i18n.d.ts`                                     | Generated from `src/lib/i18n/*.json` by `npm run i18n`. Don't hand-edit. | —                |
-| `node_modules/`, `.svelte-kit/`, `build/`, `target/`, `.dfx/` | Build output. Never commit.                                              | —                |
+| Path                                                              | Reason                                                                   | Owner            |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------- |
+| `.github/workflows/**`                                            | CI integrity. Only `ci(...)` PRs touch these.                            | repo maintainers |
+| `.github/CODEOWNERS`, `.github/actions/**`                        | Review routing & action policy.                                          | repo maintainers |
+| `.github/dependabot.yml`                                          | Dependency update policy.                                                | repo maintainers |
+| `package.json` (deps), `package-lock.json`                        | New / upgraded dependencies require explicit approval.                   | repo maintainers |
+| `juno.config.ts`, `juno.dev.config.ts`                            | Collection rules + satellite IDs. Schema drift breaks data + auth.       | repo maintainers |
+| `eslint.config.js`, `.prettierrc`, `tsconfig*.json`               | Lint / format / TS policy.                                               | repo maintainers |
+| `static/workers/**`                                               | Synced from `@junobuild/core` by `npm run postinstall`. Don't hand-edit. | —                |
+| `src/lib/types/i18n.d.ts`                                         | Generated from `src/lib/i18n/*.json` by `npm run i18n`. Don't hand-edit. | —                |
+| `src/declarations/**`                                             | Generated from upstream `escrow.did` by `npm run did`. Don't hand-edit.  | —                |
+| `scripts/{did,import-candid,compile-idl-js}.sh`, `scripts/lib/**` | Bindings pipeline. Touch only when prompted.                             | repo maintainers |
+| `../escrow/**`                                                    | External repo. Open it as a separate workspace; obey its README first.   | escrow team      |
+| `node_modules/`, `.svelte-kit/`, `build/`, `target/`, `.dfx/`     | Build output. Never commit.                                              | —                |
 
 If a change must touch a protected path, call it out explicitly in the PR
 description.
@@ -83,7 +86,8 @@ description.
   ([FE structure](./frontend/structure.md)).
 - Run `npm run format`, `npm run lint`, `npm run check`,
   `npm run quality`, `npm run dev`, `npm run build`,
-  `npm run preview`, `npm run test`, `npm run e2e`, `npm run i18n`.
+  `npm run preview`, `npm run test`, `npm run e2e`, `npm run i18n`,
+  `npm run did`.
 - Update these `docs/ai/**` pages when the meta-update rule fires.
 
 ### Forbidden without explicit prompt

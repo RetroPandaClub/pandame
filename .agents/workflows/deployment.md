@@ -1,11 +1,18 @@
 ---
-description: local + production deployment workflow for the Juno satellite
+description: local + production deployment workflow for the PandaMe SvelteKit app
 ---
+
+PandaMe is a **frontend-only** repo. The on-chain Escrow Rust canister
+lives in [`../escrow/`](../../../escrow/) (mainnet
+`umxj5-niaaa-aaaae-af2sq-cai`); pandame's only deploy target is the Juno
+satellite that hosts the static SvelteKit build.
 
 This workflow covers the two flavours of deploy that pandame supports:
 
 - **Local emulator** — for iterating against a fresh Juno satellite
-  container on your machine.
+  container on your machine. The escrow canister is still called on
+  mainnet (the agent dials `window.location.origin`, which `juno dev`
+  proxies).
 - **Production** — push the built static site to the live satellite via
   GitHub Actions or the `juno` CLI.
 
@@ -32,11 +39,22 @@ This workflow covers the two flavours of deploy that pandame supports:
    The app boots at <http://localhost:5173>. The emulator-side admin
    console is at <http://localhost:5866>.
 
-4. The collections (`notes`, `images`) are seeded automatically from
-   [`juno.dev.config.ts`](../../juno.dev.config.ts) on first emulator
-   start. If you change `juno.dev.config.ts`, restart `juno dev start`.
+4. PandaMe ships **no Juno datastore / storage collections** — the
+   empty config block in
+   [`juno.dev.config.ts`](../../juno.dev.config.ts) keeps `juno dev`
+   happy without provisioning any state. All persistent data lives in
+   the escrow canister on mainnet.
 
-5. (Optional) Run the Vitest unit suite or Playwright E2E:
+5. (Optional) regenerate the candid bindings from upstream
+   [`../escrow/`](../../../escrow/) before starting:
+
+   ```bash
+   npm run did
+   ```
+
+   See [`docs/ai/frontend/workflows/regenerate-bindings.md`](../../docs/ai/frontend/workflows/regenerate-bindings.md).
+
+6. (Optional) Run the Vitest unit suite or Playwright E2E:
 
    ```bash
    npm run test -- --run
@@ -97,6 +115,11 @@ If CI is unavailable:
 ## See also
 
 - [`docs/ai/pr-and-ci.md`](../../docs/ai/pr-and-ci.md) — full CI matrix.
-- [`.claude/rules/juno.md`](../../.claude/rules/juno.md) — Juno SDK
-  cheatsheet.
+- [`.claude/rules/juno.md`](../../.claude/rules/juno.md) — Juno + escrow
+  SDK cheatsheet.
+- [`docs/ai/frontend/workflows/regenerate-bindings.md`](../../docs/ai/frontend/workflows/regenerate-bindings.md)
+  — re-pull the escrow `.did` after an upstream change.
 - [`docs/ai/README.md`](../../docs/ai/README.md) — AI agent docs index.
+- [`../escrow/src/escrow/README.md`](../../../escrow/src/escrow/README.md)
+  — upstream canister docs (deal lifecycle, ICRC-7 NFT views, scaling
+  roadmap).

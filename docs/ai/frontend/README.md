@@ -13,17 +13,22 @@ it once per session.
 - [ ] I know which folder my code belongs in — see
       [`structure.md`](./structure.md).
 - [ ] I checked [`reusability.md`](./reusability.md) for an existing
-      component / util / store before creating one.
+      component / util / store / service before creating one.
 - [ ] My code follows [`stack-and-patterns.md`](./stack-and-patterns.md)
-      (Svelte 5 runes, named `Props` interface, no `any`).
+      (Svelte 5 runes, named `Props` interface, no `any`,
+      `EscrowDid` types come from `$declarations`).
 - [ ] No bare clickable `<div>`s; labelled inputs; `aria-hidden` on
       decorative icons — [`a11y.md`](./a11y.md).
 - [ ] User-visible copy goes through `$i18n.*` keys —
       [`workflows/i18n.md`](./workflows/i18n.md).
-- [ ] I added Vitest tests for any new pure helper / store logic —
-      [`testing.md`](./testing.md).
-- [ ] No relative imports from parent directories under `src/`
+- [ ] I added Vitest tests for any new pure helper / service / store
+      with logic — [`testing.md`](./testing.md).
+- [ ] No relative parent imports under `src/` — use the aliases
       (eslint enforces).
+- [ ] I went through the service layer, not directly to
+      `EscrowCanister` / `IcrcLedgerCanister` / `@junobuild/core`.
+- [ ] If I regenerated bindings, I committed `src/declarations/escrow/**`
+      together with the calling code change.
 - [ ] Local quality gates pass —
       [`../pr-and-ci.md`](../pr-and-ci.md#4-local-quality-gates).
 - [ ] PR title + body match conventions — [`../pr-and-ci.md`](../pr-and-ci.md).
@@ -33,61 +38,78 @@ it once per session.
 ## Stack at a glance
 
 - **SvelteKit 2 + Svelte 5 (runes)**, TypeScript everywhere.
-- **Tailwind v4** wired via `@tailwindcss/vite`. The lavender-blue palette,
-  the `JetBrains Mono` font, the `tall:` custom variant and the
-  `animate-fade` keyframe live in [`src/app.css`](../../../src/app.css)
-  via `@theme` + `@custom-variant`. No `tailwind.config.ts`.
-- **`@junobuild/core`** for auth + datastore + storage.
-- **`@dfinity/utils`** for nullish helpers.
-- **`nanoid`** for unique IDs.
+- **Tailwind v4** wired via `@tailwindcss/vite`. The lavender-blue
+  palette, the `JetBrains Mono` font, the `tall:` custom variant and
+  the `animate-fade` keyframe live in
+  [`src/app.css`](../../../src/app.css) via `@theme` +
+  `@custom-variant`. No `tailwind.config.ts`.
+- **`@junobuild/core`** for Internet Identity sign-in.
+- **`@dfinity/agent` + `@icp-sdk/canisters`** for talking to the escrow
+  canister and the ICP ledger.
+- **`@icp-sdk/bindgen`** generates the TS bindings from the upstream
+  `escrow.did` (driven by `npm run did`).
+- **`qrcode`** renders the share-link QR for the tip flow.
+- **`nanoid`** is in the tree (legacy) — not used in the current code.
 - **ESLint** flat config (see
-  [`eslint.config.js`](../../../eslint.config.js)). Local additions:
+  [`eslint.config.js`](../../../eslint.config.js)). Notable rules:
   `import/no-relative-parent-imports` is **`error`** under `src/**`,
-  `import/no-duplicates` and `import/order` (alphabetical) too.
-- **Vitest 3** with `jsdom` for unit tests. **Playwright** for E2E across
-  desktop + mobile + tablet devices.
+  `import/no-duplicates`, `import/order` (alphabetical),
+  `svelte/require-each-key`. `svelte/no-navigation-without-resolve` is
+  intentionally `off` (we have external `<a href>` URLs).
+- **Vitest 3** with `jsdom` for unit tests. **Playwright** for E2E
+  across desktop + mobile + tablet devices.
 - **Path aliases** (declared in
   [`svelte.config.js`](../../../svelte.config.js) and mirrored in
   [`vite.config.ts`](../../../vite.config.ts)):
 
-  | Alias     | Path         |
-  | --------- | ------------ |
-  | `$lib`    | `src/lib`    |
-  | `$routes` | `src/routes` |
-  | `$root`   | repo root    |
+  | Alias           | Path               |
+  | --------------- | ------------------ |
+  | `$lib`          | `src/lib`          |
+  | `$declarations` | `src/declarations` |
+  | `$routes`       | `src/routes`       |
+  | `$root`         | repo root          |
 
 ## Where things go (one-liner)
 
 ```
 src/
-├── app.css                 Tailwind import + @theme tokens + JetBrains Mono @font-face
-├── app.html                HTML shell
-├── app.d.ts                Ambient SvelteKit types
-├── custom-events.d.ts      Ambient custom-event types for Juno DOM events
-├── routes/                 SvelteKit shell (single page with notes table + create modal)
+├── app.{css,html,d.ts}     Tailwind theme, HTML shell, ambient types
+├── custom-events.d.ts      Juno DOM events typing
+├── routes/
+│   ├── +layout.svelte      Brand + auth shell
+│   ├── +page.svelte        Dashboard
+│   └── claim/[deal_id]/    Public QR / share-link claim flow
+├── declarations/           Generated Candid bindings (DO NOT hand-edit)
 └── lib/
-    ├── components/         Svelte components (Auth, Modal, Table, Login, Logout, …)
-    ├── derived/            Derived stores (`*.derived.ts`)
-    ├── i18n/               Translation dictionaries (one JSON per locale)
-    ├── stores/             Svelte stores (`*.store.ts`)
-    ├── types/              TS interfaces / types (incl. generated `i18n.d.ts`)
-    └── utils/              Pure helpers (`*.utils.ts` + colocated `*.spec.ts`)
+    ├── actors/             Shared agent / actor manager
+    ├── api/                Identity-passing facades (`*.api.ts`)
+    ├── canisters/          `Canister<S>` wrappers (`*.canister.ts`)
+    ├── components/         UI components (flat — no feature folders today)
+    ├── constants/          App-wide constants & lookup tables
+    ├── derived/            Derived stores
+    ├── enums/              const-object enums
+    ├── env/                Vite env wrappers
+    ├── i18n/               Translation dictionaries
+    ├── services/           Side-effectful orchestration
+    ├── stores/             Writable / readable Svelte stores
+    ├── types/              TS interfaces / types
+    └── utils/              Pure helpers
 ```
 
 Full taxonomy and naming conventions: [`structure.md`](./structure.md).
 
 ## What "good" looks like in this repo
 
-A 10x change is small, focused, and reuses what's there. Recent merged PRs
-to learn from (from `git log` on `main`):
+A 10x change is small, focused, and reuses what's there. Recent merged
+PRs to learn from (from `git log` on `main`):
 
-- `build(deps): bump dependencies and migrate to @junobuild/core + Tailwind v4`
-  — single dependency-driven migration with all the necessary code edits
-  in one commit.
-- `chore: modernize repository structure inspired by vici-app`
-  — config-only change, no behaviour change.
-- `ci: rework CI/CD pipelines and dependabot inspired by vici-app`
-  — single-area infra change.
+- `feat(canisters,services,stores): add escrow + ICP ledger client layer`
+  — single layered addition, every file fits an existing bucket.
+- `feat(ui,routes): replace notes scaffold with the escrow deals dashboard`
+  — single concern (UI rewrite), drops the obsolete code in the same
+  commit.
+- `chore(declarations): add candid bindings pipeline + escrow .did`
+  — single piece of infra, minimal blast radius.
 
 If your PR doesn't look like one of those (single verb, single concern,
 small diff), reconsider scope before continuing.

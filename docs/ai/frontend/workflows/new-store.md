@@ -17,9 +17,10 @@ by a simple component-local `$state` rune.
 ## Steps — adding a new `*.store.ts`
 
 1. **Search first.** `Grep` `$lib/stores/` for a near-fit. Pandame's
-   stores today are `user.store.ts` and `i18n.store.ts` — extend one of
-   them if it's a related concern (e.g. another auth-derived value goes
-   on `user.store`).
+   stores today are `user.store.ts`, `i18n.store.ts`, `deals.store.ts`,
+   and `balance.store.ts` — extend one of them if it's a related
+   concern (e.g. another auth-derived value goes on `user.store`,
+   another deal-shaped collection on `deals.store`).
 2. **Pick the name.** `<concept>.store.ts` (kebab-case, lowercase). The
    exported store name follows `camelCase` and ends in `Store` —
    `userStore`, `i18nStore`. Keep both names in sync.
@@ -80,10 +81,10 @@ by a simple component-local `$state` rune.
 
 ## Anti-patterns (do not do these)
 
-- Mirroring a `Doc<T>` from Juno into a store just to "have it
-  available". Components that need it can call `listDocs` / `getDoc`
-  directly today; only promote to a store when ≥ 2 components share
-  exactly the same shape.
+- Mirroring a `DealView` from the canister into a store just to "have it
+  available". Push refresh through `deal.services` so the canister stays
+  the source of truth — only promote to a new store when ≥ 2 components
+  share exactly the same shape and you're avoiding redundant calls.
 - Sprinkling `derived(...)` calls inside components. If the same
   computation appears in two places, extract it.
 - Using a store for transient form state — that's a `$state` rune.

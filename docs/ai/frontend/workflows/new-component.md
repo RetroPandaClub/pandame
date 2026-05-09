@@ -38,8 +38,9 @@ the use case.
      prop.
 
 5. **Compose, don't reinvent.** Build on the existing primitives —
-   `Button`, `Modal`, `Backdrop`, `Background` — before inventing new
-   shapes. Re-use icons that already live inside sibling components
+   `Button`, `Modal`, `Card`, `Backdrop`, `Background`, `EmptyState`,
+   `BalanceBadge`, `DealStatusBadge`, `DealActions` — before inventing
+   new shapes. Re-use icons that already live inside sibling components
    instead of inlining a fourth copy.
 6. **Style with the project's tokens.** Look at the closest neighbour's
    classes. Use the lavender-blue palette + base colours via the matching
@@ -72,23 +73,23 @@ the use case.
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Note } from '$lib/types/note';
+	import type { Deal } from '$lib/types/deal';
 
 	interface Props {
-		note: Note;
+		deal: Deal;
 		highlight?: boolean;
 		onSelect?: () => void;
 	}
 
-	let { note, highlight = false, onSelect = () => {} }: Props = $props();
+	let { deal, highlight = false, onSelect = () => {} }: Props = $props();
 </script>
 
 <article
 	class="rounded border-[3px] border-black bg-white p-3 shadow-[5px_5px_0px_rgba(0,0,0,1)] dark:bg-black dark:text-white"
 	class:bg-lavender-blue-50={highlight}
 >
-	<p class="line-clamp-3">{note.text}</p>
-	<Button onclick={onSelect}>{$i18n.notes.open}</Button>
+	<h3 class="font-semibold">#{deal.id.toString()}</h3>
+	<Button onclick={onSelect}>{$i18n.deals.actions.accept}</Button>
 </article>
 ```
 

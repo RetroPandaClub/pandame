@@ -1,10 +1,11 @@
 # Stack & Patterns
 
 Idiomatic patterns for the **SvelteKit 2 + Svelte 5 + TypeScript +
-Tailwind v4 + Juno** stack as it lives in this repo. If a pattern here
-disagrees with code in `src/`, the code wins (truth hierarchy in
-[governance.md](../governance.md)). Update this page in the same PR —
-that's the [meta-update rule](../governance.md#meta-update-rule).
+Tailwind v4 + Juno + Escrow canister** stack as it lives in this repo.
+If a pattern here disagrees with code in `src/`, the code wins (truth
+hierarchy in [governance.md](../governance.md)). Update this page in the
+same PR — that's the
+[meta-update rule](../governance.md#meta-update-rule).
 
 ## Svelte 5 — runes everywhere
 
@@ -15,6 +16,7 @@ This project is **Svelte 5** and uses runes for new code:
 | Separate `interface Props { … }` + `let { … }: Props = $props()` (see [Props shape](#props-shape)) | `export let foo`                              |
 | `let count = $state(0)`                                                                            | plain `let` for component-local reactive vars |
 | `let total = $derived(price * qty)`                                                                | `$: total = price * qty`                      |
+| `let label = $derived.by(() => …)`                                                                 | imperative effect-driven assignment           |
 | `$effect(() => { /* I/O */ })`                                                                     | side-effect via `$:`                          |
 | `<button onclick={fn}>`                                                                            | `on:click`                                    |
 | `{#snippet}` + `{@render}`                                                                         | named `<slot>` for new code                   |
@@ -22,20 +24,18 @@ This project is **Svelte 5** and uses runes for new code:
 ### Props shape
 
 Always declare props as a **named `interface Props`** above the
-destructuring, declared **inside** the component file. This keeps the
-shape easy to read and easy to extend in tests / sibling components:
+destructuring, declared **inside** the component file. Real example from
+[`DealRow.svelte`](../../../src/lib/components/DealRow.svelte):
 
 ```svelte
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import type { Deal } from '$lib/types/deal';
 
 	interface Props {
-		children: Snippet;
-		highlight?: boolean;
-		onSelect?: () => void;
+		deal: Deal;
 	}
 
-	let { children, highlight = false, onSelect = () => {} }: Props = $props();
+	let { deal }: Props = $props();
 </script>
 ```
 
@@ -46,19 +46,22 @@ Rules:
 - Required props first, optional / defaulted ones after.
 - Callbacks default to a no-op (`() => {}`) so callers can omit them.
 - **Avoid `$bindable`** unless explicitly required. Prefer callback props
-  (`onChange`) over two-way bindings.
+  (`oncreated`, `onclose`).
 - Do **not** inline the type literal into `$props()` for new code — use a
   named `interface Props`.
-
-See [`Auth.svelte`](../../../src/lib/components/Auth.svelte) for a real
-example.
+- For `Button`, the `onclick` signature is intentionally
+  `() => void | Promise<void>` so synchronous handlers (e.g. opening a
+  modal) compile.
 
 ### Effect hygiene
 
 - Never read state inside an `$effect` and write it back without a guard —
   it loops. Restructure to `$derived` whenever possible.
 - Prefer `$derived` over `$effect`. An `$effect` is for I/O (DOM, network,
-  storage). Computation belongs in `$derived` / `$derived.by`.
+  `setInterval`); computation belongs in `$derived` / `$derived.by`.
+- When TypeScript can't narrow across a `$derived` arrow boundary, use
+  `$derived.by(() => …)` and pull the value into a local `const`
+  before branching — see the claim page for the canonical example.
 
 ### Stores still exist
 
@@ -68,15 +71,6 @@ graph under `$lib/stores/` and `$lib/derived/` is the source of truth
 for cross-component state — extend it instead of inventing a parallel
 runes-only world.
 
-| Need                                           | Use                                          | Where it lives       |
-| ---------------------------------------------- | -------------------------------------------- | -------------------- |
-| Component-local mutable value                  | `$state`                                     | Inside the component |
-| Component-local computed value                 | `$derived` / `$derived.by`                   | Inside the component |
-| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work) | Inside the component |
-| Value shared by 2+ components in the same page | Pass via props / snippets                    | —                    |
-| Value shared across views                      | A Svelte `writable` / `readable` store       | `$lib/stores/`       |
-| Computed value across stores                   | `derived(...)` Svelte store                  | `$lib/derived/`      |
-
 ## TypeScript
 
 - **No `any`.** Use `unknown` and narrow.
@@ -85,62 +79,134 @@ runes-only world.
 - **No non-null assertion (`!`)** on values that can actually be null —
   use `isNullish` / `nonNullish` from `@dfinity/utils`, optional chaining,
   or an explicit guard with an early return.
-- **`@junobuild/core` types** are the source of truth at the datastore
-  boundary. Always import `Doc<T>`, `User`, etc. from `@junobuild/core`
-  rather than re-declaring them.
-- **Discriminated unions** for `Result<T>` flows. Look at the closest
-  neighbour and follow the same shape.
+- **`EscrowDid` types are the source of truth at the canister boundary.**
+  Re-export them through `$lib/types/deal.ts` so app code doesn't import
+  from `$declarations/**` outside `$lib/{api,canisters}/`.
+- **Variant unwrapping.** Generated Candid variants look like
+  `{ Funded: null }` — use the `dealStatus` / `consentState` helpers in
+  [`deal.utils.ts`](../../../src/lib/utils/deal.utils.ts) instead of
+  hand-written `Object.keys` calls.
+- **Optional Candid fields.** `[] | [T]` from bindgen — wrap with
+  `fromNullable` / `toNullable` from `@dfinity/utils`. Never use
+  `value[0]` directly.
 - **Type imports**: prefer `import type { … }` for types-only;
   `prettier-plugin-organize-imports` will sort them.
 
-## Juno usage
+## Service / data flow
 
-- **Init.** `initSatellite({ workers: { auth: true } })` runs once in
-  `src/routes/+layout.svelte`'s `$effect`. Do not init the satellite from
-  any other component.
-- **Auth.** Subscribe to `onAuthStateChange` exactly once
-  (`Auth.svelte`); push the user into `$lib/stores/user.store.ts`. Other
-  components read from the store / derived store, never from
-  `onAuthStateChange` directly.
-- **Sign-in.** Pandame uses Internet Identity. `signIn` requires the
-  provider object: `signIn({ internet_identity: {} })`.
-- **Sign-out.** `signOut` accepts a `SignOutOptions` arg, so wrap it in
-  an arrow function when binding to `onclick`:
-  `onclick={() => signOut()}`.
-- **Datastore reads / writes.** Components call `listDocs` / `setDoc` /
-  `deleteDoc` / `uploadFile` / `deleteAsset` from `@junobuild/core`
-  directly today. If/when the app grows enough that this becomes
-  noisy, introduce a `$lib/services/<thing>.services.ts` layer and
-  document it here.
-- **Collections.** Two collections, defined in
-  [`juno.dev.config.ts`](../../../juno.dev.config.ts):
-  - `notes` (datastore, managed permissions).
-  - `images` (storage, managed permissions).
+```
+Component (.svelte)
+  ↳ $lib/services/*.services.ts          orchestration + identity wiring + error handling
+       ↳ $lib/api/*.api.ts               identity-passing facade
+            ↳ $lib/canisters/*.canister.ts    typed actor wrappers (Canister<S>)
+                 ↳ $lib/actors/agents.ic.ts   shared AgentManager
+                      ↳ @dfinity/agent / @icp-sdk/canisters
+```
 
-  Use the literal collection name (`'notes'`, `'images'`) in calls until a
-  central enum is justified.
+- Components **do not** call `EscrowCanister.create` / the
+  `@dfinity/agent` actor / `IcrcLedgerCanister` directly. Always go
+  through the matching service module.
+- A `*.services.ts` function should:
+  - Accept a typed input.
+  - Pull identity via
+    [`safeGetIdentityOnce`](../../../src/lib/services/identity.services.ts)
+    for authenticated actions or `getIdentityOrAnonymous` for public
+    reads.
+  - Surface errors by throwing a useful `Error` (the canister wrapper's
+    `unwrap()` already JSON-stringifies the typed `EscrowError`).
+- Worker-bound logic (auth workers) lives under `static/workers/` and is
+  synced by `npm run postinstall`. Don't hand-edit those files.
 
-- **Worker assets.** `npm run postinstall` copies
-  `@junobuild/core/dist/workers/` into `static/workers/`. Don't hand-edit
-  those files.
+Example shape (from
+[`deal.services.ts`](../../../src/lib/services/deal.services.ts)):
+
+```ts
+export const createAndFundDeal = async (
+	request: CreateDealRequest
+): Promise<{ created: EscrowDid.DealView; funded: EscrowDid.DealView }> => {
+	const identity = await safeGetIdentityOnce();
+	const token = request.token ?? ICP_TOKEN;
+
+	const created = await escrowApi.createDeal({ identity, params: { …request } });
+
+	await ledgerApi.approve({
+		identity,
+		ledgerCanisterId: token.ledgerCanisterId,
+		amount: request.amount + token.fee,
+		spender: { owner: ESCROW_CANISTER_ID, subaccount: created.escrow_subaccount },
+		expiresAt: request.expires_at_ns
+	});
+
+	const funded = await escrowApi.fundDeal({ identity, dealId: created.id });
+
+	return { created, funded };
+};
+```
+
+## Identity & auth
+
+- Principal source of truth:
+  [`identity.services.ts`](../../../src/lib/services/identity.services.ts).
+- Use `getIdentityOrAnonymous` for public reads (the `/claim` preview).
+- Use `safeGetIdentityOnce` for authenticated actions (throws if the
+  user isn't signed in).
+- Auth uses Internet Identity via Juno. The single subscription to
+  `onAuthStateChange` lives in
+  [`Auth.svelte`](../../../src/lib/components/Auth.svelte). Other
+  components read from
+  [`userStore`](../../../src/lib/stores/user.store.ts) and the
+  [`userSignedIn` / `userNotSignedIn`](../../../src/lib/derived/user.derived.ts)
+  derived stores.
+- `signIn` requires the provider object:
+  `signIn({ internet_identity: {} })`.
+- `signOut` accepts `SignOutOptions` — wrap it in an arrow function when
+  binding to `onclick`: `onclick={() => signOut()}`.
+- Auth worker assets must be synced via `npm run postinstall` to
+  `./static/workers` — otherwise sign-in silently breaks.
+
+## Talking to the escrow canister
+
+- One canister wrapper per upstream canister. Today: `EscrowCanister`
+  ([`canisters/escrow.canister.ts`](../../../src/lib/canisters/escrow.canister.ts)).
+- One api facade per canister wrapper. Today:
+  [`api/escrow.api.ts`](../../../src/lib/api/escrow.api.ts).
+- The wrapper internal `unwrap()` turns the canister's `{ Ok | Err }`
+  into a thrown `Error` with the JSON-stringified variant. Components
+  catch it via the standard `try/catch` + UI error state.
+- Both `idlFactoryEscrow` (normal) and `idlFactoryCertifiedEscrow`
+  (queries-as-updates) are wired so `@dfinity/utils`'s `Canister<S>`
+  knows when to certify a query.
+
+## ICRC-1 / -2 ledger
+
+- `IcrcLedgerCanister` from `@icp-sdk/canisters/ledger/icrc` is the
+  canonical wrapper. Don't redeclare it. The api facade is
+  [`api/icrc-ledger.api.ts`](../../../src/lib/api/icrc-ledger.api.ts).
+- The deal funding flow is **always** create → `icrc2_approve(amount + fee)`
+  → `fund_deal`. The fee headroom matters: without it,
+  `transfer_from` will fail on the ledger because the spender (the
+  escrow canister) needs both the `amount` and the `fee` available.
+- Pandame ships a single token today (`ICP_TOKEN`,
+  `ryjl3-tyaaa-aaaaa-aaaba-cai`, 8 decimals, fee 10_000 e8s). Add new
+  tokens to `$lib/constants/tokens.constants.ts` (and call out the
+  reason in the PR), don't sprinkle hex literals across the codebase.
 
 ## Tailwind v4 + design tokens
 
-Pandame migrated to Tailwind v4. There is **no `tailwind.config.ts`**.
+Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
 
-- **Theme tokens** live in [`src/app.css`](../../../src/app.css) inside an
-  `@theme` block. The lavender-blue palette (`bg-lavender-blue-500`,
-  `text-lavender-blue-400`, …), the `JetBrains Mono` `--font-sans`, the
-  `--animate-fade` keyframe and the `tall:` custom variant are all defined
-  there.
-- The block opens with `--color-*: initial;` to clear all default Tailwind
-  colour utilities — only the palette enumerated in `@theme` is available
-  (plus `inherit` / `transparent` / `current` / `black` / `white`). If you
-  need a colour outside the palette, **add it to `@theme`** (and call it
-  out in the PR), don't reach for arbitrary `bg-[#hex]`.
+- **Theme tokens** live in [`src/app.css`](../../../src/app.css) inside
+  an `@theme` block. The lavender-blue palette
+  (`bg-lavender-blue-500`, …), the `JetBrains Mono` `--font-sans`, the
+  `--animate-fade` keyframe and the `tall:` custom variant are all
+  defined there.
+- The block opens with `--color-*: initial;` — only colours enumerated
+  in `@theme` are available. To use a new colour, **add it to `@theme`**
+  (and call it out in the PR), don't reach for arbitrary `bg-[#hex]`.
 - **No raw hex** (`bg-[#0f0]`), no inline `style="color:…"`. Arbitrary
-  values are tolerated for non-colour props (`shadow-[5px_5px_0px_rgba(0,0,0,1)]`)
-  but prefer a named token when you can.
+  values are tolerated for non-colour props (e.g.
+  `shadow-[5px_5px_0px_rgba(0,0,0,1)]`) but prefer a named token when
+  you can.
 - **Class order** is auto-sorted by `prettier-plugin-tailwindcss`. Don't
   bikeshed it.
 - **Variants & responsive:** prefer Tailwind variants (`md:`, `dark:`,
@@ -148,34 +214,41 @@ Pandame migrated to Tailwind v4. There is **no `tailwind.config.ts`**.
 
 ## Routing
 
-- Single-route SvelteKit shell: `src/routes/+page.svelte` mounts `Table`
-  and `Modal`. Don't add new `+page.svelte` files unless you have an
-  explicit reason; new top-level views are components mounted inside the
-  existing page.
+- Single-route SvelteKit shell: `src/routes/+page.svelte` mounts the
+  dashboard. The only other route is `/claim/[deal_id]/+page.svelte`
+  for the public QR / share-link flow.
 - `src/routes/+layout.ts` sets `ssr = false` and `prerender = false`
-  (SPA fallback via `adapter-static`).
+  (SPA fallback via `adapter-static`). The deeply-linked `/claim/...`
+  URL works because the static fallback serves the same shell.
+- Don't add new SvelteKit routes without a deliberate reason — surface
+  the ask first.
 
 ## i18n
 
-Pandame ships a tiny typed-i18n layer. The runtime store is
-[`$lib/stores/i18n.store.ts`](../../../src/lib/stores/i18n.store.ts); the
-typed shape is generated into
+Pandame ships a typed-i18n layer. The runtime store is
+[`$lib/stores/i18n.store.ts`](../../../src/lib/stores/i18n.store.ts);
+the typed shape is generated into
 [`$lib/types/i18n.d.ts`](../../../src/lib/types/i18n.d.ts) by
 `npm run i18n` from `src/lib/i18n/<locale>.json`.
 
 - **Add a key:** edit every locale JSON (today `en.json`) → run
   `npm run i18n` → use `$i18n.section.key` in your component.
 - **No raw English in components** for new copy — go through `$i18n`.
+- **Interpolation** is done by the call site via `String#replace` (see
+  `CreateDealModal.svelte` for the `{symbol}` / `{fee_str}` pattern).
+  We don't ship a runtime ICU formatter today.
 - See [`workflows/i18n.md`](./workflows/i18n.md) for the full flow.
 
 ## Custom DOM events
 
 Juno emits `junoSignOutAuthTimer` and `junoExampleReload` on `window`.
-Their typings live in [`src/custom-events.d.ts`](../../../src/custom-events.d.ts)
-(augmenting `svelte/elements`). Listen to them with
+Their typings live in
+[`src/custom-events.d.ts`](../../../src/custom-events.d.ts) (augmenting
+`svelte/elements`). Listen with
 `<svelte:window onjunoXxx={handler} />` — see
 [`Auth.svelte`](../../../src/lib/components/Auth.svelte) and
-[`Table.svelte`](../../../src/lib/components/Table.svelte).
+[`+page.svelte`](../../../src/routes/+page.svelte) (`junoExampleReload`
+is reused by `<svelte:window>` for the dashboard refresh hook).
 
 If you add a new custom event, declare it in `src/custom-events.d.ts`.
 
@@ -185,11 +258,18 @@ If you add a new custom event, declare it in `src/custom-events.d.ts`.
   Svelte store, not in the render path.
 - `{#each items as item, index (item.key)}` with a stable key (eslint
   enforces `svelte/require-each-key`).
-- Lazy-load heavy modules with dynamic `import()` inside an `$effect` /
-  event handler when they aren't needed on first paint.
+- For ID-keyed lists like the deals table, use `(deal.id)` — the
+  canister gives every deal a unique `bigint` id.
 
 ## Anti-patterns (do not do these)
 
+- Importing from `$declarations/**` outside `$lib/{api,canisters}/` —
+  re-export through `$lib/types/`.
+- Calling `EscrowCanister.create` / `IcrcLedgerCanister.create` /
+  `getAgent` from a component — go through the api facade + service.
+- Mirroring a `Doc<T>` from the canister into a store you keep manually
+  in sync. Push refresh through the matching service so the canister
+  stays the source of truth.
 - `export let foo` in new code.
 - Inline type literal in `$props()` (`let { … }: { … } = $props()`).
 - Reactive `$:` statements in new code.
@@ -202,6 +282,12 @@ If you add a new custom event, declare it in `src/custom-events.d.ts`.
 - "Just one more `any`" — there is no "just one more".
 - Adding a wrapper component that only re-exports another component.
 - `target="_blank"` without `rel="noopener noreferrer"`.
-- `{@html …}` without sanitisation.
-- `console.log` left in committed code (eslint allows only `console.warn`
-  / `console.error`).
+- `{@html …}` without sanitisation — the only tolerated cases today are
+  `$i18n.*_html` keys (controlled-input dictionary) with an
+  `eslint-disable-next-line svelte/no-at-html-tags`.
+- `console.log` left in committed code (eslint allows only
+  `console.warn` / `console.error`).
+- Calling `signIn()` without a provider object (`@junobuild/core` 5.x
+  requires it: `signIn({ internet_identity: {} })`).
+- Binding `signOut` directly to `onclick` (it accepts `SignOutOptions`,
+  not a `MouseEvent` — wrap it in an arrow).
