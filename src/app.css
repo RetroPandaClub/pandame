@@ -3,26 +3,37 @@
 /*
  * Design tokens for the PandaMe brand.
  *
- * Two palettes:
- *  - Brand purple   (`#632AE8` primary, `#D5C4F9` light) — CTAs, headings, chips.
- *  - Brand green    (`#1DBB8E` success, `#29E8B1` light) — confirmations, positive states.
+ * Three palettes:
+ *  - Brand purple   (`#6200EE` header / hero, `#632AE8` button stroke /
+ *                   secondary, `#D5C4F9` light variant) — CTAs, headings,
+ *                   chips, sheet headers.
+ *  - Brand green    (`#1DBB8E` success / positive, `#29E8B1` light) —
+ *                   confirmations, Arbitrator role chrome.
+ *  - Neutral surfaces + a "Blu Night" body-text colour.
  *
- * Plus neutral surfaces and a "Blu Night" body-text colour. App code should
- * always reach for the **semantic** tokens (`bg-primary`, `text-default`,
- * `border-soft`, …) instead of hex literals.
+ * Three font families (matched to design system usage):
+ *  - Poppins   — primary copy, headings, button labels.
+ *  - Inter     — form labels, summary rows, dense numeric copy.
+ *  - Roboto    — vote-quorum picker numbers + sub-labels (only).
  *
- * THEMING — see the `@layer base` block below. Every brand-aware token is
- * a CSS custom property declared on `[data-theme='light']` (the default).
- * To add a dark mode, fill in the `[data-theme='dark']` block; the
- * `@media (prefers-color-scheme: dark)` rule already routes system
- * preference through the same selector when the user hasn't explicitly
- * chosen a theme.
+ * App code should always reach for the **semantic** tokens
+ * (`bg-primary`, `text-default`, `border-soft`, `font-sans`,
+ * `font-serif-ui`, `font-numeric`, …) instead of hex / family
+ * literals. Theming via `[data-theme]` is wired below.
  */
 
 @font-face {
 	font-family: 'Poppins';
 	font-style: normal;
 	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/poppins-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 500;
 	font-display: swap;
 	src: url('/fonts/poppins-regular.woff2') format('woff2');
 }
@@ -49,6 +60,23 @@
 	font-weight: 900;
 	font-display: swap;
 	src: url('/fonts/poppins-black.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url('/fonts/inter-variable.woff2') format('woff2-variations');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 100 900;
+	font-stretch: 100%;
+	font-display: swap;
+	src: url('/fonts/roboto-variable.woff2') format('woff2-variations');
 }
 
 @font-face {
@@ -80,11 +108,15 @@
 	 * blocks below override them at runtime so theme switching works
 	 * without a rebuild. */
 
-	/* Brand — purple */
-	--color-primary: #632ae8;
+	/* Brand — purple. `primary` is the header / hero / hover purple
+	 * straight from Figma; `primary-stroke` is the slightly darker
+	 * purple used as the canonical CTA fill (`Bottone Home`) and as
+	 * the active-input border on the Create-Deal screen. */
+	--color-primary: #6200ee;
+	--color-primary-stroke: #632ae8;
 	--color-primary-light: #d5c4f9;
 
-	/* Brand — green (success / positive) */
+	/* Brand — green (success / positive / Arbitrator chrome) */
 	--color-success: #1dbb8e;
 	--color-success-light: #29e8b1;
 
@@ -103,26 +135,39 @@
 	--color-default-inverse: #ffffff;
 	--color-muted: #6b6884;
 	--color-subtle: #a39fbf;
+	--color-link-purple: #6b36e8;
+	--color-terms-link: #a57ff6;
 
 	/* Border */
 	--color-border: #d5c4f9;
 	--color-border-soft: #ece5fb;
 	--color-border-strong: #632ae8;
 
-	/* Typography — modular scale (base 16, ratio 1.25). Theme-independent. */
+	/* Typography — three families. `font-sans` is the default body /
+	 * heading face. `font-serif-ui` (Inter) is reserved for form
+	 * labels, summary rows, and dense numeric copy that reads better
+	 * with Inter's tighter rhythm. `font-numeric` (Roboto) is reserved
+	 * for the vote-quorum picker. `font-mono` is the principal /
+	 * amount monospaced face. */
 	--font-sans:
 		'Poppins', 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+	--font-serif-ui:
+		'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+	--font-numeric:
+		'Roboto', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-	--text-xxs: 0.625rem; /* 10 px */
-	--text-xxs--line-height: 1;
-	--text-body2: 0.8125rem; /* 13 px */
+	/* Type scale — the Figma actual usage, not the ratio-based
+	 * marketing scale. Each utility names the role, not the size. */
+	--text-xxs: 0.625rem; /* 10 px — micro captions ("Maximum files 10 MB") */
+	--text-xxs--line-height: 1.49;
+	--text-body2: 0.8125rem; /* 13 px — body small */
 	--text-body2--line-height: 1.32;
-	--text-body1: 1rem; /* 16 px */
+	--text-body1: 1rem; /* 16 px — body */
 	--text-body1--line-height: 1.4;
-	--text-h6: 1.25rem; /* 20 px */
+	--text-h6: 1.25rem; /* 20 px — BrandHeader title, section headings */
 	--text-h6--line-height: 1;
-	--text-h5: 1.5625rem; /* 25 px */
+	--text-h5: 1.5625rem; /* 25 px — sub-hero copy */
 	--text-h5--line-height: 1.2;
 	--text-h4: 1.9375rem; /* 31 px */
 	--text-h4--line-height: 1.32;
@@ -133,15 +178,38 @@
 	--text-h1: 3.8125rem; /* 61 px */
 	--text-h1--line-height: 1.6;
 
-	/* Radius — design-system tokens. Theme-independent.
-	 *  - `button` (22 px) is the canonical CTA radius.
-	 *  - `pill` (9999 px) is reserved for chips, badges, balance pills. */
-	--radius-sm: 0.5rem; /* 8 px */
+	/* Per-Figma-screen literal sizes (used inline with explicit
+	 * tracking — keep them as utilities so Prettier sorts them
+	 * predictably). */
+	--text-figma-12: 0.75rem; /* 12 px — small CTA copy ("Create new deals") */
+	--text-figma-12--line-height: 1.4;
+	--text-figma-14: 0.875rem; /* 14 px — Inter Medium summary rows */
+	--text-figma-14--line-height: 1.4;
+	--text-figma-15: 0.9375rem; /* 15 px — Username link, Help link */
+	--text-figma-15--line-height: 1.5;
+	--text-figma-16: 1rem; /* 16 px — form labels */
+	--text-figma-16--line-height: 1.19; /* matches Figma 19px lh on 16px */
+	--text-figma-21: 1.3375rem; /* 21.4 px — welcome caption */
+	--text-figma-21--line-height: 1.68;
+	--text-figma-26: 1.6625rem; /* 26.5 px — welcome heading */
+	--text-figma-26--line-height: 1.32;
+
+	/* Radius — design-system tokens. Theme-independent. */
+	--radius-sm: 0.5rem; /* 8 px — also the canonical input radius */
+	--radius-input: 0.5rem; /* 8 px — alias for clarity */
 	--radius-md: 0.75rem; /* 12 px */
 	--radius-lg: 1rem; /* 16 px */
-	--radius-xl: 1.25rem; /* 20 px */
-	--radius-button: 1.375rem; /* 22 px */
-	--radius-pill: 9999px;
+	--radius-xl: 1.25rem; /* 20 px — Tabs container outer */
+	--radius-tab: 1.4375rem; /* 23 px — Tabs active pill */
+	--radius-button: 1.375rem; /* 22 px — canonical CTA */
+	--radius-bottom-nav: 0.875rem; /* 14 px — BottomNav top corners */
+	--radius-sheet: 2.5rem; /* 40 px — Sheet top corners (the white card sliding over the header) */
+	--radius-pill: 9999px; /* reserved for chips / badges */
+
+	/* Shadows — Figma specs. */
+	--shadow-bottom-nav: 0 0 80px 0 rgba(55, 62, 125, 0.25);
+	--shadow-raised-button: 0 4px 4px 0 rgba(0, 0, 0, 0.16), 0 -4px 8.1px 0 rgba(55, 62, 125, 0.08);
+	--shadow-deal-card: 0 4px 12px 0 rgba(99, 42, 232, 0.08);
 
 	/* Animations */
 	--animate-fade: fadeIn 0.25s ease-in-out;
@@ -161,17 +229,13 @@
 @layer base {
 	/* ----------------------------------------------------------------
 	 * Light theme (current default).
-	 *
-	 * The `<html data-theme="light">` attribute (set in `app.html`) is
-	 * the authoritative selector. The naked `:root` rule duplicates
-	 * the values so a missing `data-theme` attribute still renders
-	 * correctly.
 	 * ---------------------------------------------------------------- */
 	:root,
 	[data-theme='light'] {
 		color-scheme: light;
 
-		--color-primary: #632ae8;
+		--color-primary: #6200ee;
+		--color-primary-stroke: #632ae8;
 		--color-primary-light: #d5c4f9;
 
 		--color-success: #1dbb8e;
@@ -189,6 +253,8 @@
 		--color-default-inverse: #ffffff;
 		--color-muted: #6b6884;
 		--color-subtle: #a39fbf;
+		--color-link-purple: #6b36e8;
+		--color-terms-link: #a57ff6;
 
 		--color-border: #d5c4f9;
 		--color-border-soft: #ece5fb;
@@ -196,18 +262,7 @@
 	}
 
 	/* ----------------------------------------------------------------
-	 * Dark theme — placeholder.
-	 *
-	 * Fill the values in the `[data-theme='dark']` block below to
-	 * enable a dark theme. Components already drive their colours
-	 * exclusively through the semantic tokens above, so no component
-	 * change is needed once the values land.
-	 *
-	 * The `@media (prefers-color-scheme: dark)` rule routes the system
-	 * preference through `[data-theme='dark']` only when the user
-	 * hasn't explicitly chosen a theme — so an explicit
-	 * `data-theme="light"` always wins over OS dark mode (and vice
-	 * versa once we expose a toggle).
+	 * Dark theme — placeholder. Fill the values to enable.
 	 * ---------------------------------------------------------------- */
 	[data-theme='dark'] {
 		color-scheme: dark;
@@ -215,30 +270,6 @@
 		/* TODO(theme): set the dark values for every brand-aware token.
 		 * Until they're filled in, the cascade falls back to the light
 		 * defaults from `@theme` so the app stays usable. */
-		/*
-		--color-primary:         …;
-		--color-primary-light:   …;
-
-		--color-success:         …;
-		--color-success-light:   …;
-
-		--color-warning:         …;
-		--color-danger:          …;
-
-		--color-bg:              …;
-		--color-bg-elevated:     …;
-		--color-bg-soft:         …;
-		--color-bg-inverse:      …;
-
-		--color-default:         …;
-		--color-default-inverse: …;
-		--color-muted:           …;
-		--color-subtle:          …;
-
-		--color-border:          …;
-		--color-border-soft:     …;
-		--color-border-strong:   …;
-		*/
 	}
 
 	@media (prefers-color-scheme: dark) {

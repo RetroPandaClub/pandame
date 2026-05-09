@@ -2,3 +2,6 @@
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+
+# Local dfx state — pandame uses Juno; dfx output is never committed.
+.dfx/
