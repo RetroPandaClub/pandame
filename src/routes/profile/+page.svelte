@@ -11,9 +11,12 @@
 	import LogoutConfirmModal from '$lib/components/LogoutConfirmModal.svelte';
 	import ReliabilityCard from '$lib/components/ReliabilityCard.svelte';
 	import RoleSwitcher from '$lib/components/RoleSwitcher.svelte';
+	import { profileDisplayName } from '$lib/derived/profile.derived';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { getReliability } from '$lib/services/deal.services';
+	import { ensureProfile, getProfile } from '$lib/services/profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { profileStore } from '$lib/stores/profile.store';
 	import { userStore } from '$lib/stores/user.store';
 	import { shortPrincipal } from '$lib/utils/format.utils';
 
@@ -34,10 +37,27 @@
 		const text = principalText;
 
 		if (text === undefined || text.length === 0) {
+			profileStore.reset();
 			reliability = undefined;
 
 			return;
 		}
+
+		(async () => {
+			try {
+				// Fast read-only fetch first so the screen paints with whatever
+				// is already on chain; ensureProfile then back-fills a default
+				// shell on first sign-in (and round-trips a `version` so
+				// subsequent edits succeed).
+				const initial = await getProfile(text);
+				profileStore.set(initial);
+
+				const ensured = await ensureProfile(text);
+				profileStore.set(ensured);
+			} catch (err) {
+				console.error('Failed to load profile:', err);
+			}
+		})();
 
 		(async () => {
 			try {
@@ -100,14 +120,16 @@
 	</div>
 
 	<div class="flex flex-col items-center gap-3 text-center">
-		<Avatar fallback={principalShort} size="xl" alt={principalShort} />
+		<Avatar fallback={$profileDisplayName || principalShort} size="xl" alt={$profileDisplayName} />
 
 		<div class="flex flex-col gap-1">
-			<span class="text-body2 text-muted">{$i18n.profile.principal_label}</span>
+			<h2 class="text-h6 text-default font-bold">
+				{$profileDisplayName || principalShort}
+			</h2>
 			<button
 				type="button"
 				onclick={copyPrincipal}
-				class="text-body1 text-default hover:bg-primary-light/50 rounded-md px-3 py-1 font-mono font-bold transition-colors"
+				class="text-body2 text-muted hover:bg-primary-light/50 rounded-md px-3 py-1 font-mono transition-colors"
 				aria-label={$i18n.profile.copy_principal}
 			>
 				{copied ? $i18n.core.text.copied : principalShort}
@@ -118,6 +140,23 @@
 			{$i18n.profile.edit_cta}
 		</Button>
 	</div>
+
+	{#if $profileStore !== undefined}
+		<dl class="border-border-soft bg-bg text-body2 flex flex-col gap-2 rounded-xl border p-4">
+			{#if $profileStore.data.email.length > 0}
+				<div class="flex items-baseline justify-between gap-3">
+					<dt class="text-muted">{$i18n.profile.email_label}</dt>
+					<dd class="text-default truncate">{$profileStore.data.email}</dd>
+				</div>
+			{/if}
+			{#if $profileStore.data.address.length > 0}
+				<div class="flex items-baseline justify-between gap-3">
+					<dt class="text-muted">{$i18n.profile.address_label}</dt>
+					<dd class="text-default truncate">{$profileStore.data.address}</dd>
+				</div>
+			{/if}
+		</dl>
+	{/if}
 
 	<ReliabilityCard {reliability} />
 

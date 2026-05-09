@@ -109,8 +109,17 @@ interface I18nProfile {
 	role_stub_card_label: string;
 	edit_title: string;
 	edit_save: string;
+	edit_saving: string;
+	edit_save_success: string;
+	edit_save_error: string;
 	edit_cancel: string;
-	edit_disabled_hint: string;
+	loading: string;
+	username_placeholder: string;
+	name_placeholder: string;
+	surname_placeholder: string;
+	address_placeholder: string;
+	email_placeholder: string;
+	email_invalid: string;
 }
 
 interface I18nLogout_confirm {

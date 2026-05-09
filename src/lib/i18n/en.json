@@ -99,8 +99,17 @@
 		"role_stub_card_label": "Mock-up preview",
 		"edit_title": "Edit profile",
 		"edit_save": "Save",
+		"edit_saving": "Saving…",
+		"edit_save_success": "Profile saved.",
+		"edit_save_error": "Couldn't save the profile. Please try again.",
 		"edit_cancel": "Cancel",
-		"edit_disabled_hint": "Profile editing will land once user metadata moves on-chain."
+		"loading": "Loading profile…",
+		"username_placeholder": "Pick a public nickname",
+		"name_placeholder": "Your first name",
+		"surname_placeholder": "Your last name",
+		"address_placeholder": "Where you'd ship a deal-related parcel to",
+		"email_placeholder": "you@example.com",
+		"email_invalid": "That doesn't look like a valid email."
 	},
 	"logout_confirm": {
 		"title": "Sign out?",

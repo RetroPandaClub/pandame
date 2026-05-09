@@ -1,15 +1,35 @@
 import { defineDevConfig } from '@junobuild/config';
 
 /**
- * Pandame uses Juno only for Internet Identity sign-in — all persistent
- * state lives in the standalone Escrow Rust canister. No datastore /
- * storage collections are required, but the dev config block stays to
- * keep `juno dev start` happy with an explicit (empty) collection list.
+ * Datastore collection names. Keep in sync with
+ * `src/lib/constants/collections.constants.ts`'s `Collection` enum and
+ * with the production satellite's collection definitions (managed via
+ * the Juno Console).
+ */
+const enum DatastoreCollection {
+	PROFILES = 'profiles'
+}
+
+/**
+ * Pandame uses Juno for Internet Identity sign-in + the user-profile
+ * datastore. Persistent escrow state lives in the standalone Escrow
+ * canister.
  */
 export default defineDevConfig(() => ({
 	satellite: {
 		collections: {
-			datastore: [],
+			datastore: [
+				{
+					collection: DatastoreCollection.PROFILES,
+					memory: 'stable' as const,
+					// Profiles are public so other users can resolve a principal
+					// to a nickname on history / claim screens. Only the owner
+					// can mutate their own document (key === principal).
+					read: 'public' as const,
+					write: 'private' as const,
+					mutablePermissions: true
+				}
+			],
 			storage: []
 		}
 	}
