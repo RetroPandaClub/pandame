@@ -23,6 +23,7 @@
 		"e2e:report": "npm run playwright:install && playwright show-report"
 	},
 	"devDependencies": {
+		"@icp-sdk/bindgen": "^0.4.0",
 		"@junobuild/config": "^3.0.1",
 		"@junobuild/vite-plugin": "^4.7.1",
 		"@playwright/test": "^1.59.1",
@@ -34,6 +35,7 @@
 		"@testing-library/jest-dom": "^6.6.3",
 		"@types/eslint": "^9.6.1",
 		"@types/node": "^25.3.3",
+		"@types/qrcode": "^1.5.5",
 		"eslint": "^9.34.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-import": "^2.31.0",
@@ -59,7 +61,11 @@
 	"type": "module",
 	"dependencies": {
 		"@dfinity/utils": "^4.2.1",
+		"@icp-sdk/canisters": "^3.5.2",
+		"@icp-sdk/core": "^5.0.0",
 		"@junobuild/core": "^5.4.0",
-		"nanoid": "^5.1.11"
+		"@junobuild/schema": "^1.2.4",
+		"nanoid": "^5.1.11",
+		"qrcode": "^1.5.4"
 	}
 }
