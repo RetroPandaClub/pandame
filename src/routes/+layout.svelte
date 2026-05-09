@@ -28,14 +28,18 @@
 
 <div class="relative isolate min-h-[100dvh]">
 	<main class="tall:min-h-[calc(100dvh-128px)] mx-auto max-w-screen-2xl px-8 py-16 md:px-24">
-		<h1 class="text-5xl font-bold tracking-tight md:pt-24 md:text-6xl dark:text-white">
-			Example App
-		</h1>
+		<h1 class="text-5xl font-bold tracking-tight md:pt-24 md:text-6xl dark:text-white">PandaMe</h1>
 		<p class="py-4 md:max-w-lg dark:text-white">
-			Explore this demo app built with SvelteKit, Tailwind, and
-			<a href="https://juno.build" rel="noopener noreferrer" target="_blank" class="underline">
-				Juno</a
-			>, showcasing a practical application of these technologies.
+			A trustless escrow on the
+			<a
+				href="https://internetcomputer.org"
+				rel="noopener noreferrer"
+				target="_blank"
+				class="underline"
+			>
+				Internet Computer
+			</a>. Lock funds against a known counterparty, share a tip link with anyone, or reclaim what's
+			yours after expiry — all from a single Juno-powered Internet Identity session.
 		</p>
 
 		<Auth>
