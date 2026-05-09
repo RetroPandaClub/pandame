@@ -10,7 +10,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Countdown from '$lib/components/Countdown.svelte';
 	import DealActions from '$lib/components/DealActions.svelte';
-	import DealStatusDot from '$lib/components/DealStatusDot.svelte';
+	import DealStatusIcon from '$lib/components/DealStatusIcon.svelte';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import Money from '$lib/components/Money.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
@@ -137,7 +137,7 @@
 
 	{#snippet trailing()}
 		{#if status !== undefined}
-			<DealStatusDot {status} />
+			<DealStatusIcon {status} />
 		{/if}
 	{/snippet}
 </BrandHeader>

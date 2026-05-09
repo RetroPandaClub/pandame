@@ -1,0 +1,97 @@
+<script lang="ts">
+	import { DealStatuses, type DealStatusName } from '$lib/enums/deal-status';
+
+	interface Props {
+		status: DealStatusName;
+		ariaLabel?: string;
+	}
+
+	let { status, ariaLabel }: Props = $props();
+
+	interface Spec {
+		class: string;
+		glyph: 'check' | 'cross' | 'dot' | 'swap' | 'refresh';
+	}
+
+	// Figma "icon created" / status badges (`244:1398`, `244:1400`,
+	// `228:777`): a 22-26 px circle on the right of the deal-card
+	// title bar. Settled = green check, Rejected = red cross, Pending /
+	// Created funded but not yet completed = blue swap, Refunded =
+	// orange dot.
+	const SPEC: Record<DealStatusName, Spec> = {
+		[DealStatuses.Settled]: { class: 'bg-success', glyph: 'check' },
+		[DealStatuses.Rejected]: { class: 'bg-danger', glyph: 'cross' },
+		[DealStatuses.Cancelled]: { class: 'bg-muted', glyph: 'cross' },
+		[DealStatuses.Refunded]: { class: 'bg-warning', glyph: 'dot' },
+		[DealStatuses.Funded]: { class: 'bg-bg-elevated', glyph: 'swap' },
+		[DealStatuses.Created]: { class: 'bg-warning', glyph: 'refresh' }
+	};
+
+	let spec = $derived(SPEC[status]);
+</script>
+
+<span
+	class="text-default-inverse inline-flex h-[24px] w-[24px] items-center justify-center rounded-full {spec.class}"
+	role="img"
+	aria-label={ariaLabel ?? status}
+>
+	{#if spec.glyph === 'check'}
+		<svg
+			viewBox="0 0 24 24"
+			class="h-3.5 w-3.5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="3"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<polyline points="5,12 10,17 19,7" />
+		</svg>
+	{:else if spec.glyph === 'cross'}
+		<svg
+			viewBox="0 0 24 24"
+			class="h-3.5 w-3.5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="3"
+			stroke-linecap="round"
+			aria-hidden="true"
+		>
+			<line x1="6" y1="6" x2="18" y2="18" />
+			<line x1="6" y1="18" x2="18" y2="6" />
+		</svg>
+	{:else if spec.glyph === 'swap'}
+		<svg
+			viewBox="0 0 24 24"
+			class="text-primary h-3.5 w-3.5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2.5"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<polyline points="7,4 4,7 7,10" />
+			<line x1="4" y1="7" x2="19" y2="7" />
+			<polyline points="17,14 20,17 17,20" />
+			<line x1="5" y1="17" x2="20" y2="17" />
+		</svg>
+	{:else if spec.glyph === 'refresh'}
+		<svg
+			viewBox="0 0 24 24"
+			class="h-3.5 w-3.5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2.5"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<polyline points="20,6 14,6 14,12" />
+			<path d="M20 6a8 8 0 1 1-2.5 11" />
+		</svg>
+	{:else}
+		<span class="block h-2 w-2 rounded-full bg-current"></span>
+	{/if}
+</span>

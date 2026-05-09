@@ -6,7 +6,7 @@
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Countdown from '$lib/components/Countdown.svelte';
-	import DealStatusDot from '$lib/components/DealStatusDot.svelte';
+	import DealStatusIcon from '$lib/components/DealStatusIcon.svelte';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import Login from '$lib/components/Login.svelte';
 	import Money from '$lib/components/Money.svelte';
@@ -148,7 +148,7 @@
 				</div>
 				<div class="flex items-baseline justify-between">
 					<dt class="text-body2 text-muted">{$i18n.claim.status_field}</dt>
-					<dd><DealStatusDot status={dealStatus(claimed)} /></dd>
+					<dd><DealStatusIcon status={dealStatus(claimed)} /></dd>
 				</div>
 				<div class="flex items-baseline justify-between">
 					<dt class="text-body2 text-muted">{$i18n.claim.deal_field}</dt>
@@ -164,7 +164,7 @@
 		>
 			<header class="flex items-start justify-between gap-3">
 				<h2 class="text-h6 text-default font-bold">{title}</h2>
-				<DealStatusDot status={dealStatus(preview)} />
+				<DealStatusIcon status={dealStatus(preview)} />
 			</header>
 
 			{#if note !== undefined}
