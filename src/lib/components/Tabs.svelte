@@ -20,10 +20,18 @@
 	};
 </script>
 
+<!--
+  Figma "Toggle Pay Receive" (`92:600` / `159:1205`):
+    - Container: rounded-[20px], border 0.846px solid rgba(255,255,255,0.15),
+      sits on the purple BrandHeader.
+    - Each tab: ~121px wide × 34px tall, rounded-[23px].
+    - Active: bg #F7F7FA (off-white canvas), text Inter Medium 11.85px Blu Night.
+    - Inactive: transparent, text Inter Medium 11.85px white tracking -0.237px.
+-->
 <div
 	role="tablist"
 	aria-label={ariaLabel}
-	class="rounded-pill bg-primary/30 inline-flex items-center p-1"
+	class="inline-flex items-center rounded-xl border-[0.846px] border-white/15 bg-transparent"
 >
 	{#each tabs as tab (tab.id)}
 		{@const active = value === tab.id}
@@ -33,8 +41,8 @@
 			aria-selected={active}
 			disabled={tab.disabled}
 			onclick={select(tab.id)}
-			class="rounded-pill text-body2 px-6 py-2 font-bold transition-colors {active
-				? 'bg-bg-elevated text-primary shadow-sm'
+			class="rounded-tab font-serif-ui flex h-[34px] min-w-[120px] items-center justify-center px-[20px] text-[11.85px] font-medium tracking-[-0.237px] transition-colors {active
+				? 'bg-bg text-default'
 				: 'text-default-inverse/90 hover:text-default-inverse'} {tab.disabled
 				? 'cursor-not-allowed opacity-40'
 				: ''}"
