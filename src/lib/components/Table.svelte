@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Doc, listDocs } from '@junobuild/core-peer';
+	import { type Doc, listDocs } from '@junobuild/core';
 	import Delete from '$lib/components/Delete.svelte';
 	import { userNotSignedIn } from '$lib/derived/user.derived';
 	import type { Note } from '$lib/types/note';
@@ -35,9 +35,9 @@
 	</div>
 
 	<div class="py-2" role="rowgroup">
-		{#each items as item, index}
+		{#each items as item, index (item.key)}
 			<div
-				class="mb-4 flex items-center gap-2 rounded border-[3px] border-black bg-white px-3 shadow-[8px_8px_0px_rgba(0,0,0,1)] transition-all dark:border-lavender-blue-500 dark:bg-black dark:text-white dark:shadow-[8px_8px_0px_#7888FF]"
+				class="dark:border-lavender-blue-500 mb-4 flex items-center gap-2 rounded border-[3px] border-black bg-white px-3 shadow-[8px_8px_0px_rgba(0,0,0,1)] transition-all dark:bg-black dark:text-white dark:shadow-[8px_8px_0px_#7888FF]"
 				role="row"
 			>
 				<span role="cell" aria-rowindex={index} class="align-center flex min-w-max p-1">

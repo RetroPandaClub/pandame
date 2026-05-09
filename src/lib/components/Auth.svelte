@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authSubscribe } from '@junobuild/core-peer';
+	import { onAuthStateChange } from '@junobuild/core';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import Login from '$lib/components/Login.svelte';
 	import Logout from '$lib/components/Logout.svelte';
@@ -14,7 +14,7 @@
 
 	let unsubscribe: (() => void) | undefined = undefined;
 
-	onMount(() => (unsubscribe = authSubscribe((user) => userStore.set(user))));
+	onMount(() => (unsubscribe = onAuthStateChange((user) => userStore.set(user))));
 
 	const automaticSignOut = () => console.warn('Automatically signed out because session expired');
 

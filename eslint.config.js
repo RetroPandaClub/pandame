@@ -59,7 +59,10 @@ export default tseslint.config(
 			'no-else-return': ['warn', { allowElseIf: false }],
 			'no-unused-vars': 'off',
 			'prefer-template': 'error',
-			'require-await': 'error'
+			'require-await': 'error',
+			// External / user-supplied URLs are bound to `<a href>` here; the
+			// SvelteKit `resolve()` helper is meant for in-app navigation.
+			'svelte/no-navigation-without-resolve': 'off'
 		}
 	},
 	{

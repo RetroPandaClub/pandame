@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setDoc, uploadFile } from '@junobuild/core-peer';
+	import { setDoc, uploadFile } from '@junobuild/core';
 	import { nanoid } from 'nanoid';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -94,7 +94,7 @@
 </Button>
 
 {#if showModal}
-	<div class="fixed inset-0 z-50 animate-fade p-16 md:px-24 md:py-44" role="dialog">
+	<div class="animate-fade fixed inset-0 z-50 p-16 md:px-24 md:py-44" role="dialog">
 		<div class="relative w-full max-w-xl">
 			<textarea
 				class="form-control m-0 block w-full resize-none rounded-sm border-[3px] border-black bg-white px-3 py-1.5 text-base font-normal shadow-[5px_5px_0px_rgba(0,0,0,1)] focus:outline-none"
@@ -108,7 +108,7 @@
 				<div>
 					<button
 						aria-label="Attach a file to the entry"
-						class="flex items-center gap-2 hover:text-lavender-blue-600 active:text-lavender-blue-400"
+						class="hover:text-lavender-blue-600 active:text-lavender-blue-400 flex items-center gap-2"
 						onclick={openSelectFile}
 					>
 						<svg
@@ -131,7 +131,7 @@
 
 					<input
 						type="file"
-						class="fixed -bottom-24 right-0 opacity-0"
+						class="fixed right-0 -bottom-24 opacity-0"
 						onchange={onChangeFile}
 						disabled={progress}
 						bind:this={inputFile}
@@ -140,7 +140,7 @@
 
 				{#if progress}
 					<div
-						class="text-indigo-600 my-8 inline-block h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent"
+						class="my-8 inline-block h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent text-indigo-600"
 						role="status"
 						aria-label="loading"
 					>
@@ -149,7 +149,7 @@
 				{:else}
 					<div class="my-4 flex">
 						<button
-							class="px-8 py-1 hover:text-lavender-blue-600 active:text-lavender-blue-400"
+							class="hover:text-lavender-blue-600 active:text-lavender-blue-400 px-8 py-1"
 							type="button"
 							onclick={() => (showModal = false)}
 						>
