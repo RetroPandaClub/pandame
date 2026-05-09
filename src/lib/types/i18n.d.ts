@@ -59,6 +59,17 @@ interface I18nHistory {
 	filter_cancelled: string;
 }
 
+interface I18nTransitions {
+	title: string;
+	tab_pending: string;
+	tab_created: string;
+	tab_disputed: string;
+	empty_title: string;
+	empty_pending: string;
+	empty_created: string;
+	empty_disputed: string;
+}
+
 interface I18nDispute {
 	title: string;
 	intro: string;
@@ -221,6 +232,7 @@ interface I18n {
 	nav: I18nNav;
 	home: I18nHome;
 	history: I18nHistory;
+	transitions: I18nTransitions;
 	dispute: I18nDispute;
 	detail: I18nDetail;
 	profile: I18nProfile;

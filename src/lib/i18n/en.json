@@ -50,6 +50,16 @@
 		"filter_refunded": "Refunded",
 		"filter_cancelled": "Cancelled"
 	},
+	"transitions": {
+		"title": "Transitions",
+		"tab_pending": "Pending",
+		"tab_created": "Created",
+		"tab_disputed": "Disputate",
+		"empty_title": "Nothing to show here",
+		"empty_pending": "Deals waiting on your approval will appear here.",
+		"empty_created": "Deals you've funded but the recipient hasn't accepted yet will appear here.",
+		"empty_disputed": "Disputed deals will appear here once the dispute jury lands."
+	},
 	"dispute": {
 		"title": "Open a dispute",
 		"intro": "If you and your counterparty disagree on whether the deal was fulfilled, you can escalate to a jury of arbitrators. Each arbitrator votes; the majority decision releases or refunds the funds.",
