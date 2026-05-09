@@ -1,20 +1,22 @@
 <script lang="ts">
 	import { fromNullable } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Backdrop from '$lib/components/Backdrop.svelte';
+	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import DealStatusBadge from '$lib/components/DealStatusBadge.svelte';
+	import Countdown from '$lib/components/Countdown.svelte';
+	import DealStatusDot from '$lib/components/DealStatusDot.svelte';
+	import IconButton from '$lib/components/IconButton.svelte';
 	import Login from '$lib/components/Login.svelte';
-	import Logout from '$lib/components/Logout.svelte';
+	import Money from '$lib/components/Money.svelte';
+	import PandaMark from '$lib/components/PandaMark.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { acceptDeal, getClaimableDeal } from '$lib/services/deal.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userStore } from '$lib/stores/user.store';
 	import type { ClaimableDeal, Deal } from '$lib/types/deal';
 	import { dealStatus } from '$lib/utils/deal.utils';
-	import { formatTokenAmount, nsToDate } from '$lib/utils/format.utils';
 
 	let dealId = $derived(parseDealId(page.params.deal_id ?? ''));
 	let claimCode = $derived(page.url.searchParams.get('code') ?? undefined);
@@ -30,7 +32,7 @@
 		loadError = undefined;
 
 		if (dealId === undefined) {
-			loadError = 'Invalid deal id in the URL.';
+			loadError = $i18n.detail.not_found;
 
 			return;
 		}
@@ -68,28 +70,18 @@
 		}
 	};
 
-	let amountStr = $derived.by((): string | undefined => {
-		const p = preview;
-
-		return p === undefined ? undefined : formatTokenAmount(p.amount, ICP_TOKEN);
-	});
-
 	let title = $derived.by((): string | undefined => {
 		const p = preview;
 
-		return p === undefined ? undefined : (fromNullable(p.title) ?? $i18n.deals.row.untitled);
+		return p === undefined
+			? undefined
+			: (fromNullable(p.title) ?? $i18n.claim.preview_title_fallback);
 	});
 
 	let note = $derived.by((): string | undefined => {
 		const p = preview;
 
 		return p === undefined ? undefined : fromNullable(p.note);
-	});
-
-	let expiresAt = $derived.by((): Date | undefined => {
-		const p = preview;
-
-		return p === undefined ? undefined : nsToDate(p.expires_at_ns);
 	});
 
 	function parseDealId(text: string): bigint | undefined {
@@ -105,89 +97,121 @@
 	<title>{$i18n.claim.title} · {$i18n.layout.title}</title>
 </svelte:head>
 
-<section class="mx-auto mt-12 max-w-xl space-y-6 dark:text-white">
-	<header class="space-y-2">
-		<a href="/" class="text-sm underline">{$i18n.core.text.back_to_dashboard}</a>
-		<h1 class="text-3xl font-bold">{$i18n.claim.title}</h1>
-		{#if claimCode === undefined}
-			<p class="text-sm opacity-75">{$i18n.claim.missing_code}</p>
-		{/if}
-	</header>
+<BrandHeader title={$i18n.claim.title}>
+	{#snippet leading()}
+		<IconButton
+			ariaLabel={$i18n.core.text.back_to_dashboard}
+			variant="ghost"
+			onclick={() => goto('/')}
+		>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path d="M15 18l-6-6 6-6" />
+			</svg>
+		</IconButton>
+	{/snippet}
+</BrandHeader>
 
+<section class="flex flex-1 flex-col gap-5 px-6 pt-6 pb-10">
 	{#if !$userSignedIn}
-		<Card title={$i18n.claim.signin_title}>
-			<p class="text-sm">{$i18n.claim.signin_description}</p>
-			{#snippet footer()}
-				<Login />
-			{/snippet}
-		</Card>
+		<div class="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+			<PandaMark size="lg" />
+			<h2 class="text-h6 text-default font-bold">{$i18n.claim.signin_title}</h2>
+			<p class="text-body1 text-muted">{$i18n.claim.signin_description}</p>
+			<Login fullWidth />
+		</div>
 	{:else if loadError !== undefined}
-		<Card title={$i18n.claim.load_error_title}>
-			<p class="text-sm text-red-700">{loadError}</p>
-			{#snippet footer()}
-				<Button onclick={reload}>{$i18n.core.text.try_again}</Button>
-			{/snippet}
-		</Card>
+		<div class="border-danger/40 bg-danger/10 flex flex-col gap-3 rounded-xl border p-5">
+			<h2 class="text-h6 text-default font-bold">{$i18n.claim.load_error_title}</h2>
+			<p class="text-body2 text-default">{loadError}</p>
+			<Button variant="secondary" onclick={reload}>{$i18n.core.text.try_again}</Button>
+		</div>
 	{:else if claimed !== undefined}
-		<Card title={$i18n.claim.settled_title}>
-			<p>{$i18n.claim.settled_description}</p>
-			<dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-				<dt class="opacity-60">{$i18n.deals.row.amount}</dt>
-				<dd class="text-right font-mono">{formatTokenAmount(claimed.amount, ICP_TOKEN)}</dd>
-				<dt class="opacity-60">{$i18n.claim.status_field}</dt>
-				<dd class="text-right">
-					<DealStatusBadge status={dealStatus(claimed)} />
-				</dd>
-				<dt class="opacity-60">{$i18n.claim.deal_field}</dt>
-				<dd class="text-right">#{claimed.id.toString()}</dd>
+		<div class="flex flex-col items-center gap-5 text-center">
+			<PandaMark size="lg" />
+			<h2 class="text-h5 text-success font-bold">{$i18n.claim.settled_title}</h2>
+			<p class="text-body1 text-default">{$i18n.claim.settled_description}</p>
+
+			<dl
+				class="border-success/40 bg-success/5 flex w-full flex-col gap-2 rounded-xl border p-4 text-left"
+			>
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.deals.row.amount}</dt>
+					<dd><Money amount={claimed.amount} size="lg" /></dd>
+				</div>
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.claim.status_field}</dt>
+					<dd><DealStatusDot status={dealStatus(claimed)} /></dd>
+				</div>
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.claim.deal_field}</dt>
+					<dd class="text-default font-mono">#{claimed.id.toString()}</dd>
+				</div>
 			</dl>
-			{#snippet footer()}
-				<a href="/" class="underline">{$i18n.core.text.open_dashboard}</a>
-			{/snippet}
-		</Card>
+
+			<Button fullWidth onclick={() => goto('/')}>{$i18n.core.text.open_dashboard}</Button>
+		</div>
 	{:else if preview !== undefined}
-		<Card title={title ?? $i18n.claim.preview_title_fallback}>
+		<div
+			class="border-border-soft bg-bg shadow-primary/5 flex flex-col gap-3 rounded-xl border p-5 shadow-sm"
+		>
+			<header class="flex items-start justify-between gap-3">
+				<h2 class="text-h6 text-default font-bold">{title}</h2>
+				<DealStatusDot status={dealStatus(preview)} />
+			</header>
+
 			{#if note !== undefined}
-				<p class="text-sm opacity-80">{note}</p>
+				<p class="text-body1 text-default">{note}</p>
 			{/if}
-			<dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-				<dt class="opacity-60">{$i18n.deals.row.amount}</dt>
-				<dd class="text-right font-mono">{amountStr}</dd>
-				<dt class="opacity-60">{$i18n.claim.status_field}</dt>
-				<dd class="text-right">
-					<DealStatusBadge status={dealStatus(preview)} />
-				</dd>
-				<dt class="opacity-60">{$i18n.deals.row.expires}</dt>
-				<dd class="text-right">
-					{#if expiresAt !== undefined}
-						<time datetime={expiresAt.toISOString()}>{expiresAt.toLocaleString()}</time>
-					{/if}
-				</dd>
-				<dt class="opacity-60">{$i18n.deals.row.recipient}</dt>
-				<dd class="text-right">
-					{preview.is_recipient_bound ? $i18n.claim.recipient_bound : $i18n.claim.recipient_open}
-				</dd>
+
+			<dl class="border-border-soft flex flex-col gap-2 border-t pt-3">
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.deals.row.amount}</dt>
+					<dd><Money amount={preview.amount} token={ICP_TOKEN} size="lg" /></dd>
+				</div>
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.deals.row.expires}</dt>
+					<dd><Countdown expiresAtNs={preview.expires_at_ns} /></dd>
+				</div>
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.deals.row.recipient}</dt>
+					<dd class="text-body2 text-default">
+						{preview.is_recipient_bound ? $i18n.claim.recipient_bound : $i18n.claim.recipient_open}
+					</dd>
+				</div>
 			</dl>
+		</div>
 
-			{#if claimError !== undefined}
-				<p class="rounded-sm border-2 border-red-600 bg-red-50 p-2 text-sm text-red-700">
-					{claimError}
-				</p>
-			{/if}
+		{#if claimCode === undefined}
+			<p
+				class="border-warning/40 bg-warning/10 text-body2 text-default rounded-md border p-3"
+				role="note"
+			>
+				{$i18n.claim.missing_code}
+			</p>
+		{/if}
 
-			{#snippet footer()}
-				<small class="mr-auto text-xs opacity-60">
-					{$i18n.core.text.signed_in_as}
-					{$userStore?.key}
-				</small>
-				<Logout />
-				<Button onclick={claim} disabled={progress}>
-					{progress ? $i18n.claim.submitting : $i18n.claim.submit}
-				</Button>
-			{/snippet}
-		</Card>
+		{#if claimError !== undefined}
+			<p
+				class="border-danger bg-danger/10 text-body2 text-danger rounded-md border p-3"
+				role="alert"
+			>
+				{claimError}
+			</p>
+		{/if}
+
+		<Button onclick={claim} loading={progress} fullWidth>
+			{$i18n.claim.submit}
+		</Button>
 	{:else}
-		<p class="text-sm opacity-75">{$i18n.claim.loading_preview}</p>
+		<p class="text-body2 text-muted" aria-live="polite">{$i18n.claim.loading_preview}</p>
 	{/if}
 </section>
 
