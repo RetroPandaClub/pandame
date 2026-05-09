@@ -1,78 +1,92 @@
 <script lang="ts">
-	import { Principal } from '@icp-sdk/core/principal';
+	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
-	import type { EscrowDid } from '$declarations';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import Chip from '$lib/components/Chip.svelte';
-	import IconButton from '$lib/components/IconButton.svelte';
 	import LogoutConfirmModal from '$lib/components/LogoutConfirmModal.svelte';
-	import ReliabilityCard from '$lib/components/ReliabilityCard.svelte';
-	import RoleSwitcher from '$lib/components/RoleSwitcher.svelte';
+	import ProfileFieldRow from '$lib/components/ProfileFieldRow.svelte';
+	import Sheet from '$lib/components/Sheet.svelte';
+	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
+	import PencilIcon from '$lib/components/icons/PencilIcon.svelte';
+	import PlusIcon from '$lib/components/icons/PlusIcon.svelte';
 	import { profileDisplayName } from '$lib/derived/profile.derived';
 	import { userPrincipalShort, userPrincipalText } from '$lib/derived/user.derived';
-	import { getReliability } from '$lib/services/deal.services';
-	import { ensureProfile, getProfile } from '$lib/services/profile.services';
+	import { ensureProfile, upsertProfile } from '$lib/services/profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { profileStore } from '$lib/stores/profile.store';
+	import type { UserProfile } from '$lib/types/profile';
 
 	let principalText = $derived($userPrincipalText);
-	let principalShort = $derived($userPrincipalShort);
-	let copied = $state(false);
 	let logoutOpen = $state(false);
+	let saveError: string | undefined = $state(undefined);
 
-	let reliability: EscrowDid.ReliabilityView | undefined = $state(undefined);
+	let profile = $derived($profileStore?.data);
+
+	let username = $state('');
+	let name = $state('');
+	let surname = $state('');
+	let address = $state('');
+	let email = $state('');
 
 	$effect(() => {
 		const text = principalText;
-
 		if (text === undefined || text.length === 0) {
 			profileStore.reset();
-			reliability = undefined;
-
 			return;
 		}
-
 		(async () => {
 			try {
-				// Fast read-only fetch first so the screen paints with whatever
-				// is already on chain; ensureProfile then back-fills a default
-				// shell on first sign-in (and round-trips a `version` so
-				// subsequent edits succeed).
-				const initial = await getProfile(text);
-				profileStore.set(initial);
-
-				const ensured = await ensureProfile(text);
-				profileStore.set(ensured);
+				const doc = await ensureProfile(text);
+				profileStore.set(doc);
 			} catch (err) {
-				console.error('Failed to load profile:', err);
-			}
-		})();
-
-		(async () => {
-			try {
-				reliability = await getReliability({ principal: Principal.fromText(text) });
-			} catch (err) {
-				console.error('getReliability failed:', err);
-				reliability = undefined;
+				console.error('Failed to ensure profile:', err);
 			}
 		})();
 	});
 
-	const copyPrincipal = async () => {
-		if (principalText === undefined) {
+	$effect(() => {
+		if (profile === undefined) {
 			return;
 		}
+		username = profile.username;
+		name = profile.name;
+		surname = profile.surname;
+		address = profile.address;
+		email = profile.email;
+	});
 
+	const isValidEmail = (text: string) => text.length === 0 || /[^@\s]+@[^@\s]+\.[^@\s]+/.test(text);
+
+	const save = async (next: Partial<UserProfile>) => {
+		const text = principalText;
+		if (text === undefined || text.length === 0) {
+			return;
+		}
+		if (next.email !== undefined && !isValidEmail(next.email)) {
+			saveError = $i18n.profile.email_invalid;
+			return;
+		}
+		saveError = undefined;
 		try {
-			await navigator.clipboard.writeText(principalText);
-			copied = true;
-			setTimeout(() => (copied = false), 2_000);
+			const merged: UserProfile = {
+				...(profile ?? {
+					owner: text,
+					username: '',
+					name: '',
+					surname: '',
+					address: '',
+					email: ''
+				}),
+				...next,
+				owner: text
+			};
+			const updated = await upsertProfile({ key: text, data: merged });
+			profileStore.set(updated);
 		} catch (err) {
-			console.error('Failed to copy principal:', err);
+			console.error('Failed to save profile:', err);
+			saveError = $i18n.profile.edit_save_error;
 		}
 	};
 </script>
@@ -83,93 +97,118 @@
 
 <AuthGuard />
 
-<BrandHeader title={$i18n.profile.title}>
-	{#snippet leading()}
-		<IconButton
-			ariaLabel={$i18n.core.text.back_to_dashboard}
-			variant="ghost"
-			onclick={() => goto('/')}
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<path d="M15 18l-6-6 6-6" />
-			</svg>
-		</IconButton>
-	{/snippet}
-
+<BrandHeader title={$i18n.profile.title} subtitle={$i18n.profile.role_user} tone="success">
 	{#snippet trailing()}
-		<Chip variant="soft">{$i18n.profile.role_user}</Chip>
+		<UserPrincipalBadge />
 	{/snippet}
 </BrandHeader>
 
-<section class="flex flex-1 flex-col gap-5 px-6 pt-6 pb-28">
-	<div class="flex justify-center">
-		<RoleSwitcher current="user" />
-	</div>
-
-	<div class="flex flex-col items-center gap-3 text-center">
-		<Avatar fallback={$profileDisplayName || principalShort} size="xl" alt={$profileDisplayName} />
-
-		<div class="flex flex-col gap-1">
-			<h2 class="text-h6 text-default font-bold">
-				{$profileDisplayName || principalShort}
-			</h2>
+<Sheet paddingClass="px-[25px] pt-[80px] pb-[120px]" class="gap-[18px]">
+	<!--
+    Big avatar overlapping the green→white seam (Figma `71:302`,
+    134 × 134, with a `+` purple badge floating bottom-right).
+    Positioned absolutely so it bleeds out of the Sheet's top edge.
+  -->
+	<div class="absolute -top-[60px] left-1/2 -translate-x-1/2">
+		<div class="relative">
+			<Avatar size="xl" fallback={$profileDisplayName || $userPrincipalShort} />
 			<button
 				type="button"
-				onclick={copyPrincipal}
-				class="text-body2 text-muted hover:bg-primary-light/50 rounded-md px-3 py-1 font-mono transition-colors"
-				aria-label={$i18n.profile.copy_principal}
+				class="bg-primary-stroke text-default-inverse shadow-deal-card absolute right-[6px] bottom-[6px] flex h-[30px] w-[30px] items-center justify-center rounded-full"
+				aria-label={$i18n.profile.add_avatar_aria}
+				onclick={() => {
+					/* TODO: avatar upload */
+				}}
 			>
-				{copied ? $i18n.core.text.copied : principalShort}
+				<span class="flex h-[15px] w-[15px] items-center"><PlusIcon /></span>
 			</button>
 		</div>
-
-		<Button variant="secondary" size="sm" onclick={() => goto('/profile/edit')}>
-			{$i18n.profile.edit_cta}
-		</Button>
 	</div>
 
-	{#if $profileStore !== undefined}
-		<dl
-			class="border-border-soft bg-bg-elevated text-body2 flex flex-col gap-2 rounded-xl border p-4"
-		>
-			{#if $profileStore.data.email.length > 0}
-				<div class="flex items-baseline justify-between gap-3">
-					<dt class="text-muted">{$i18n.profile.email_label}</dt>
-					<dd class="text-default truncate">{$profileStore.data.email}</dd>
-				</div>
-			{/if}
-			{#if $profileStore.data.address.length > 0}
-				<div class="flex items-baseline justify-between gap-3">
-					<dt class="text-muted">{$i18n.profile.address_label}</dt>
-					<dd class="text-default truncate">{$profileStore.data.address}</dd>
-				</div>
-			{/if}
-		</dl>
+	<header class="flex items-center gap-[10px]">
+		<h2 class="text-default text-h6 font-sans font-bold">{$i18n.profile.section_edit}</h2>
+		<span class="text-default flex h-[16px] w-[16px] items-center"><PencilIcon /></span>
+	</header>
+
+	<div class="flex flex-col gap-[18px]">
+		<ProfileFieldRow
+			id="profile-username"
+			label={$i18n.profile.username_label}
+			placeholder={$i18n.profile.username_placeholder}
+			bind:value={username}
+			onsave={(next) => save({ username: next })}
+		/>
+		<ProfileFieldRow
+			id="profile-name"
+			label={$i18n.profile.name_label}
+			placeholder={$i18n.profile.name_placeholder}
+			bind:value={name}
+			onsave={(next) => save({ name: next })}
+		/>
+		<ProfileFieldRow
+			id="profile-surname"
+			label={$i18n.profile.surname_label}
+			placeholder={$i18n.profile.surname_placeholder}
+			bind:value={surname}
+			onsave={(next) => save({ surname: next })}
+		/>
+		<ProfileFieldRow
+			id="profile-address"
+			label={$i18n.profile.address_label}
+			placeholder={$i18n.profile.address_placeholder}
+			bind:value={address}
+			onsave={(next) => save({ address: next })}
+		/>
+		<ProfileFieldRow
+			id="profile-email"
+			label={$i18n.profile.email_label}
+			placeholder={$i18n.profile.email_placeholder}
+			bind:value={email}
+			onsave={(next) => save({ email: next })}
+		/>
+		<ProfileFieldRow
+			id="profile-reliability"
+			label={$i18n.profile.reliability_label}
+			value={$i18n.profile.reliability_yes}
+			editable={false}
+		/>
+		<ProfileFieldRow
+			id="profile-weight"
+			label={$i18n.profile.weight_label}
+			value="3"
+			editable={false}
+		/>
+	</div>
+
+	{#if saveError !== undefined}
+		<p class="text-danger text-body2" role="alert">{saveError}</p>
 	{/if}
 
-	<ReliabilityCard {reliability} />
-
-	<div class="mt-auto flex flex-col gap-2">
-		<Button
-			variant="ghost"
-			fullWidth
-			onclick={() => {
-				logoutOpen = true;
-			}}
+	<div class="mt-auto flex flex-col gap-[10px] pt-[20px]">
+		<button
+			type="button"
+			onclick={() => (logoutOpen = true)}
+			class="text-link-purple font-sans text-[15px] font-light underline-offset-2 hover:underline"
 		>
 			{$i18n.core.text.sign_out}
-		</Button>
+		</button>
+		<button
+			type="button"
+			onclick={async () => {
+				await goto('/history');
+			}}
+			class="text-default font-sans text-[14px] font-medium hover:underline"
+		>
+			{$i18n.profile.history_action}
+		</button>
 	</div>
-</section>
+</Sheet>
 
 <AppBottomNav />
 
 <LogoutConfirmModal open={logoutOpen} onclose={() => (logoutOpen = false)} />
+
+{#if nonNullish(profile)}
+	<!-- profile is loaded; nothing extra to render here, but the
+	     reactive subscription is what keeps the form in sync. -->
+{/if}
