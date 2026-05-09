@@ -36,8 +36,8 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Install Playwright
+        uses: ./.github/actions/playwright-install
 
       - name: Run Playwright snapshot update
         run: npm run e2e:snapshots
