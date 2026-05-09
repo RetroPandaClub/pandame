@@ -17,61 +17,97 @@
 
 ## Where reusable things live
 
-| Layer                      | Path                                | What goes there                                         |
-| -------------------------- | ----------------------------------- | ------------------------------------------------------- |
-| **Components**             | `$lib/components/`                  | All UI components (flat — no feature folders today).    |
-| **Cross-cutting services** | `$lib/services/<thing>.services.ts` | Side-effectful operations shared across components.     |
-| **API wrappers**           | `$lib/api/<canister>.api.ts`        | Identity-passing facades over `*.canister.ts`.          |
-| **Actor factories**        | `$lib/canisters/<x>.canister.ts`    | `Canister<S>` subclasses that call the generated IDL.   |
-| **Cross-cutting utils**    | `$lib/utils/<concern>.utils.ts`     | Pure helpers usable across components.                  |
-| **Stores / derived**       | `$lib/stores/`, `$lib/derived/`     | Reactive state shared across views.                     |
-| **Types**                  | `$lib/types/<name>.ts`              | TypeScript interfaces / types.                          |
-| **Enums**                  | `$lib/enums/<name>.ts`              | Plain TS const-object enums.                            |
-| **Constants**              | `$lib/constants/<x>.constants.ts`   | App-wide constants & lookup tables.                     |
-| **i18n strings**           | `$lib/i18n/<locale>.json`           | One JSON per locale, regenerated to a typed dictionary. |
+| Layer                      | Path                                | What goes there                                            |
+| -------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| **Components**             | `$lib/components/`                  | All UI components (flat — no feature folders today).       |
+| **Icons**                  | `$lib/components/icons/`            | Single-path inline-SVG components keyed by `currentColor`. |
+| **Cross-cutting services** | `$lib/services/<thing>.services.ts` | Side-effectful operations shared across components.        |
+| **API wrappers**           | `$lib/api/<canister>.api.ts`        | Identity-passing facades over `*.canister.ts`.             |
+| **Actor factories**        | `$lib/canisters/<x>.canister.ts`    | `Canister<S>` subclasses that call the generated IDL.      |
+| **Cross-cutting utils**    | `$lib/utils/<concern>.utils.ts`     | Pure helpers usable across components.                     |
+| **Stores / derived**       | `$lib/stores/`, `$lib/derived/`     | Reactive state shared across views.                        |
+| **Types**                  | `$lib/types/<name>.ts`              | TypeScript interfaces / types.                             |
+| **Enums**                  | `$lib/enums/<name>.ts`              | Plain TS const-object enums.                               |
+| **Constants**              | `$lib/constants/<x>.constants.ts`   | App-wide constants & lookup tables.                        |
+| **i18n strings**           | `$lib/i18n/<locale>.json`           | One JSON per locale, regenerated to a typed dictionary.    |
 
 ## Catalog (current — keep this honest)
 
 > Edit this section in any PR that adds, renames, or removes an entry
 > matching one of these buckets.
 
-### Components — `$lib/components/`
+### Primitives — `$lib/components/`
 
-| Component         | Use it for                                                                                                                             |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `Auth`            | Auth wrapper that gates children behind a successful sign-in. Wires `onAuthStateChange` once.                                          |
-| `Backdrop`        | Full-screen dimmed overlay; pass `spinner={true}` for a centered spinner.                                                              |
-| `Background`      | Decorative right-side illustration (hidden on `< sm`).                                                                                 |
-| `BalanceBadge`    | Caller's ICP balance pill. Reads `balanceStore`.                                                                                       |
-| `Button`          | The themed CTA. Accepts `onclick`, `disabled`, and a snippet child.                                                                    |
-| `Card`            | Generic glass-card surface (`title` + children + `footer` snippet).                                                                    |
-| `CreateDealModal` | Full create + fund form. Calls `createAndFundDeal` and emits the funded `Deal` via `oncreated`.                                        |
-| `DealActions`     | Context-aware action bar: per-side, per-status buttons (Consent / Reject / Cancel / Accept / Reclaim) plus the stubbed Dispute button. |
-| `DealRow`         | Single-deal card — badge + title + #id + fields + action bar.                                                                          |
-| `DealStatusBadge` | Colored pill per `DealStatusName`.                                                                                                     |
-| `DealsTable`      | List wrapper (loading / empty-state / `<ul>`).                                                                                         |
-| `EmptyState`      | Dashed-border "nothing here yet" placeholder, with optional snippet child.                                                             |
-| `Footer`          | App footer (brand mark + external links).                                                                                              |
-| `Login`           | Internet Identity sign-in CTA.                                                                                                         |
-| `Logout`          | Sign-out button.                                                                                                                       |
-| `Modal`           | Generic dialog shell (`title` + children + `footer` snippet, Esc-to-close, Backdrop included).                                         |
-| `ShareLinkModal`  | Post-create QR + copyable share link. Renders nothing useful when the deal already has a bound recipient.                              |
+| Component          | Use it for                                                                                                                                                                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Avatar`           | Round image with text-initials fallback. Sizes sm / md / lg / xl.                                                                                                                                                              |
+| `Backdrop`         | Full-screen dimmed overlay; pass `spinner={true}` for the centred spinner.                                                                                                                                                     |
+| `BottomNav`        | Sticky bottom-of-frame nav. Three snippet slots: `left`, `right`, `center` (centre is absolutely positioned `-top-7` for a raised IconButton).                                                                                 |
+| `BrandHeader`      | Purple full-bleed header with `title` + optional `subtitle`. Snippet slots `leading` / `trailing` (avatar, badges) and `children` (filter chips / tabs). Honours iOS safe-area-top.                                            |
+| `Button`           | Pill button. Variants: `primary` (filled), `secondary` (outlined), `ghost` (transparent). Sizes sm / md / lg. `loading` prop renders a spinner + sets `aria-busy`. `leading` / `trailing` snippet slots for inline icons.      |
+| `Card`             | Generic glass-card surface (title + children + footer snippet).                                                                                                                                                                |
+| `Chip`             | Small inline chip / badge / filter pill. Variants solid / outline / soft / success / warning / danger. Renders as `<button>` when `onclick` is supplied, plain `<span>` otherwise.                                             |
+| `Countdown`        | Live `<time>` element ticking every `updateMs` (default 1 s). Renders `h{H}:{MM}:{SS}` for sub-day, `{D}d {HH}h {MM}m` past 24 h. Swaps to `expiredLabel` + `text-danger` when the deadline passes.                            |
+| `EmptyState`       | Dashed-border "nothing here yet" placeholder, with optional snippet child.                                                                                                                                                     |
+| `FormField`        | Wraps a label + input + optional hint or error. Hint / error get a stable id and the inner slot is `aria-describedby`-d automatically.                                                                                         |
+| `IconButton`       | Square / circular icon-only button. Variants `primary` / `secondary` / `ghost` / `floating` (white card with soft shadow). Sizes sm / md / lg with `[&>svg]:` selectors that size the slotted SVG.                             |
+| `Modal`            | Generic dialog shell (`title` + children + `footer` snippet, Esc-to-close, Backdrop included).                                                                                                                                 |
+| `Money`            | Formatted token amount via `formatTokenAmount`. Props: `signed`, `colorize`, `size`, `token` (defaults to `ICP_TOKEN`).                                                                                                        |
+| `PandaMark`        | Brand illustration: dotted purple ring (two concentric SVG circles) + emoji placeholder for the panda. Sizes sm / md / lg / xl.                                                                                                |
+| `Tabs`             | Generic `<T extends string>` segmented control. Bindable `value`, `onchange`, `tabs: { id, label, disabled? }[]`. Renders inside a `bg-primary/30` capsule.                                                                    |
+| `TextInput`        | Themed `<input>`. Bindable `value`, `oninput` callback. Standard `type` / `inputmode`. `mono`, `invalid`, `aria-describedby` props.                                                                                            |
+| `VoteQuorumPicker` | Three circular vote-quorum selectors (default Fast / Fair / Slow with 3 / 7 / 11 votes). `disabled` flips the whole group to a non-interactive state. **Stubbed** today — the canister doesn't yet expose dispute-jury params. |
+
+### Composed components — `$lib/components/`
+
+| Component            | Use it for                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AppBottomNav`       | Wires `BottomNav` to the project's three primary destinations (/ · /send · /profile) with route-aware variant swaps.                                                |
+| `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.          |
+| `BalanceBadge`       | Caller's ICP balance pill. Reads `balanceStore`.                                                                                                                    |
+| `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`. |
+| `DealCard`           | Single-deal preview card (header bar + amount + countdown). Optional `href` renders the card as an `<a>` for the detail route.                                      |
+| `DealFilterChips`    | All / Active / Settled / Refunded / Cancelled chip strip — bindable `value: DealFilter`.                                                                            |
+| `DealStatusBadge`    | Uppercase pill per `DealStatusName` (legacy variant kept for inline labels).                                                                                        |
+| `DealStatusDot`      | 24 px circular icon badge per status (check / cross / fund / refresh / open circle).                                                                                |
+| `DealsTable`         | List wrapper with loading / empty-state / `<ul>` + `filter` prop.                                                                                                   |
+| `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` to the underlying Button.                                                                              |
+| `Logout`             | Legacy sign-out icon button (prefer `LogoutConfirmModal`).                                                                                                          |
+| `LogoutConfirmModal` | Sign-out confirmation modal (Cancel / Yes, sign out).                                                                                                               |
+| `ReliabilityCard`    | 3-row reliability summary: score chip + concluded count + positive count.                                                                                           |
+| `RoleStubScreen`     | Shared layout for the v2 Arbitrator / Admin profile screens.                                                                                                        |
+| `RoleSwitcher`       | User / Arbitrator / Admin tablist that navigates between the three profile routes.                                                                                  |
+| `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                |
+| `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                   |
+
+### Icons — `$lib/components/icons/`
+
+| Icon          | What                                |
+| ------------- | ----------------------------------- |
+| `FilterIcon`  | Funnel — used by `DealFilterChips`. |
+| `HomeIcon`    | House — bottom-nav centre.          |
+| `ProfileIcon` | Person — bottom-nav right.          |
+| `SwapIcon`    | Arrows — bottom-nav left.           |
+
+Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
+`currentColor`. Add new icons as their own files; consider
+`lucide-svelte` once the count crosses ~10.
 
 ### Services — `$lib/services/`
 
-| Service             | Purpose                                                                                                                                                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `identity.services` | Principal source of truth (`getIdentity`, `getIdentityOrAnonymous`, `safeGetIdentityOnce`).                                                                                                                                              |
-| `deal.services`     | Deal lifecycle orchestration: `createAndFundDeal` (create → `icrc2_approve` → `fund_deal`), plus `acceptDeal`, `consentDeal`, `rejectDeal`, `cancelDeal`, `reclaimDeal`, `listMyDeals`, `getDeal`, `getClaimableDeal`, `getReliability`. |
-| `balance.services`  | `myBalance({ token? })` — caller's principal default subaccount on the chosen ledger (defaults to ICP).                                                                                                                                  |
+| Service             | Purpose                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `identity.services` | Principal source of truth (`getIdentity`, `getIdentityOrAnonymous`, `safeGetIdentityOnce`).                                                                                                 |
+| `deal.services`     | Deal lifecycle orchestration (`createAndFundDeal`, `acceptDeal`, `consentDeal`, `rejectDeal`, `cancelDeal`, `reclaimDeal`, `listMyDeals`, `getDeal`, `getClaimableDeal`, `getReliability`). |
+| `balance.services`  | `myBalance({ token? })` — caller's principal default subaccount on the chosen ledger (defaults to ICP).                                                                                     |
 
-### API wrappers + canisters — `$lib/api/`, `$lib/canisters/`
+### API + canisters — `$lib/api/`, `$lib/canisters/`
 
-| Module            | Purpose                                                                                                                                                                                                                       |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `escrow.api`      | Identity-passing facade over `EscrowCanister` — one function per Candid endpoint.                                                                                                                                             |
-| `escrow.canister` | `Canister<EscrowService>` subclass with `createDeal`, `fundDeal`, `acceptDeal`, `consentDeal`, `rejectDeal`, `cancelDeal`, `reclaimDeal`, `getDeal`, `getClaimableDeal`, `getEscrowAccount`, `listMyDeals`, `getReliability`. |
-| `icrc-ledger.api` | `transfer`, `approve`, `transactionFee`, `balance` over `IcrcLedgerCanister` from `@icp-sdk/canisters`.                                                                                                                       |
+| Module            | Purpose                                                                           |
+| ----------------- | --------------------------------------------------------------------------------- |
+| `escrow.api`      | Identity-passing facade over `EscrowCanister` — one function per Candid endpoint. |
+| `escrow.canister` | `Canister<EscrowService>` subclass with all escrow methods.                       |
+| `icrc-ledger.api` | `transfer`, `approve`, `transactionFee`, `balance` over `IcrcLedgerCanister`.     |
 
 ### Actor — `$lib/actors/`
 
@@ -81,14 +117,14 @@
 
 ### Stores & derived
 
-| Module          | Where           | Purpose                                                                      |
-| --------------- | --------------- | ---------------------------------------------------------------------------- |
-| `user.store`    | `$lib/stores/`  | Authenticated Juno user (`User \| null \| undefined`).                       |
-| `i18n.store`    | `$lib/stores/`  | Active locale + typed dictionary (`$i18n.*`).                                |
-| `deals.store`   | `$lib/stores/`  | Cached deal list with `set` / `upsert` / `remove` / `reset`.                 |
-| `balance.store` | `$lib/stores/`  | Caller's ICP balance (e8s).                                                  |
-| `user.derived`  | `$lib/derived/` | `userSignedIn` / `userNotSignedIn` predicates.                               |
-| `deals.derived` | `$lib/derived/` | `dealsLoaded`, `dealsCount`, `activeDeals`, `settledDeals`, `refundedDeals`. |
+| Module          | Where           | Purpose                                                                                        |
+| --------------- | --------------- | ---------------------------------------------------------------------------------------------- |
+| `user.store`    | `$lib/stores/`  | Authenticated Juno user (`User \| null \| undefined`).                                         |
+| `i18n.store`    | `$lib/stores/`  | Active locale + typed dictionary (`$i18n.*`).                                                  |
+| `deals.store`   | `$lib/stores/`  | Cached deal list with `set` / `upsert` / `remove` / `reset`.                                   |
+| `balance.store` | `$lib/stores/`  | Caller's ICP balance (e8s).                                                                    |
+| `user.derived`  | `$lib/derived/` | `userSignedIn` / `userNotSignedIn` predicates.                                                 |
+| `deals.derived` | `$lib/derived/` | `dealsLoaded`, `dealsCount`, `activeDeals`, `settledDeals`, `refundedDeals`, `cancelledDeals`. |
 
 ### Constants — `$lib/constants/`
 
@@ -115,14 +151,14 @@
 
 ### Types — `$lib/types/`
 
-| Type        | Purpose                                                                                                                      |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `canister`  | `CanisterIdText` (zod via `@junobuild/schema`) + `CreateCanisterOptions<T>`.                                                 |
-| `deal`      | Re-exports `Deal` / `ClaimableDeal` / `DealError` / `DealStatusKey` / `ConsentKey` from `$declarations`; defines `DealSide`. |
-| `token`     | App-side `Token` shape.                                                                                                      |
-| `user`      | Re-exports the `@junobuild/core` `User` type.                                                                                |
-| `languages` | Supported locale codes.                                                                                                      |
-| `i18n.d.ts` | **Generated** by `npm run i18n`. Do not hand-edit.                                                                           |
+| Type        | Purpose                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| `canister`  | `CanisterIdText` (zod via `@junobuild/schema`) + `CreateCanisterOptions<T>`.                            |
+| `deal`      | Re-exports `Deal` / `ClaimableDeal` / `DealError` / `DealStatusKey` / `ConsentKey`; defines `DealSide`. |
+| `token`     | App-side `Token` shape.                                                                                 |
+| `user`      | Re-exports the `@junobuild/core` `User` type.                                                           |
+| `languages` | Supported locale codes.                                                                                 |
+| `i18n.d.ts` | **Generated** by `npm run i18n`. Do not hand-edit.                                                      |
 
 ### i18n — `$lib/i18n/`
 

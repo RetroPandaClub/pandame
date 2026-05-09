@@ -196,13 +196,36 @@ export const createAndFundDeal = async (
 Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
 
 - **Theme tokens** live in [`src/app.css`](../../../src/app.css) inside
-  an `@theme` block. The lavender-blue palette
-  (`bg-lavender-blue-500`, …), the `JetBrains Mono` `--font-sans`, the
-  `--animate-fade` keyframe and the `tall:` custom variant are all
-  defined there.
-- The block opens with `--color-*: initial;` — only colours enumerated
-  in `@theme` are available. To use a new colour, **add it to `@theme`**
-  (and call it out in the PR), don't reach for arbitrary `bg-[#hex]`.
+  an `@theme` block. The block opens with `--color-*: initial;` — only
+  the colours enumerated in `@theme` are available. To use a new
+  colour, **add it to `@theme`** (and call it out in the PR), don't
+  reach for arbitrary `bg-[#hex]`.
+
+  Brand palette (semantic — always reach for these first):
+
+  | Token           | Hex       | Use it for                                |
+  | --------------- | --------- | ----------------------------------------- |
+  | `primary`       | `#632AE8` | CTAs, headings emphasis, brand chrome.    |
+  | `primary-light` | `#D5C4F9` | Soft chips, status backgrounds, dividers. |
+  | `success`       | `#1DBB8E` | Settled deals, positive outcomes.         |
+  | `success-light` | `#29E8B1` | Subtle success accents.                   |
+  | `warning`       | `#F3A712` | "Coming soon" notices, refunded state.    |
+  | `danger`        | `#E64545` | Errors, cancelled / rejected state.       |
+
+  Surface / text / border tokens (full list in `src/app.css`):
+  `bg`, `bg-soft`, `bg-inverse`, `default`, `default-inverse`,
+  `muted`, `subtle`, `border`, `border-soft`, `border-strong`.
+
+- **Typography** is the modular scale base 16 / ratio 1.25 — utilities
+  are `text-{xxs,body2,body1,h6,h5,h4,h3,h2,h1}` with paired
+  `--text-*--line-height` tokens. Default font is **Lato** (self-hosted
+  woff2 in `static/fonts/`), with `JetBrains Mono` available as
+  `--font-mono` for principal / amount displays.
+
+- **Radii** match the Figma's pill-heavy CTA pattern: `rounded-sm`
+  (8 px), `rounded-md` (12 px), `rounded-lg` (16 px), `rounded-xl`
+  (20 px), `rounded-pill` (9999 px).
+
 - **No raw hex** (`bg-[#0f0]`), no inline `style="color:…"`. Arbitrary
   values are tolerated for non-colour props (e.g.
   `shadow-[5px_5px_0px_rgba(0,0,0,1)]`) but prefer a named token when
@@ -210,18 +233,79 @@ Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
 - **Class order** is auto-sorted by `prettier-plugin-tailwindcss`. Don't
   bikeshed it.
 - **Variants & responsive:** prefer Tailwind variants (`md:`, `dark:`,
-  `tall:`) over JS branches.
+  `tall:`) over JS branches. Pandame is **mobile-first** — design at
+  375 × 812 (iPhone 13 mini) and let `md:` / `lg:` add desktop polish.
+
+## Mobile-first device frame
+
+The root layout
+([`+layout.svelte`](../../../src/routes/+layout.svelte)) wraps every
+page in a `max-w-[420px]` device frame centred on tablet / desktop and
+edge-to-edge on phones:
+
+```svelte
+<div class="bg-bg-soft min-h-[100dvh] pb-[env(safe-area-inset-bottom)]">
+	<div class="bg-bg shadow-primary/10 mx-auto flex min-h-[100dvh] max-w-[420px] flex-col shadow-xl">
+		{@render children()}
+	</div>
+</div>
+```
+
+- Outer is `bg-bg-soft` (lavender wash); inner device frame is `bg-bg`
+  (white) with a soft purple shadow so it reads as a card on desktop.
+- The frame is a **flex column** so pages can use `mt-auto` to push
+  content (e.g. a Sign-out button) to the bottom of the viewport.
+- The bottom-nav uses `sticky bottom-0` + `mt-auto` so it docks inside
+  the frame on tall screens but flows naturally on short ones.
+
+A typical authenticated page composes:
+
+```svelte
+<BrandHeader title="…">
+	{#snippet leading()}<IconButton>back</IconButton>{/snippet}
+	{#snippet trailing()}<Avatar />{/snippet}
+	<DealFilterChips bind:value={filter} />
+</BrandHeader>
+
+<section class="flex flex-1 flex-col gap-4 px-6 pt-6 pb-28">
+	<!-- page content; pb-28 leaves room for AppBottomNav -->
+</section>
+
+<AppBottomNav />
+```
+
+A logged-out / public page (welcome, claim) drops `AppBottomNav` and
+typically uses a centred column instead.
 
 ## Routing
 
-- Single-route SvelteKit shell: `src/routes/+page.svelte` mounts the
-  dashboard. The only other route is `/claim/[deal_id]/+page.svelte`
-  for the public QR / share-link flow.
-- `src/routes/+layout.ts` sets `ssr = false` and `prerender = false`
-  (SPA fallback via `adapter-static`). The deeply-linked `/claim/...`
-  URL works because the static fallback serves the same shell.
-- Don't add new SvelteKit routes without a deliberate reason — surface
-  the ask first.
+Pandame ships several mobile-first routes wrapped in the shared device
+frame (see [structure.md](./structure.md#top-level-src) for the full
+tree):
+
+| Route                      | What                                                         |
+| -------------------------- | ------------------------------------------------------------ |
+| `/`                        | Logged-out → `WelcomeScreen`; logged-in → History dashboard. |
+| `/deals/new`               | Create-deal full-screen flow with Pay/Receive tabs.          |
+| `/deals/[deal_id]`         | Per-deal detail with the lifecycle action bar.               |
+| `/deals/[deal_id]/dispute` | Dispute mockup (v2 stub — disabled inputs + warning banner). |
+| `/profile`                 | User profile (avatar + reliability + sign-out).              |
+| `/profile/edit`            | Edit form (v2 stub — disabled inputs).                       |
+| `/profile/arbitrator`      | Arbitrator dashboard preview (v2 stub).                      |
+| `/profile/admin`           | Admin console preview (v2 stub).                             |
+| `/send`                    | Direct send/receive (v2 stub).                               |
+| `/claim/[deal_id]?code=…`  | Public claim page for the QR / share-link flow.              |
+
+`src/routes/+layout.ts` sets `ssr = false` and `prerender = false`
+(SPA fallback via `adapter-static`). Deeply-linked routes work because
+the static fallback serves the same shell.
+
+Auth-gated routes (everything except `/` logged-out and `/claim`) call
+`goto('/')` from an `$effect` when `userSignedIn` flips false, so
+direct URL hits route the user back to the welcome screen.
+
+Don't add new SvelteKit routes without a deliberate reason — surface
+the ask first.
 
 ## i18n
 
