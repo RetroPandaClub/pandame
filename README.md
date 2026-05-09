@@ -4,6 +4,28 @@ Pandame is a SvelteKit + [Juno](https://juno.build) starter scaffolded around a
 notes + image upload datastore. It uses Internet Identity for authentication and
 runs on the Internet Computer via a Juno satellite.
 
+## 📖 Project Guidelines & AI Agent Docs
+
+This project follows strict development patterns. AI agents (Claude Code,
+Cursor, Copilot, Codex, …) and humans should start at the canonical
+entry point:
+
+- **[AGENTS.md](./AGENTS.md)** — universal entry for every AI agent.
+- **[CLAUDE.md](./CLAUDE.md)** — Claude-specific runtime layer (defers to
+  AGENTS.md).
+- **[docs/ai/](./docs/ai/)** — long-form documentation:
+  - [`docs/ai/governance.md`](./docs/ai/governance.md) — truth hierarchy,
+    boundaries, capabilities, meta-update rule.
+  - [`docs/ai/pr-and-ci.md`](./docs/ai/pr-and-ci.md) — PR conventions, CI
+    gates, local quality gates.
+  - [`docs/ai/frontend/`](./docs/ai/frontend/) — SvelteKit + Svelte 5 +
+    Tailwind v4 conventions, structure, reusability catalog, a11y,
+    testing.
+- **[.agents/workflows/deployment.md](./.agents/workflows/deployment.md)** —
+  local + production deployment runbook.
+- **[.claude/rules/](./.claude/rules/)** — Claude-only quick-reference
+  cards that defer to `docs/ai/`.
+
 ## ⚙️ What's inside
 
 - **Notes datastore**: list, create and delete notes from the `notes` Juno
