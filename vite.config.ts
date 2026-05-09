@@ -8,6 +8,7 @@ export default defineConfig({
 	plugins: [sveltekit(), juno({ container: true }), tailwindcss()],
 	resolve: {
 		alias: {
+			$declarations: resolve('./src/declarations'),
 			$routes: resolve('./src/routes'),
 			$lib: resolve('./src/lib'),
 			$root: resolve('./')

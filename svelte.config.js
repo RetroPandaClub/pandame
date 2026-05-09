@@ -25,6 +25,7 @@ const config = {
 			name: version
 		},
 		alias: {
+			$declarations: './src/declarations',
 			$routes: './src/routes',
 			$root: './'
 		}

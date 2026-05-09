@@ -39,6 +39,7 @@ jobs:
               - 'e2e/**'
               - 'src/**'
               - 'static/**'
+              - 'scripts/**'
               - 'playwright.config.ts'
               - 'juno.config.ts'
               - 'juno.dev.config.ts'

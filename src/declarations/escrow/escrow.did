@@ -1,0 +1,406 @@
+// Generated from AntonioVentilii/escrow commit 83ef1b8f1f8b49fb1bbf4af01f941cfe032e6622 for file 'src/escrow/escrow.did'
+
+// Arguments for accepting (claiming) a funded deal.
+type AcceptDealArgs = record {
+	// Claim code required for open (unbound-recipient) deals. Must match the
+	// code generated at deal creation. Not required when the caller is the
+	// deal's bound recipient.
+	claim_code : opt text;
+	// Identifier of the deal to accept.
+	deal_id : nat64
+};
+type AcceptDealResult = variant { Ok : DealView; Err : EscrowError };
+type Account = record { owner : principal; subaccount : opt blob };
+// Arguments for cancelling an unfunded deal.
+type CancelDealArgs = record {
+	// Identifier of the deal to cancel.
+	deal_id : nat64
+};
+// Reduced view for public claim pages — does not expose payer, claim code,
+// or internal fields.
+type ClaimableDealView = record {
+	// Unique deal identifier.
+	id : nat64;
+	// Current lifecycle status of the deal.
+	status : DealStatus;
+	// Optional short title.
+	title : opt text;
+	// Optional note or message.
+	note : opt text;
+	// Escrowed token amount.
+	amount : nat;
+	// Principal of the ICRC token ledger canister.
+	token_ledger : principal;
+	// Nanosecond UTC timestamp after which the deal expires.
+	expires_at_ns : nat64;
+	// Whether a recipient principal has already been bound to this deal.
+	is_recipient_bound : bool
+};
+type Consent = variant { Rejected; Accepted; Pending };
+// Arguments for creating a new deal.
+//
+// If both `payer` and `recipient` are `None`, the caller defaults to payer
+// and the recipient is bound on first acceptance (tip / share-link flow).
+// If neither resolved party is the caller, the call is rejected. The
+// caller's consent is automatically set to `Accepted`; the counterparty's
+// consent starts as `Pending`.
+type CreateDealArgs = record {
+	// Optional short title displayed on claim pages.
+	title : opt text;
+	// Optional note or message attached to the deal.
+	note : opt text;
+	// Optional recipient principal. If `None`, the recipient is bound on first
+	// acceptance (QR / share-link flow).
+	recipient : opt principal;
+	// Optional payer principal. If `None`, defaults to the caller when the
+	// caller is not the recipient.
+	payer : opt principal;
+	// Token amount to escrow (must be > 0).
+	amount : nat;
+	// Principal of the ICRC-1/ICRC-2 token ledger canister.
+	token_ledger : principal;
+	// Nanosecond UTC timestamp after which the deal expires and becomes reclaimable.
+	expires_at_ns : nat64
+};
+type DealStatus = variant {
+	Refunded;
+	Rejected;
+	Funded;
+	Cancelled;
+	Created;
+	Settled
+};
+// Full deal view returned to authorised participants (payer or recipient).
+type DealView = record {
+	// Unique deal identifier.
+	id : nat64;
+	// Current lifecycle status of the deal.
+	status : DealStatus;
+	// Optional short title.
+	title : opt text;
+	// Timestamp when the deal was funded, if applicable.
+	funded_at_ns : opt nat64;
+	// Principal who last updated the deal.
+	updated_by : opt principal;
+	// Recipient's consent to the deal terms.
+	recipient_consent : Consent;
+	// Timestamp when the deal was refunded, if applicable.
+	refunded_at_ns : opt nat64;
+	// Optional note or message.
+	note : opt text;
+	// Principal of the recipient, or `None` if not yet bound.
+	recipient : opt principal;
+	// Nanosecond UTC timestamp when the deal was last updated.
+	updated_at_ns : opt nat64;
+	// 32-byte ledger subaccount that holds the escrowed funds.
+	escrow_subaccount : blob;
+	// Principal who created the deal.
+	created_by : principal;
+	// Payer's consent to the deal terms.
+	payer_consent : Consent;
+	// Nanosecond UTC timestamp when the deal was created.
+	created_at_ns : nat64;
+	// Claim code for sharing via QR / link. Only visible to authorised
+	// participants; never exposed in the public claimable view.
+	claim_code : opt text;
+	// Timestamp when the deal was settled (funds released), if applicable.
+	settled_at_ns : opt nat64;
+	// Principal of the payer, or `None` if not yet assigned.
+	payer : opt principal;
+	// Escrowed token amount.
+	amount : nat;
+	// Principal of the ICRC token ledger canister.
+	token_ledger : principal;
+	// Nanosecond UTC timestamp after which the deal expires.
+	expires_at_ns : nat64
+};
+// Canonical error type returned by all deal endpoints.
+type EscrowError = variant {
+	// The deal has already reached a terminal state (`Settled`, `Refunded`, `Cancelled`, or
+	// `Rejected`).
+	AlreadyFinalised;
+	// Payer and recipient cannot be the same principal.
+	SelfDeal;
+	// At least one of payer or recipient must be specified.
+	NeitherPartySet;
+	// The supplied expiry timestamp is invalid (e.g. in the past).
+	InvalidExpiry;
+	// The anonymous principal cannot be used as a deal party.
+	AnonymousParty;
+	// The supplied amount is invalid (e.g. zero).
+	InvalidAmount;
+	// The payer principal is not set for this deal.
+	PayerNotSet;
+	// The requested deal does not exist.
+	NotFound;
+	// A generic validation error with a human-readable message.
+	ValidationError : text;
+	// The caller is not authorised to perform this action on the deal.
+	NotAuthorised;
+	// Both parties must consent before this operation can proceed.
+	ConsentRequired;
+	// A claim code is required for open (unbound-recipient) deals.
+	MissingClaimCode;
+	// An error occurred while communicating with the ICRC ledger canister.
+	LedgerError : text;
+	// The expiry timestamp is too far in the future.
+	ExpiryTooFar;
+	// The caller's reliability score is below the minimum threshold.
+	ReliabilityTooLow : record { threshold : nat32; score : nat32 };
+	// The supplied claim code does not match the deal's claim code.
+	InvalidClaimCode;
+	// A metadata field exceeds its maximum allowed length.
+	MetadataTooLong : record { max : nat32; field : text };
+	// The caller does not match the deal's bound recipient.
+	RecipientMismatch;
+	// The ledger accepted the call but the transfer itself failed.
+	TransferFailed : text;
+	// The caller has too many active (non-terminal) deals.
+	TooManyActiveDeals : record { max : nat32 };
+	// A reclaim was attempted before the deal's expiry deadline.
+	NotExpired;
+	// The deal is not in the expected state for this operation.
+	InvalidState : record {
+		// The state the deal is actually in.
+		actual : text;
+		// The state(s) that would have been valid.
+		expected : text
+	};
+	// An accept was attempted after the deal's expiry deadline.
+	Expired
+};
+// Arguments for funding a created deal via ICRC-2 `transfer_from`.
+type FundDealArgs = record {
+	// Identifier of the deal to fund.
+	deal_id : nat64
+};
+type FundDealResult = variant { Ok : DealView; Err : EscrowError };
+type GetClaimableDealResult = variant {
+	Ok : ClaimableDealView;
+	Err : EscrowError
+};
+type GetDealResult = variant { Ok : DealView; Err : EscrowError };
+type GetEscrowAccountResult = variant { Ok : Account; Err : EscrowError };
+// ICRC-7 transfer argument for a single token.
+type Icrc7TransferArg = record {
+	to : Account;
+	token_id : nat;
+	memo : opt blob;
+	from_subaccount : opt blob;
+	created_at_time : opt nat64
+};
+// ICRC-7 transfer error.
+type Icrc7TransferError = variant {
+	GenericError : record { message : text; error_code : nat };
+	Duplicate : record { duplicate_of : nat };
+	NonExistingTokenId;
+	Unauthorized;
+	CreatedInFuture : record { ledger_time : nat64 };
+	InvalidRecipient;
+	GenericBatchError : record { message : text; error_code : nat };
+	TooOld
+};
+// Explicit response variant for `icrc7_transfer` to avoid the generic
+// fallback name in the generated Candid interface.
+type Icrc7TransferResponse = variant { Ok : nat; Err : Icrc7TransferError };
+// Pagination arguments for listing the caller's deals.
+type ListMyDealsArgs = record {
+	// Number of deals to skip (0-based). Defaults to `0`.
+	offset : opt nat64;
+	// Maximum number of deals to return. Defaults to `50`.
+	limit : opt nat64
+};
+type ProcessExpiredDealsResult = variant { Ok : vec nat64; Err : EscrowError };
+// Public view of a principal's reliability score.
+type ReliabilityView = record {
+	// Total concluded deals (positive + counterparty rejections).
+	concluded : nat32;
+	// Reliability percentage (0–100), or `None` when there is not enough
+	// deal history to produce a meaningful score.
+	score : opt nat32;
+	// Deals that ended positively (Settled or Refunded).
+	positive : nat32
+};
+// ICRC-10 supported standard descriptor.
+type SupportedStandard = record { url : text; name : text };
+// Generic metadata value following the ICRC-16 specification.
+//
+// Used for both collection-level and token-level metadata in the ICRC-7 NFT
+// interface.
+type Value = variant {
+	Int : int;
+	Map : Vec;
+	Nat : nat;
+	Blob : blob;
+	Text : text;
+	Array : vec Value
+};
+type Vec = vec record {
+	text;
+	variant {
+		Int : int;
+		Map : Vec;
+		Nat : nat;
+		Blob : blob;
+		Text : text;
+		Array : vec Value
+	}
+};
+service : () -> {
+	// Accepts (claims) a funded deal, releasing the escrowed tokens to the caller.
+	//
+	// If the deal has no bound recipient, the caller must supply the correct
+	// `claim_code`. The caller is bound as the recipient and their consent is
+	// automatically set to `Accepted`. The deal transitions from `Funded` to
+	// `Settled`.
+	accept_deal : (AcceptDealArgs) -> (AcceptDealResult);
+	// Cancels a deal that has not yet been funded.
+	//
+	// Either party may cancel. The deal transitions from `Created` to
+	// `Cancelled`. Funded deals cannot be cancelled — use [`reclaim_deal`] after
+	// expiry instead.
+	cancel_deal : (CancelDealArgs) -> (AcceptDealResult);
+	// Returns the current global configuration of the Escrow canister.
+	//
+	// This method is gated to canister controllers.
+	config : () -> (record {}) query;
+	// Explicitly consents to a deal's terms.
+	//
+	// The caller must be the payer or recipient. Sets their consent to `Accepted`.
+	// Both parties must consent before the payer can fund a deal with a known
+	// recipient.
+	consent_deal : (CancelDealArgs) -> (AcceptDealResult);
+	// Creates a new escrow deal.
+	//
+	// The caller is automatically assigned as one of the parties based on the
+	// supplied `payer` and `recipient` fields. Their consent is set to `Accepted`;
+	// the counterparty's consent starts as `Pending`.
+	//
+	// A cryptographically random claim code is generated and returned in the
+	// `DealView`. This code must be included in QR / share links so that an
+	// unbound recipient can later claim the deal.
+	create_deal : (CreateDealArgs) -> (AcceptDealResult);
+	// Funds a previously created deal by transferring tokens from the payer's
+	// account into the deal's escrow subaccount via ICRC-2 `transfer_from`.
+	//
+	// The deal transitions from `Created` to `Funded`. Funding implicitly sets
+	// the payer's consent to `Accepted`. For deals with a known recipient, the
+	// recipient must have consented first.
+	fund_deal : (FundDealArgs) -> (FundDealResult);
+	// Reduced public view for claim/share-link pages.
+	// Returns limited info (no payer, no claim code, no internal fields). Any
+	// authenticated caller may query this — authorization is intentionally open
+	// so a not-yet-bound recipient can preview the deal before accepting.
+	get_claimable_deal : (nat64) -> (GetClaimableDealResult) query;
+	// Returns the full deal view for an authorised participant.
+	//
+	// Only the payer or the bound recipient may query a deal's full details.
+	get_deal : (nat64) -> (GetDealResult) query;
+	// Returns the escrow `Account` (canister principal + deal subaccount) for a deal.
+	get_escrow_account : (nat64) -> (GetEscrowAccountResult) query;
+	// Returns the reliability score for any principal.
+	//
+	// This is a public query — any authenticated caller may check any
+	// principal's score. No authorization required beyond being non-anonymous.
+	get_reliability : (principal) -> (ReliabilityView) query;
+	// Returns the list of ICRC standards supported by this canister.
+	//
+	// Currently reports ICRC-7 (NFT) and ICRC-10 (supported-standards discovery).
+	icrc10_supported_standards : () -> (vec SupportedStandard) query;
+	// Whether batch transfers are executed atomically. Currently `None`.
+	icrc7_atomic_batch_transfers : () -> (opt bool) query;
+	// Returns the number of deal NFTs owned by each requested account.
+	//
+	// Accounts with a non-default subaccount always return `0`.
+	icrc7_balance_of : (vec Account) -> (vec nat) query;
+	// Returns collection-level metadata as an ICRC-16 key-value map.
+	//
+	// Includes `icrc7:name`, `icrc7:symbol`, `icrc7:description`, and
+	// `icrc7:total_supply`.
+	icrc7_collection_metadata : () -> (vec record { text; Value }) query;
+	// Returns the default page size for `icrc7_tokens` / `icrc7_tokens_of`
+	// when the caller omits the `take` argument.
+	icrc7_default_take_value : () -> (opt nat) query;
+	// Returns a human-readable description of the NFT collection.
+	icrc7_description : () -> (opt text) query;
+	// Returns the collection logo. Currently `None`.
+	icrc7_logo : () -> (opt text) query;
+	// Returns the maximum memo size accepted in transfer arguments.
+	//
+	// Currently `None` (no explicit limit).
+	icrc7_max_memo_size : () -> (opt nat) query;
+	// Returns the maximum number of token IDs accepted by `icrc7_token_metadata`
+	// and `icrc7_owner_of` in a single call.
+	icrc7_max_query_batch_size : () -> (opt nat) query;
+	// Returns the maximum page size for `icrc7_tokens` / `icrc7_tokens_of`.
+	icrc7_max_take_value : () -> (opt nat) query;
+	// Returns the maximum number of transfer args accepted by `icrc7_transfer`
+	// in a single call. Currently `None`.
+	icrc7_max_update_batch_size : () -> (opt nat) query;
+	// Returns the human-readable name of the NFT collection (`"Escrow Deals"`).
+	icrc7_name : () -> (text) query;
+	// Returns the owner account for each requested token ID.
+	//
+	// Ownership follows deal lifecycle: the payer owns the token in all states
+	// except `Settled`, where the recipient becomes the owner.
+	// Unknown IDs produce `None`.
+	icrc7_owner_of : (vec nat) -> (vec opt Account) query;
+	// Returns the permitted time drift for deduplication. Currently `None`.
+	icrc7_permitted_drift : () -> (opt nat) query;
+	// Returns the maximum number of deal NFTs that can ever exist.
+	//
+	// Currently `None` (unlimited).
+	icrc7_supply_cap : () -> (opt nat) query;
+	// Returns the ticker symbol of the NFT collection (`"ESCROW"`).
+	icrc7_symbol : () -> (text) query;
+	// Returns per-token metadata for each requested token ID.
+	//
+	// Each deal's metadata includes `icrc7:name`, `escrow:status`,
+	// `escrow:payer`, `escrow:amount`, `escrow:token_ledger`, and other
+	// deal-specific fields. Unknown IDs produce `None` in the result vector.
+	icrc7_token_metadata : (vec nat) -> (
+		vec opt vec record { text; Value }
+	) query;
+	// Returns a page of token IDs in ascending order.
+	//
+	// `prev` is the last token ID the caller received (exclusive cursor).
+	// `take` limits the page size (defaults to 50, capped at 500).
+	icrc7_tokens : (opt nat, opt nat) -> (vec nat) query;
+	// Returns a page of token IDs owned by `account`, in ascending order.
+	//
+	// See [`icrc7_tokens`] for cursor / take semantics.
+	icrc7_tokens_of : (Account, opt nat, opt nat) -> (vec nat) query;
+	// Returns the total number of deal NFTs that have been minted (one per deal).
+	icrc7_total_supply : () -> (nat) query;
+	// Rejects all transfer attempts with a `GenericError`.
+	//
+	// Deal ownership transitions are managed exclusively through escrow
+	// operations (`accept_deal`, `reclaim_deal`, …), not via direct ICRC-7
+	// transfers.
+	icrc7_transfer : (vec Icrc7TransferArg) -> (vec opt Icrc7TransferResponse);
+	// Returns the transaction deduplication window. Currently `None`.
+	icrc7_tx_window : () -> (opt nat) query;
+	// Lists all deals where the caller is either the payer or the recipient,
+	// ordered by creation time with pagination support.
+	list_my_deals : (ListMyDealsArgs) -> (vec DealView) query;
+	// Batch-processes expired deals by refunding escrowed tokens back to their
+	// payers.
+	//
+	// Scans up to `limit` expired-but-still-funded deals and attempts to reclaim
+	// each one. Returns the IDs of deals that were successfully refunded.
+	process_expired_deals : (nat32) -> (ProcessExpiredDealsResult);
+	// Reclaims escrowed funds from an expired, unclaimed deal back to the payer.
+	//
+	// Only callable after the deal's `expires_at_ns` deadline has passed. The deal
+	// transitions from `Funded` to `Refunded`.
+	reclaim_deal : (FundDealArgs) -> (GetDealResult);
+	// Rejects a deal's terms. The deal transitions to `Rejected` (terminal).
+	//
+	// The caller must be the payer or recipient. Their consent is set to
+	// `Rejected` and the deal becomes final.
+	reject_deal : (FundDealArgs) -> (GetDealResult);
+	// Updates the global configuration for the Escrow canister.
+	//
+	// This method is gated to canister controllers.
+	update_config : (record {}) -> ()
+}
