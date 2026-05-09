@@ -1,4 +1,6 @@
 <script lang="ts">
+	type Variant = 'default' | 'active';
+
 	interface Props {
 		id: string;
 		value: string;
@@ -13,6 +15,13 @@
 		invalid?: boolean;
 		ariaDescribedby?: string;
 		ariaLabel?: string;
+		/**
+		 * `default` (Figma `159:1132`): 1.5px solid `#D5C4F9` border —
+		 * resting state for every form input.
+		 * `active` (Figma `166:751`): 1px solid `#632AE8` border —
+		 * the highlighted variant used by the Amount/Currency input.
+		 */
+		variant?: Variant;
 	}
 
 	let {
@@ -28,8 +37,14 @@
 		mono = false,
 		invalid = false,
 		ariaDescribedby,
-		ariaLabel
+		ariaLabel,
+		variant = 'default'
 	}: Props = $props();
+
+	const VARIANT: Record<Variant, string> = {
+		default: 'border-[1.5px] border-border focus:border-primary-stroke',
+		active: 'border border-primary-stroke focus:border-primary'
+	};
 
 	const handleInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
@@ -38,6 +53,12 @@
 	};
 </script>
 
+<!--
+  Figma input field (`159:1132` / `166:751`):
+    h-[41px] (or 40 in some places), w-full inside a 334px column,
+    rounded-[8px], px-[10px], placeholder Poppins Regular 14px,
+    value Poppins Regular 14px Blu Night.
+-->
 <input
 	{id}
 	{value}
@@ -51,7 +72,9 @@
 	aria-describedby={ariaDescribedby}
 	aria-label={ariaLabel}
 	aria-invalid={invalid || undefined}
-	class="bg-bg-elevated text-body1 text-default placeholder:text-subtle focus:border-primary focus:ring-primary/30 w-full rounded-md border px-4 py-3 focus:ring-2 focus:outline-none {invalid
-		? 'border-danger focus:border-danger focus:ring-danger/30'
-		: 'border-border'} {mono ? 'font-mono' : ''} {disabled ? 'cursor-not-allowed opacity-60' : ''}"
+	class="bg-bg-elevated text-default placeholder:text-subtle rounded-input focus:ring-primary/20 h-[41px] w-full px-[10px] text-[14px] leading-none focus:ring-2 focus:outline-none {invalid
+		? 'border-danger focus:border-danger focus:ring-danger/30 border-[1.5px]'
+		: VARIANT[variant]} {mono ? 'font-mono' : 'font-sans'} {disabled
+		? 'cursor-not-allowed opacity-60'
+		: ''}"
 />
