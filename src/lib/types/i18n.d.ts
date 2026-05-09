@@ -182,15 +182,29 @@ interface I18nCreate {
 	recipient_placeholder: string;
 	mode_pay: string;
 	mode_receive: string;
+	payer_wallet_label: string;
+	recipient_wallet_label: string;
 	currency_label: string;
-	counterparty_label_pay: string;
-	counterparty_label_receive: string;
+	amount_label: string;
 	tenor_label: string;
 	votes_label: string;
 	votes_disabled_hint: string;
+	summary_label: string;
 	summary_amount: string;
+	summary_rate: string;
 	summary_fee: string;
 	summary_total: string;
+	title_deal_label: string;
+	title_deal_placeholder: string;
+	agreement_label: string;
+	agreement_placeholder: string;
+	add_documents_label: string;
+	upload_cta: string;
+	upload_caption: string;
+	terms_prefix: string;
+	terms_brand: string;
+	terms_link: string;
+	help_label: string;
 }
 
 interface I18nShare {

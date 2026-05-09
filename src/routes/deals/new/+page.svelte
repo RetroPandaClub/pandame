@@ -7,12 +7,16 @@
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FormField from '$lib/components/FormField.svelte';
-	import IconButton from '$lib/components/IconButton.svelte';
+	import InfoLink from '$lib/components/InfoLink.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
+	import Sheet from '$lib/components/Sheet.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
+	import TermsCheckbox from '$lib/components/TermsCheckbox.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
+	import UploadCTA from '$lib/components/UploadCTA.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import VoteQuorumPicker, { type Quorum } from '$lib/components/VoteQuorumPicker.svelte';
+	import BackIcon from '$lib/components/icons/BackIcon.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { createAndFundDeal } from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
@@ -26,7 +30,10 @@
 	let counterpartyText = $state('');
 	let amountText = $state('');
 	let tenorLocal = $state(defaultTenor());
+	let titleDeal = $state('');
+	let agreement = $state('');
 	let quorum: Quorum = $state('fair');
+	let termsAgreed = $state(false);
 
 	let progress = $state(false);
 	let error: string | undefined = $state(undefined);
@@ -40,7 +47,8 @@
 	let tenorNs = $derived(Number.isFinite(tenorMs) ? msToNs(tenorMs) : undefined);
 
 	let valid = $derived(
-		amount !== undefined &&
+		termsAgreed &&
+			amount !== undefined &&
 			amount > 0n &&
 			tenorNs !== undefined &&
 			tenorMs > Date.now() &&
@@ -58,52 +66,53 @@
 		error = undefined;
 
 		try {
+			const recipientPrincipal =
+				mode === 'pay' && counterparty !== undefined ? counterparty : undefined;
+			const payerPrincipal =
+				mode === 'receive' && counterparty !== undefined ? counterparty : undefined;
+
 			const { funded } = await createAndFundDeal({
 				amount,
 				expires_at_ns: tenorNs,
-				token,
-				...(mode === 'pay' ? { recipient: counterparty } : { payer: counterparty })
+				recipient: recipientPrincipal,
+				payer: payerPrincipal,
+				title: titleDeal.trim() || undefined,
+				note: agreement.trim() || undefined,
+				token
 			});
 
 			dealsStore.upsert(funded);
 			createdDeal = funded;
 		} catch (err) {
 			error = err instanceof Error ? err.message : String(err);
-			console.error('createAndFundDeal failed:', err);
 		} finally {
 			progress = false;
 		}
 	};
 
-	const onShareDone = () => {
+	const closeShare = async () => {
 		createdDeal = undefined;
-		goto('/');
+		await goto('/history');
 	};
 
 	function parsePrincipal(text: string): Principal | undefined {
-		const trimmed = text.trim();
-
-		if (trimmed.length === 0) {
+		if (text.trim().length === 0) {
 			return undefined;
 		}
-
 		try {
-			return Principal.fromText(trimmed);
+			return Principal.fromText(text.trim());
 		} catch {
 			return undefined;
 		}
 	}
 
 	function defaultTenor(): string {
-		const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-		const offsetMs = date.getTime() - date.getTimezoneOffset() * 60_000;
-
-		return new Date(offsetMs).toISOString().slice(0, 16);
+		const nowMs = Date.now();
+		const tzOffsetMs = new Date(nowMs).getTimezoneOffset() * 60_000;
+		const localNowMs = nowMs - tzOffsetMs;
+		const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+		return new Date(localNowMs + sevenDaysMs).toISOString().slice(0, 16);
 	}
-
-	let counterpartyLabel = $derived(
-		mode === 'pay' ? $i18n.create.counterparty_label_pay : $i18n.create.counterparty_label_receive
-	);
 </script>
 
 <svelte:head>
@@ -114,23 +123,14 @@
 
 <BrandHeader title={$i18n.layout.title}>
 	{#snippet leading()}
-		<IconButton
-			ariaLabel={$i18n.core.text.back_to_dashboard}
-			variant="ghost"
+		<button
+			type="button"
+			aria-label={$i18n.core.text.back_to_dashboard}
 			onclick={() => goto('/')}
+			class="text-default-inverse flex h-[24px] w-[24px] items-center justify-center"
 		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<path d="M15 18l-6-6 6-6" />
-			</svg>
-		</IconButton>
+			<BackIcon />
+		</button>
 	{/snippet}
 
 	{#snippet trailing()}
@@ -147,98 +147,132 @@
 	/>
 </BrandHeader>
 
-<form
-	class="flex flex-1 flex-col gap-4 px-6 pt-6 pb-28"
-	onsubmit={(e) => {
-		e.preventDefault();
-		submit();
-	}}
->
-	<FormField label={counterpartyLabel} htmlFor="counterparty">
-		<TextInput
-			id="counterparty"
-			mono
-			bind:value={counterpartyText}
-			placeholder={$i18n.create.recipient_placeholder}
-			disabled={progress}
-			invalid={counterpartyText.trim().length > 0 && counterparty === undefined}
-		/>
-	</FormField>
+<Sheet paddingClass="px-[19px] pt-[34px] pb-[140px]" class="gap-[18px] overflow-y-auto">
+	<form
+		class="flex flex-col gap-[18px]"
+		onsubmit={(e) => {
+			e.preventDefault();
+			submit();
+		}}
+	>
+		<FormField
+			label={mode === 'pay' ? $i18n.create.payer_wallet_label : $i18n.create.recipient_wallet_label}
+			htmlFor="counterparty"
+		>
+			<TextInput id="counterparty" bind:value={counterpartyText} placeholder="abcde-12345-…" />
+		</FormField>
 
-	<div class="grid grid-cols-[1fr_auto] gap-3">
-		<FormField label={$i18n.create.summary_amount} htmlFor="amount">
+		<div class="flex flex-col gap-[8px]">
+			<div class="flex items-center justify-between">
+				<span class="text-default text-figma-16 font-serif-ui font-medium tracking-[-0.32px]">
+					{$i18n.create.amount_label}
+				</span>
+				<span class="text-default text-figma-16 font-serif-ui font-medium tracking-[-0.32px]">
+					{$i18n.create.currency_label}
+				</span>
+			</div>
+			<div class="flex items-center gap-[10px]">
+				<TextInput
+					id="amount"
+					bind:value={amountText}
+					placeholder="0.5"
+					inputmode="decimal"
+					variant="active"
+				/>
+				<span
+					class="border-primary-stroke text-primary-stroke rounded-input flex h-[41px] shrink-0 items-center px-[14px] font-sans text-[14px]"
+				>
+					{token.symbol}
+				</span>
+			</div>
+		</div>
+
+		<FormField label={$i18n.create.tenor_label} htmlFor="tenor" labelFamily="serif-ui">
+			<TextInput id="tenor" type="datetime-local" bind:value={tenorLocal} />
+		</FormField>
+
+		<div class="flex flex-col gap-[12px]">
+			<span class="text-default text-figma-16 font-sans font-medium tracking-[-0.32px]">
+				{$i18n.create.votes_label}
+			</span>
+			<VoteQuorumPicker bind:value={quorum} disabled />
+			<small class="text-muted text-xxs">{$i18n.create.votes_disabled_hint}</small>
+		</div>
+
+		<section class="flex flex-col gap-[8px]">
+			<h3 class="text-default text-figma-16 font-sans font-medium tracking-[-0.32px]">
+				{$i18n.create.summary_label}
+			</h3>
+			<dl
+				class="text-default font-serif-ui text-figma-14 grid grid-cols-[1fr_auto] gap-y-[6px] font-medium tracking-[-0.28px]"
+			>
+				<dt>{$i18n.create.summary_amount}</dt>
+				<dd class="text-right">
+					{amount !== undefined ? formatTokenAmount(amount, token) : `0 ${token.symbol}`}
+				</dd>
+				<dt>{$i18n.create.summary_fee}</dt>
+				<dd class="text-right">{formatTokenAmount(token.fee, token)}</dd>
+				<dt class="font-sans font-medium">{$i18n.create.summary_total}</dt>
+				<dd class="text-right font-sans font-semibold">
+					{totalAmount !== undefined ? formatTokenAmount(totalAmount, token) : '—'}
+				</dd>
+			</dl>
+		</section>
+
+		<FormField label={$i18n.create.title_deal_label} htmlFor="title-deal">
 			<TextInput
-				id="amount"
-				inputmode="decimal"
-				bind:value={amountText}
-				placeholder="0.0"
-				disabled={progress}
-				invalid={amountText.length > 0 && (amount === undefined || amount <= 0n)}
+				id="title-deal"
+				bind:value={titleDeal}
+				placeholder={$i18n.create.title_deal_placeholder}
 			/>
 		</FormField>
 
-		<FormField label={$i18n.create.currency_label} htmlFor="currency">
-			<TextInput id="currency" value={token.symbol} readonly disabled />
+		<FormField label={$i18n.create.agreement_label} htmlFor="agreement-details">
+			<textarea
+				id="agreement-details"
+				bind:value={agreement}
+				placeholder={$i18n.create.agreement_placeholder}
+				class="bg-bg-elevated text-default placeholder:text-subtle border-border rounded-input focus:border-primary-stroke focus:ring-primary-stroke/20 min-h-[154px] w-full resize-none border-[1.5px] px-[10px] py-[10px] font-sans text-[14px] focus:ring-2 focus:outline-none"
+			></textarea>
 		</FormField>
-	</div>
 
-	<FormField label={$i18n.create.tenor_label} htmlFor="tenor">
-		<TextInput
-			id="tenor"
-			type="datetime-local"
-			bind:value={tenorLocal}
-			disabled={progress}
-			invalid={tenorMs <= Date.now()}
+		<div class="flex flex-col gap-[8px]">
+			<span class="text-default text-figma-16 font-serif-ui font-medium tracking-[-0.32px]">
+				{$i18n.create.add_documents_label}
+			</span>
+			<UploadCTA label={$i18n.create.upload_cta} caption={$i18n.create.upload_caption} />
+		</div>
+
+		<TermsCheckbox
+			id="terms"
+			bind:checked={termsAgreed}
+			prefix={$i18n.create.terms_prefix}
+			brand={$i18n.create.terms_brand}
+			linkLabel={$i18n.create.terms_link}
+			linkHref="https://github.com/AntonioVentilii/escrow"
+			suffix=""
 		/>
-	</FormField>
 
-	<div class="flex flex-col gap-3">
-		<div class="flex items-baseline justify-between">
-			<span class="text-body2 text-default font-bold">{$i18n.create.votes_label}</span>
-			<span class="text-xxs text-muted">{$i18n.deals.actions.dispute}</span>
-		</div>
-		<VoteQuorumPicker bind:value={quorum} disabled />
-		<small class="text-xxs text-muted">{$i18n.create.votes_disabled_hint}</small>
-	</div>
+		{#if error !== undefined}
+			<p class="text-danger text-body2" role="alert">{error}</p>
+		{/if}
 
-	<dl class="bg-bg-soft text-body2 flex flex-col gap-1 rounded-md p-4">
-		<div class="flex justify-between">
-			<dt class="text-muted">{$i18n.create.summary_amount}</dt>
-			<dd class="text-default font-mono">
-				{amount !== undefined ? formatTokenAmount(amount, token) : `— ${token.symbol}`}
-			</dd>
-		</div>
-		<div class="flex justify-between">
-			<dt class="text-muted">{$i18n.create.summary_fee}</dt>
-			<dd class="text-default font-mono">{formatTokenAmount(token.fee, token)}</dd>
-		</div>
-		<div class="border-border-soft mt-1 flex justify-between border-t pt-1">
-			<dt class="text-default font-bold">{$i18n.create.summary_total}</dt>
-			<dd class="text-default font-mono font-bold">
-				{totalAmount !== undefined ? formatTokenAmount(totalAmount, token) : `— ${token.symbol}`}
-			</dd>
-		</div>
-	</dl>
+		<Button type="submit" fullWidth disabled={!valid} loading={progress}>
+			{progress ? $i18n.create.submitting : $i18n.create.submit}
+		</Button>
 
-	{#if error !== undefined}
-		<p class="border-danger bg-danger/10 text-body2 text-danger rounded-md border p-3" role="alert">
-			{error}
-		</p>
-	{/if}
-
-	<Button type="submit" disabled={!valid} loading={progress} fullWidth>
-		{progress ? $i18n.create.submitting : $i18n.create.submit}
-	</Button>
-</form>
+		<InfoLink label={$i18n.create.help_label} href="https://github.com/AntonioVentilii/escrow" />
+	</form>
+</Sheet>
 
 <AppBottomNav />
 
 {#if createdDeal !== undefined}
 	<ShareLinkModal
-		open
+		open={true}
 		dealId={createdDeal.id}
 		claimCode={createdDeal.claim_code}
-		onclose={onShareDone}
+		onclose={closeShare}
 	/>
 {/if}
 
