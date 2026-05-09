@@ -60,7 +60,34 @@
 	"profile": {
 		"title": "Profile",
 		"principal_label": "Principal",
-		"copy_principal": "Copy principal"
+		"copy_principal": "Copy principal",
+		"edit_cta": "Edit profile",
+		"username_label": "Username",
+		"name_label": "Name",
+		"surname_label": "Surname",
+		"address_label": "Address",
+		"email_label": "Email",
+		"reliability_label": "Reliability",
+		"weight_label": "Weight",
+		"reliability_score": "Score",
+		"reliability_concluded": "Concluded deals",
+		"reliability_positive": "Positive outcomes",
+		"reliability_pending": "Not enough history yet",
+		"role_label": "Role",
+		"role_user": "User",
+		"role_arbitrator": "Arbitrator",
+		"role_admin": "Admin",
+		"role_stub_hint": "Arbitrator and Admin roles will land in a future release.",
+		"edit_title": "Edit profile",
+		"edit_save": "Save",
+		"edit_cancel": "Cancel",
+		"edit_disabled_hint": "Profile editing will land once user metadata moves on-chain."
+	},
+	"logout_confirm": {
+		"title": "Sign out?",
+		"description": "We'll clear your local session. Your deals stay on chain — sign back in to access them.",
+		"confirm": "Yes, sign out",
+		"cancel": "Cancel"
 	},
 	"send": {
 		"title": "Send",

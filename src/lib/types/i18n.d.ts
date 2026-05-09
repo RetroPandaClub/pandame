@@ -70,6 +70,34 @@ interface I18nProfile {
 	title: string;
 	principal_label: string;
 	copy_principal: string;
+	edit_cta: string;
+	username_label: string;
+	name_label: string;
+	surname_label: string;
+	address_label: string;
+	email_label: string;
+	reliability_label: string;
+	weight_label: string;
+	reliability_score: string;
+	reliability_concluded: string;
+	reliability_positive: string;
+	reliability_pending: string;
+	role_label: string;
+	role_user: string;
+	role_arbitrator: string;
+	role_admin: string;
+	role_stub_hint: string;
+	edit_title: string;
+	edit_save: string;
+	edit_cancel: string;
+	edit_disabled_hint: string;
+}
+
+interface I18nLogout_confirm {
+	title: string;
+	description: string;
+	confirm: string;
+	cancel: string;
 }
 
 interface I18nSend {
@@ -179,6 +207,7 @@ interface I18n {
 	history: I18nHistory;
 	detail: I18nDetail;
 	profile: I18nProfile;
+	logout_confirm: I18nLogout_confirm;
 	send: I18nSend;
 	deals: I18nDeals;
 	create: I18nCreate;
