@@ -11,7 +11,7 @@
 </script>
 
 <section
-	class="dark:border-lavender-blue-500/40 my-8 flex flex-col items-center gap-3 rounded border-[3px] border-dashed border-black/30 p-8 text-center dark:text-white"
+	class="dark:border-primary/40 my-8 flex flex-col items-center gap-3 rounded border-[3px] border-dashed border-black/30 p-8 text-center dark:text-white"
 >
 	<h3 class="text-lg font-semibold">{title}</h3>
 	{#if description !== undefined}

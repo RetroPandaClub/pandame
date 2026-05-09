@@ -29,7 +29,7 @@
 		aria-label={title}
 	>
 		<div
-			class="dark:border-lavender-blue-500 relative z-10 w-full max-w-xl rounded-sm border-[3px] border-black bg-white p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)] dark:bg-black dark:text-white dark:shadow-[8px_8px_0px_#7888FF]"
+			class="dark:border-primary relative z-10 w-full max-w-xl rounded-sm border-[3px] border-black bg-white p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)] dark:bg-black dark:text-white dark:shadow-[8px_8px_0px_#632AE8]"
 		>
 			{#if title !== undefined}
 				<header class="mb-4 flex items-center justify-between">
@@ -38,7 +38,7 @@
 						type="button"
 						aria-label="Close"
 						onclick={onclose}
-						class="hover:text-lavender-blue-600 active:text-lavender-blue-400"
+						class="hover:text-primary active:text-primary/80"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"

@@ -9,12 +9,12 @@
 	let { status }: Props = $props();
 
 	const STATUS_CLASS: Record<DealStatusName, string> = {
-		[DealStatuses.Created]: 'bg-lavender-blue-100 text-lavender-blue-800',
-		[DealStatuses.Funded]: 'bg-lavender-blue-500 text-white',
-		[DealStatuses.Settled]: 'bg-black text-white',
-		[DealStatuses.Refunded]: 'bg-lavender-blue-200 text-lavender-blue-900',
-		[DealStatuses.Cancelled]: 'bg-white text-black',
-		[DealStatuses.Rejected]: 'bg-white text-black'
+		[DealStatuses.Created]: 'bg-primary-light text-default',
+		[DealStatuses.Funded]: 'bg-primary text-white',
+		[DealStatuses.Settled]: 'bg-success text-white',
+		[DealStatuses.Refunded]: 'bg-primary-light text-default',
+		[DealStatuses.Cancelled]: 'bg-white text-default',
+		[DealStatuses.Rejected]: 'bg-white text-default'
 	};
 
 	let className = $derived(STATUS_CLASS[status]);
