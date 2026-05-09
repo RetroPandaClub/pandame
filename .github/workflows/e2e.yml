@@ -22,6 +22,10 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      # `dorny/paths-filter` calls `pulls.listFiles(pull_number)` on
+      # `pull_request` events; without `pull-requests: read` the action
+      # fails with "Resource not accessible by integration".
+      pull-requests: read
     outputs:
       changed: ${{ steps.change.outputs.relevant }}
     steps:
@@ -108,9 +112,15 @@ jobs:
     steps:
       - name: Cleared for merging
         env:
+          CHECK_RESULT: ${{ needs.check-e2e-changes.result }}
           E2E_RESULT: ${{ needs.e2e.result }}
           CHANGED: ${{ needs.check-e2e-changes.outputs.changed }}
         run: |
+          if [[ "$CHECK_RESULT" != "success" ]]; then
+            echo "E2E paths-filter did not succeed (check-e2e-changes=$CHECK_RESULT). Cannot determine whether E2E should have run."
+            exit 1
+          fi
+
           if [[ "$E2E_RESULT" == "success" ]]; then
             echo "E2E passed."
           elif [[ "$E2E_RESULT" == "skipped" && "$CHANGED" == "false" ]]; then
