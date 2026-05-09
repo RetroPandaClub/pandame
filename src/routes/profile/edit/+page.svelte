@@ -2,19 +2,19 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
+	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FormField from '$lib/components/FormField.svelte';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
-	import { userSignedIn } from '$lib/derived/user.derived';
+	import { userPrincipalText } from '$lib/derived/user.derived';
 	import { ensureProfile, upsertProfile } from '$lib/services/profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { profileStore } from '$lib/stores/profile.store';
-	import { userStore } from '$lib/stores/user.store';
 	import { emptyProfile, type UserProfile } from '$lib/types/profile';
 
-	let principalText = $derived($userStore?.key);
+	let principalText = $derived($userPrincipalText);
 
 	let username = $state('');
 	let name = $state('');
@@ -26,12 +26,6 @@
 	let saving = $state(false);
 	let saveError: string | undefined = $state(undefined);
 	let saveSuccess = $state(false);
-
-	$effect(() => {
-		if (!$userSignedIn) {
-			goto('/');
-		}
-	});
 
 	$effect(() => {
 		const text = principalText;
@@ -112,6 +106,8 @@
 <svelte:head>
 	<title>{$i18n.profile.edit_title} · {$i18n.layout.title}</title>
 </svelte:head>
+
+<AuthGuard />
 
 <BrandHeader title={$i18n.profile.edit_title}>
 	{#snippet leading()}

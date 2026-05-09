@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import type { EscrowDid } from '$declarations';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
+	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -12,26 +13,18 @@
 	import ReliabilityCard from '$lib/components/ReliabilityCard.svelte';
 	import RoleSwitcher from '$lib/components/RoleSwitcher.svelte';
 	import { profileDisplayName } from '$lib/derived/profile.derived';
-	import { userSignedIn } from '$lib/derived/user.derived';
+	import { userPrincipalShort, userPrincipalText } from '$lib/derived/user.derived';
 	import { getReliability } from '$lib/services/deal.services';
 	import { ensureProfile, getProfile } from '$lib/services/profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { profileStore } from '$lib/stores/profile.store';
-	import { userStore } from '$lib/stores/user.store';
-	import { shortPrincipal } from '$lib/utils/format.utils';
 
-	let principalText = $derived($userStore?.key);
-	let principalShort = $derived(principalText !== undefined ? shortPrincipal(principalText) : '');
+	let principalText = $derived($userPrincipalText);
+	let principalShort = $derived($userPrincipalShort);
 	let copied = $state(false);
 	let logoutOpen = $state(false);
 
 	let reliability: EscrowDid.ReliabilityView | undefined = $state(undefined);
-
-	$effect(() => {
-		if (!$userSignedIn) {
-			goto('/');
-		}
-	});
 
 	$effect(() => {
 		const text = principalText;
@@ -87,6 +80,8 @@
 <svelte:head>
 	<title>{$i18n.profile.title} · {$i18n.layout.title}</title>
 </svelte:head>
+
+<AuthGuard />
 
 <BrandHeader title={$i18n.profile.title}>
 	{#snippet leading()}

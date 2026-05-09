@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
+	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -14,11 +15,10 @@
 	import Money from '$lib/components/Money.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
-	import { userSignedIn } from '$lib/derived/user.derived';
+	import { userPrincipalText } from '$lib/derived/user.derived';
 	import { getDeal } from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userStore } from '$lib/stores/user.store';
 	import type { Deal, DealSide } from '$lib/types/deal';
 	import { consentState, dealStatus, sideOf } from '$lib/utils/deal.utils';
 	import { nsToDate, shortPrincipal } from '$lib/utils/format.utils';
@@ -28,12 +28,6 @@
 	let progress = $state(false);
 	let loadError: string | undefined = $state(undefined);
 	let shareOpen = $state(false);
-
-	$effect(() => {
-		if (!$userSignedIn) {
-			goto('/');
-		}
-	});
 
 	const reload = async () => {
 		if (dealId === undefined) {
@@ -60,7 +54,7 @@
 		reload();
 	});
 
-	let principal = $derived(parsePrincipal($userStore?.key));
+	let principal = $derived(parsePrincipal($userPrincipalText));
 	let mySide: DealSide = $derived(deal !== undefined ? sideOf(deal, principal) : 'unknown');
 	let status = $derived(deal !== undefined ? dealStatus(deal) : undefined);
 	let title = $derived.by((): string => {
@@ -117,6 +111,8 @@
 <svelte:head>
 	<title>{title} · {$i18n.layout.title}</title>
 </svelte:head>
+
+<AuthGuard />
 
 <BrandHeader {title}>
 	{#snippet leading()}

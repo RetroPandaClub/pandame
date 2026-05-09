@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
-	import Avatar from '$lib/components/Avatar.svelte';
 	import BalanceBadge from '$lib/components/BalanceBadge.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import DealFilterChips, { type DealFilter } from '$lib/components/DealFilterChips.svelte';
 	import DealsTable from '$lib/components/DealsTable.svelte';
+	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import WelcomeScreen from '$lib/components/WelcomeScreen.svelte';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { myBalance } from '$lib/services/balance.services';
@@ -14,8 +14,6 @@
 	import { balanceStore } from '$lib/stores/balance.store';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userStore } from '$lib/stores/user.store';
-	import { shortPrincipal } from '$lib/utils/format.utils';
 
 	let filter: DealFilter = $state('all');
 
@@ -39,10 +37,6 @@
 	$effect(() => {
 		reloadDeals();
 	});
-
-	let principalLabel = $derived(
-		$userStore?.key !== undefined ? shortPrincipal($userStore.key) : ''
-	);
 </script>
 
 <svelte:window onjunoExampleReload={reloadDeals} />
@@ -52,10 +46,7 @@
 {:else}
 	<BrandHeader title={$i18n.history.title}>
 		{#snippet trailing()}
-			<span class="text-default-inverse text-body2 font-bold underline-offset-2 hover:underline">
-				{principalLabel}
-			</span>
-			<Avatar fallback={principalLabel} size="md" alt={principalLabel} />
+			<UserPrincipalBadge />
 		{/snippet}
 
 		<DealFilterChips bind:value={filter} />

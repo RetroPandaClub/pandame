@@ -2,7 +2,7 @@
 	import { Principal } from '@icp-sdk/core/principal';
 	import { goto } from '$app/navigation';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
-	import Avatar from '$lib/components/Avatar.svelte';
+	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -11,20 +11,14 @@
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
+	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import VoteQuorumPicker, { type Quorum } from '$lib/components/VoteQuorumPicker.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
-	import { userSignedIn } from '$lib/derived/user.derived';
 	import { createAndFundDeal } from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userStore } from '$lib/stores/user.store';
 	import type { Deal } from '$lib/types/deal';
-	import {
-		formatTokenAmount,
-		msToNs,
-		parseTokenAmount,
-		shortPrincipal
-	} from '$lib/utils/format.utils';
+	import { formatTokenAmount, msToNs, parseTokenAmount } from '$lib/utils/format.utils';
 
 	type Mode = 'pay' | 'receive';
 
@@ -53,17 +47,7 @@
 			(counterpartyText.trim().length === 0 || counterparty !== undefined)
 	);
 
-	let principalLabel = $derived(
-		$userStore?.key !== undefined ? shortPrincipal($userStore.key) : ''
-	);
-
 	let totalAmount = $derived(amount !== undefined ? amount + token.fee : undefined);
-
-	$effect(() => {
-		if (!$userSignedIn) {
-			goto('/');
-		}
-	});
 
 	const submit = async () => {
 		if (!valid || amount === undefined || tenorNs === undefined) {
@@ -126,6 +110,8 @@
 	<title>{$i18n.create.title} · {$i18n.layout.title}</title>
 </svelte:head>
 
+<AuthGuard />
+
 <BrandHeader title={$i18n.layout.title}>
 	{#snippet leading()}
 		<IconButton
@@ -148,8 +134,7 @@
 	{/snippet}
 
 	{#snippet trailing()}
-		<span class="text-default-inverse text-body2 font-bold">{principalLabel}</span>
-		<Avatar fallback={principalLabel} size="md" alt={principalLabel} />
+		<UserPrincipalBadge />
 	{/snippet}
 
 	<Tabs

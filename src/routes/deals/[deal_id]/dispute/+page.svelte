@@ -2,23 +2,17 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
+	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FormField from '$lib/components/FormField.svelte';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import VoteQuorumPicker, { type Quorum } from '$lib/components/VoteQuorumPicker.svelte';
-	import { userSignedIn } from '$lib/derived/user.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let dealId = $derived(page.params.deal_id ?? '');
 	let quorum: Quorum = $state('fair');
 	let reason = $state('');
-
-	$effect(() => {
-		if (!$userSignedIn) {
-			goto('/');
-		}
-	});
 
 	const back = () => goto(`/deals/${dealId}`);
 </script>
@@ -26,6 +20,8 @@
 <svelte:head>
 	<title>{$i18n.dispute.title} · {$i18n.layout.title}</title>
 </svelte:head>
+
+<AuthGuard />
 
 <BrandHeader title={$i18n.dispute.title}>
 	{#snippet leading()}

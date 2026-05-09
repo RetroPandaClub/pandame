@@ -86,6 +86,7 @@ one fits.
 
 - `AppBottomNav.svelte` — wires `BottomNav` to / · /send · /profile.
 - `Auth.svelte` — behaviour-only: subscribes to `onAuthStateChange`.
+- `AuthGuard.svelte` — behaviour-only redirect guard for logged-in routes.
 - `BalanceBadge.svelte` — caller's ICP balance pill (reads `balanceStore`).
 - `DealActions.svelte` — context-aware action bar (Consent / Reject / Cancel / Accept / Reclaim / Dispute).
 - `DealCard.svelte` — single-deal preview (header bar + amount + countdown).
@@ -98,6 +99,7 @@ one fits.
 - `RoleStubScreen.svelte` — shared Arbitrator / Admin v2 stub layout.
 - `RoleSwitcher.svelte` — User / Arbitrator / Admin tablist.
 - `ShareLinkModal.svelte` — post-create QR + copyable share link.
+- `UserPrincipalBadge.svelte` — short-principal + Avatar pair for the BrandHeader trailing slot.
 - `WelcomeScreen.svelte` — full-screen logged-out connect-wallet hero.
 
 ### Icons (`components/icons/`)

@@ -63,6 +63,7 @@
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AppBottomNav`       | Wires `BottomNav` to the project's three primary destinations (/ · /send · /profile) with route-aware variant swaps.                                                |
 | `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.          |
+| `AuthGuard`          | Behaviour-only redirect guard. Drop `<AuthGuard />` once at the top of any logged-in route — it `goto`s `redirectTo` (default `/`) when `userSignedIn` is false.    |
 | `BalanceBadge`       | Caller's ICP balance pill. Reads `balanceStore`.                                                                                                                    |
 | `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`. |
 | `DealCard`           | Single-deal preview card (header bar + amount + countdown). Optional `href` renders the card as an `<a>` for the detail route.                                      |
@@ -75,6 +76,7 @@
 | `RoleStubScreen`     | Shared layout for the v2 Arbitrator / Admin profile screens.                                                                                                        |
 | `RoleSwitcher`       | User / Arbitrator / Admin tablist that navigates between the three profile routes.                                                                                  |
 | `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                |
+| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                             |
 | `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                   |
 
 ### Icons — `$lib/components/icons/`
@@ -122,7 +124,7 @@ Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 | `deals.store`     | `$lib/stores/`  | Cached deal list with `set` / `upsert` / `remove` / `reset`.                                   |
 | `balance.store`   | `$lib/stores/`  | Caller's ICP balance (e8s).                                                                    |
 | `profile.store`   | `$lib/stores/`  | Caller's `Doc<UserProfile> \| undefined` (lazy-loaded by `ensureProfile`).                     |
-| `user.derived`    | `$lib/derived/` | `userSignedIn` / `userNotSignedIn` predicates.                                                 |
+| `user.derived`    | `$lib/derived/` | `userSignedIn` / `userNotSignedIn` predicates + `userPrincipalText` / `userPrincipalShort`.    |
 | `deals.derived`   | `$lib/derived/` | `dealsLoaded`, `dealsCount`, `activeDeals`, `settledDeals`, `refundedDeals`, `cancelledDeals`. |
 | `profile.derived` | `$lib/derived/` | `profileLoaded`, `profileDisplayName`.                                                         |
 
