@@ -3,6 +3,8 @@
 	import Button from '$lib/components/Button.svelte';
 	import CreateDealModal from '$lib/components/CreateDealModal.svelte';
 	import DealsTable from '$lib/components/DealsTable.svelte';
+	import Login from '$lib/components/Login.svelte';
+	import Logout from '$lib/components/Logout.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { myBalance } from '$lib/services/balance.services';
@@ -46,8 +48,23 @@
 
 <svelte:window onjunoExampleReload={reloadDeals} />
 
-<header class="flex flex-wrap items-center justify-between gap-3">
-	<div class="flex flex-wrap items-center gap-2">
+{#if !$userSignedIn}
+	<section
+		class="flex min-h-[100dvh] flex-col items-center justify-center gap-6 px-6 py-10 text-center"
+	>
+		<h1 class="text-h4 text-default font-bold">
+			{$i18n.layout.title}
+		</h1>
+		<p class="text-muted">{$i18n.claim.signin_description}</p>
+		<Login />
+	</section>
+{:else}
+	<section class="flex flex-1 flex-col gap-6 px-6 pt-[max(env(safe-area-inset-top),1.5rem)] pb-10">
+		<header class="flex items-center justify-between">
+			<h1 class="text-h5 text-default font-bold">{$i18n.layout.title}</h1>
+			<BalanceBadge />
+		</header>
+
 		<Button
 			onclick={() => {
 				createOpen = true;
@@ -65,13 +82,14 @@
 				<path d="M417-417H166v-126h251v-251h126v251h251v126H543v251H417v-251Z" />
 			</svg>
 		</Button>
-	</div>
-	<BalanceBadge />
-</header>
 
-<div class="mt-8">
-	<DealsTable />
-</div>
+		<DealsTable />
+
+		<div class="mt-auto pt-6">
+			<Logout />
+		</div>
+	</section>
+{/if}
 
 <CreateDealModal open={createOpen} onclose={() => (createOpen = false)} oncreated={onCreated} />
 
