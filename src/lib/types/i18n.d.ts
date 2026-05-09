@@ -133,7 +133,6 @@ interface I18nProfile {
 
 interface I18nLogout_confirm {
 	title: string;
-	description: string;
 	confirm: string;
 	cancel: string;
 }

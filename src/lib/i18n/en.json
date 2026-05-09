@@ -119,9 +119,8 @@
 		"email_invalid": "That doesn't look like a valid email."
 	},
 	"logout_confirm": {
-		"title": "Sign out?",
-		"description": "We'll clear your local session. Your deals stay on chain — sign back in to access them.",
-		"confirm": "Yes, sign out",
+		"title": "Are You Sure?",
+		"confirm": "Yes",
 		"cancel": "Cancel"
 	},
 	"send": {
