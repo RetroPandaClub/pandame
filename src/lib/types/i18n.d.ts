@@ -110,6 +110,18 @@ interface I18nCreate {
 	amount_invalid: string;
 	expiry_label: string;
 	expiry_invalid: string;
+	mode_pay: string;
+	mode_receive: string;
+	currency_label: string;
+	counterparty_label_pay: string;
+	counterparty_label_receive: string;
+	tenor_label: string;
+	votes_label: string;
+	votes_disabled_hint: string;
+	summary_title: string;
+	summary_amount: string;
+	summary_fee: string;
+	summary_total: string;
 }
 
 interface I18nShare {

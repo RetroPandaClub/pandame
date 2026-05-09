@@ -1,13 +1,12 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import BalanceBadge from '$lib/components/BalanceBadge.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import CreateDealModal from '$lib/components/CreateDealModal.svelte';
 	import DealFilterChips, { type DealFilter } from '$lib/components/DealFilterChips.svelte';
 	import DealsTable from '$lib/components/DealsTable.svelte';
-	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import WelcomeScreen from '$lib/components/WelcomeScreen.svelte';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { myBalance } from '$lib/services/balance.services';
@@ -16,11 +15,8 @@
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userStore } from '$lib/stores/user.store';
-	import type { Deal } from '$lib/types/deal';
 	import { shortPrincipal } from '$lib/utils/format.utils';
 
-	let createOpen = $state(false);
-	let shareDeal: Deal | undefined = $state(undefined);
 	let filter: DealFilter = $state('all');
 
 	const reloadDeals = async () => {
@@ -43,13 +39,6 @@
 	$effect(() => {
 		reloadDeals();
 	});
-
-	const onCreated = (deal: Deal) => {
-		dealsStore.upsert(deal);
-		balanceStore.set(undefined);
-		reloadDeals();
-		shareDeal = deal;
-	};
 
 	let principalLabel = $derived(
 		$userStore?.key !== undefined ? shortPrincipal($userStore.key) : ''
@@ -75,12 +64,7 @@
 	<section class="flex flex-1 flex-col gap-4 px-6 pt-6 pb-28">
 		<div class="flex items-center justify-between">
 			<BalanceBadge />
-			<Button
-				size="sm"
-				onclick={() => {
-					createOpen = true;
-				}}
-			>
+			<Button size="sm" onclick={() => goto('/deals/new')}>
 				{$i18n.deals.create_cta}
 			</Button>
 		</div>
@@ -89,15 +73,4 @@
 	</section>
 
 	<AppBottomNav />
-{/if}
-
-<CreateDealModal open={createOpen} onclose={() => (createOpen = false)} oncreated={onCreated} />
-
-{#if shareDeal !== undefined}
-	<ShareLinkModal
-		open
-		dealId={shareDeal.id}
-		claimCode={shareDeal.claim_code}
-		onclose={() => (shareDeal = undefined)}
-	/>
 {/if}

@@ -102,7 +102,19 @@
 		"amount_placeholder_html": "e.g. 0.5 — fee ≈ {fee_str}",
 		"amount_invalid": "Enter a positive amount.",
 		"expiry_label": "Expires at",
-		"expiry_invalid": "Expiry must be in the future."
+		"expiry_invalid": "Expiry must be in the future.",
+		"mode_pay": "Pay",
+		"mode_receive": "Receive",
+		"currency_label": "Currency",
+		"counterparty_label_pay": "Recipient",
+		"counterparty_label_receive": "Payer",
+		"tenor_label": "Tenor",
+		"votes_label": "Votes in case of dispute",
+		"votes_disabled_hint": "Dispute jury voting will land in a future canister upgrade.",
+		"summary_title": "Summary",
+		"summary_amount": "Amount",
+		"summary_fee": "Network fee",
+		"summary_total": "Total payment"
 	},
 	"share": {
 		"title": "Share your deal",
