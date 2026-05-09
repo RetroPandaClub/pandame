@@ -10,6 +10,7 @@
 	import IconButton from '$lib/components/IconButton.svelte';
 	import LogoutConfirmModal from '$lib/components/LogoutConfirmModal.svelte';
 	import ReliabilityCard from '$lib/components/ReliabilityCard.svelte';
+	import RoleSwitcher from '$lib/components/RoleSwitcher.svelte';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { getReliability } from '$lib/services/deal.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -94,6 +95,10 @@
 </BrandHeader>
 
 <section class="flex flex-1 flex-col gap-5 px-6 pt-6 pb-28">
+	<div class="flex justify-center">
+		<RoleSwitcher current="user" />
+	</div>
+
 	<div class="flex flex-col items-center gap-3 text-center">
 		<Avatar fallback={principalShort} size="xl" alt={principalShort} />
 

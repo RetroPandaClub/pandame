@@ -87,6 +87,12 @@ interface I18nProfile {
 	role_arbitrator: string;
 	role_admin: string;
 	role_stub_hint: string;
+	role_switch_aria: string;
+	role_arbitrator_title: string;
+	role_arbitrator_description: string;
+	role_admin_title: string;
+	role_admin_description: string;
+	role_stub_card_label: string;
 	edit_title: string;
 	edit_save: string;
 	edit_cancel: string;
