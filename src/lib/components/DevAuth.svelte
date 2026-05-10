@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { User } from '@junobuild/core';
-	import { onMount } from 'svelte';
-	import { dev } from '$app/environment';
+	import { browser, dev } from '$app/environment';
 	import { userStore } from '$lib/stores/user.store';
 
 	/*
@@ -13,9 +12,15 @@
 	 * effect is gated by `dev`, which `import.meta.env.DEV` resolves
 	 * to `false` at build time.
 	 *
-	 * Usage: `npm run dev`, then visit http://localhost:5173/?dev=1
-	 * (the query persists across SPA navigations because nothing in
-	 * the app strips it).
+	 * The store is set **synchronously during script init** (not in
+	 * `onMount`) so it's already populated before any auth-guarded
+	 * route's own `$effect` runs — otherwise AuthGuard fires its
+	 * redirect on first paint, before DevAuth has a chance to lie
+	 * about the user.
+	 *
+	 * Usage: `npm run dev`, then visit
+	 * http://localhost:5173/?dev=1 (the query persists across SPA
+	 * navigations because nothing in the app strips it).
 	 */
 	const MOCK_USER: User = {
 		key: 'aaaaa-aa',
@@ -28,16 +33,10 @@
 		version: 0n
 	};
 
-	onMount(() => {
-		if (!dev) {
-			return;
-		}
-
+	if (dev && browser) {
 		const params = new URLSearchParams(window.location.search);
-		if (!params.has('dev')) {
-			return;
+		if (params.has('dev')) {
+			userStore.set(MOCK_USER);
 		}
-
-		userStore.set(MOCK_USER);
-	});
+	}
 </script>
