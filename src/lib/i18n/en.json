@@ -25,7 +25,6 @@
 		"aria_label": "Primary navigation",
 		"home": "Home",
 		"transitions": "Transitions",
-		"send": "Send",
 		"profile": "Profile"
 	},
 	"home": {
@@ -89,7 +88,6 @@
 	"profile": {
 		"title": "Profile",
 		"section_edit": "Edit Profile",
-		"copy_principal": "Copy principal",
 		"username_label": "Username",
 		"name_label": "Name",
 		"surname_label": "Surname",
@@ -97,20 +95,12 @@
 		"email_label": "Email",
 		"reliability_label": "Reliability",
 		"reliability_yes": "YES",
-		"reliability_no": "NO",
 		"weight_label": "Weight",
 		"role_user": "User",
-		"role_arbitrator": "Arbitrator",
-		"role_admin": "Admin",
-		"switch_accounts": "Switch Accounts",
 		"history_action": "History",
-		"logout_action": "Log Out",
 		"add_avatar_aria": "Add or change profile photo",
 		"edit_save": "Save",
-		"edit_saving": "Saving…",
-		"edit_save_success": "Profile saved.",
 		"edit_save_error": "Couldn't save the profile. Please try again.",
-		"loading": "Loading profile…",
 		"username_placeholder": "Pick a public nickname",
 		"name_placeholder": "Your first name",
 		"surname_placeholder": "Your last name",
@@ -123,26 +113,20 @@
 		"confirm": "Yes",
 		"cancel": "Cancel"
 	},
-	"send": {
-		"title": "Send",
-		"coming_soon_title": "Coming soon",
-		"coming_soon_description": "Direct send / receive lands in a future release. For now, use the deal flow on the home tab."
-	},
 	"deals": {
-		"create_cta": "Create a deal",
 		"empty_title": "No deals yet",
 		"empty_description": "Create your first escrow deal to lock funds against a recipient or share a tip link.",
 		"row": {
 			"amount": "Amount",
 			"recipient": "Recipient",
 			"recipient_open": "open / share-link",
-			"expires": "Expires",
+			"expires": "Time to conclude",
 			"your_role": "Your role",
 			"none": "—"
 		},
 		"actions": {
-			"consent": "Consent",
-			"reject": "Reject",
+			"consent": "Approve",
+			"reject": "Decline",
 			"cancel": "Cancel",
 			"accept": "Accept",
 			"reclaim": "Reclaim",
@@ -150,19 +134,13 @@
 			"dispute_tooltip": "Dispute resolution will land in a future canister upgrade."
 		},
 		"status": {
-			"created": "Created",
-			"funded": "Funded",
-			"settled": "Settled",
-			"refunded": "Refunded",
-			"cancelled": "Cancelled",
-			"rejected": "Rejected"
+			"refunded": "Refunded"
 		}
 	},
 	"create": {
 		"title": "Create a deal",
 		"submit": "Create new deals",
 		"submitting": "Creating…",
-		"recipient_placeholder": "Leave empty for a tip / share-link flow",
 		"mode_pay": "Pay",
 		"mode_receive": "Receive",
 		"payer_wallet_label": "Payer wallet",
@@ -174,7 +152,6 @@
 		"votes_disabled_hint": "Dispute jury voting will land in a future canister upgrade.",
 		"summary_label": "Summary",
 		"summary_amount": "Amount",
-		"summary_rate": "Rate",
 		"summary_fee": "Deposit fee",
 		"summary_total": "Total payment",
 		"title_deal_label": "Title Deal",

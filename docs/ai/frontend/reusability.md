@@ -38,59 +38,68 @@
 
 ### Primitives — `$lib/components/`
 
-| Component          | Use it for                                                                                                                                                                                                                                                                   |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Avatar`           | Round image with text-initials fallback. Sizes sm / md / lg / xl.                                                                                                                                                                                                            |
-| `Backdrop`         | Full-screen dimmed overlay; pass `spinner={true}` for the centred spinner.                                                                                                                                                                                                   |
-| `BottomNav`        | Sticky bottom-of-frame nav. Three snippet slots: `left`, `right`, `center` (centre is absolutely positioned `-top-7` for a raised IconButton).                                                                                                                               |
-| `BrandHeader`      | Purple full-bleed header with `title` + optional `subtitle`. Snippet slots `leading` / `trailing` (avatar, badges) and `children` (filter chips / tabs). Honours iOS safe-area-top.                                                                                          |
-| `Button`           | Pill button. Variants: `primary` (filled), `secondary` (outlined), `ghost` (transparent). Sizes sm / md / lg. `loading` prop renders a spinner + sets `aria-busy`. `leading` / `trailing` snippet slots for inline icons.                                                    |
-| `Chip`             | Small inline chip / badge / filter pill. Variants solid / outline / soft / success / warning / danger. Renders as `<button>` when `onclick` is supplied, plain `<span>` otherwise.                                                                                           |
-| `Countdown`        | Live `<time>` element ticking every `updateMs` (default 1 s). Renders `h{H}:{MM}:{SS}` for sub-day, `{D}d {HH}h {MM}m` past 24 h. Swaps to `expiredLabel` + `text-danger` when the deadline passes.                                                                          |
-| `EmptyState`       | Dashed-border "nothing here yet" placeholder, with optional snippet child.                                                                                                                                                                                                   |
-| `FormField`        | Wraps a label + input + optional hint or error. Hint / error get a stable id and the inner slot is `aria-describedby`-d automatically.                                                                                                                                       |
-| `IconButton`       | Square / circular icon-only button. Variants `primary` / `secondary` / `ghost` / `floating` (white card with soft shadow). Sizes sm / md / lg with `[&>svg]:` selectors that size the slotted SVG.                                                                           |
-| `Modal`            | Generic dialog shell (`title` + children + `footer` snippet, Esc-to-close, Backdrop included).                                                                                                                                                                               |
-| `Money`            | Formatted token amount via `formatTokenAmount`. Props: `signed`, `colorize`, `size`, `token` (defaults to `ICP_TOKEN`).                                                                                                                                                      |
-| `PandaMark`        | Brand mark: panda silhouette inside a soft lavender squircle, sourced from the real brand artwork (`static/brand/panda.png`). Sizes sm / md / lg / xl. The hero variant on the welcome screen is built inline (rings GIF + cropped panda) — don't extend `PandaMark` for it. |
-| `Tabs`             | Generic `<T extends string>` segmented control. Bindable `value`, `onchange`, `tabs: { id, label, disabled? }[]`. Renders inside a `bg-primary/30` capsule.                                                                                                                  |
-| `TextInput`        | Themed `<input>`. Bindable `value`, `oninput` callback. Standard `type` / `inputmode`. `mono`, `invalid`, `aria-describedby` props.                                                                                                                                          |
-| `VoteQuorumPicker` | Three circular vote-quorum selectors (default Fast / Fair / Slow with 3 / 7 / 11 votes). `disabled` flips the whole group to a non-interactive state. **Stubbed** today — the canister doesn't yet expose dispute-jury params.                                               |
+| Component          | Use it for                                                                                                                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Avatar`           | Round image with text-initials fallback. Sizes sm 32 / md 48 / lg 76 / xl 134 px (matching Figma usage).                                                                                                                   |
+| `Backdrop`         | Full-screen dimmed overlay; pass `spinner={true}` for the centred spinner.                                                                                                                                                 |
+| `BottomNav`        | White card with `rounded-t-bottom-nav` (14 px), `shadow-bottom-nav`, three snippet slots (`left`, `right`, `center`). Centre snippet is wrapped in a 75 px floating circle with `shadow-raised-button`.                    |
+| `BrandHeader`      | Coloured full-bleed header. `tone="primary"` (purple, default) or `tone="success"` (green for Profile). Snippet slots `leading` / `trailing` and `children` (Tabs / FilterChip strip). Honours iOS safe-area-top.          |
+| `Button`           | CTA. Variants: `primary` (filled), `secondary` (outlined), `ghost`. Sizes `xs` 31 / `sm` 36 / `md` 40 / `lg` 54 px. `loading` renders a spinner + sets `aria-busy`. `leading` / `trailing` snippet slots for inline icons. |
+| `ChatBubble`       | `side="bot"` (panda avatar + soft-bg bubble) or `side="user"` (right-aligned brand-bg bubble). Used by the home chat wizard.                                                                                               |
+| `ChatChoiceRow`    | Array-driven row of outlined / filled reply pills indented under the bot avatar. `choices: { id, label, variant?, onclick }[]`.                                                                                            |
+| `Chip`             | Small inline chip / badge / filter pill. Variants solid / outline / soft / success / warning / danger. Renders as `<button>` when `onclick` is supplied, plain `<span>` otherwise.                                         |
+| `Countdown`        | Live `<time>` element ticking every `updateMs` (default 1 s). Renders `h{H}:{MM}:{SS}` for sub-day, `{D}d {HH}h {MM}m` past 24 h. Swaps to `expiredLabel` + `text-danger` when the deadline passes.                        |
+| `EmptyState`       | Dashed-border "nothing here yet" placeholder, with optional snippet child.                                                                                                                                                 |
+| `FilterChip`       | Single dropdown-style filter chip (label + funnel + chevron). Used by `/history`.                                                                                                                                          |
+| `FormField`        | Label-above input wrapper. `labelFamily="sans" \| "serif-ui"` to switch between Poppins Medium and Inter Medium 16 px tracking `-0.32 px` per Figma.                                                                       |
+| `IconButton`       | Square / circular icon-only button. Variants `primary` / `secondary` / `ghost` / `floating` (white card with soft shadow). Sizes sm / md / lg.                                                                             |
+| `InfoLink`         | "Do you need help?" — info icon + Poppins Light 15 px purple. Renders as `<a>` if `href` given.                                                                                                                            |
+| `Modal`            | Generic dialog shell (title + children + footer + Esc to close). Prefer `LogoutConfirmModal` for the Figma-spec sign-out dialog.                                                                                           |
+| `Money`            | Formatted token amount via `formatTokenAmount`. Props: `signed`, `colorize`, `size`, `token` (defaults to `ICP_TOKEN`).                                                                                                    |
+| `PandaBotAvatar`   | Lavender disc with the panda silhouette (chat-bubble face). Sizes sm 40 / md 60 / lg 76 px. Different chrome from `PandaMark` (full circle vs squircle).                                                                   |
+| `PandaMark`        | Brand mark: panda silhouette inside a soft lavender squircle, sourced from `static/brand/panda.png`. Sizes sm / md / lg / xl. The hero variant on the welcome screen is built inline — don't extend `PandaMark`.           |
+| `ProfileFieldRow`  | Label-left / green-value-right inline-editable row. Click to edit, Enter commits, Esc cancels, blur commits. Used by `/profile`.                                                                                           |
+| `Sheet`            | The white off-white card with `rounded-t-sheet` (40 px) sliding over the BrandHeader. Configurable `overlap` (default 40 px) + `paddingClass`.                                                                             |
+| `Tabs`             | Generic `<T extends string>` segmented control matching the Figma "Toggle Pay Receive": Inter Medium 11.85 px, `rounded-tab` (23 px) active pill on a translucent-white outlined `rounded-xl` (20 px) container.           |
+| `TermsCheckbox`    | 14 × 14 checkbox + multi-color label (prefix + brand + linked term). Used by `/deals/new`.                                                                                                                                 |
+| `TextInput`        | Themed `<input>` (h-[41px], `rounded-input` 8 px, 1.5 px light-purple border). `variant="default" \| "active"` (active = 1 px primary-stroke border).                                                                      |
+| `UploadCTA`        | Purple "Choose files to upload" button + "Zip, Jpg or Pdf — Maximum files 10 MB" caption pair. Used by `/deals/new` and `/transitions` (Created tab).                                                                      |
+| `VoteQuorumPicker` | Concentric SVG rings with Roboto numbers + labels (3 sizes 83 / 102 / 83 px, default Fast / Fair / Slow with 3 / 7 / 11 votes). `disabled` flips the whole group. Stubbed today — canister doesn't expose jury params.     |
 
 ### Composed components — `$lib/components/`
 
-| Component            | Use it for                                                                                                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AppBottomNav`       | Wires `BottomNav` to the project's three primary destinations (/ · /send · /profile) with route-aware variant swaps.                                                |
-| `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.          |
-| `AuthGuard`          | Behaviour-only redirect guard. Drop `<AuthGuard />` once at the top of any logged-in route — it `goto`s `redirectTo` (default `/`) when `userSignedIn` is false.    |
-| `BalanceBadge`       | Caller's ICP balance pill. Reads `balanceStore`.                                                                                                                    |
-| `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`. |
-| `DealCard`           | Single-deal preview card (header bar + amount + countdown). Optional `href` renders the card as an `<a>` for the detail route.                                      |
-| `DealFilterChips`    | All / Active / Settled / Refunded / Cancelled chip strip — bindable `value: DealFilter`.                                                                            |
-| `DealStatusDot`      | 24 px circular icon badge per status (check / cross / fund / refresh / open circle).                                                                                |
-| `DealsTable`         | List wrapper with loading / empty-state / `<ul>` + `filter` prop.                                                                                                   |
-| `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` to the underlying Button.                                                                              |
-| `LogoutConfirmModal` | Sign-out confirmation modal (Cancel / Yes, sign out).                                                                                                               |
-| `ReliabilityCard`    | 3-row reliability summary: score chip + concluded count + positive count.                                                                                           |
-| `RoleStubScreen`     | Shared layout for the v2 Arbitrator / Admin profile screens.                                                                                                        |
-| `RoleSwitcher`       | User / Arbitrator / Admin tablist that navigates between the three profile routes.                                                                                  |
-| `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                |
-| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                             |
-| `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                   |
+| Component            | Use it for                                                                                                                                                           |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AppBottomNav`       | Wires `BottomNav` to the project's three destinations (/transitions · / · /profile) with active-route colour swaps. Side icons are bare SVGs (no IconButton chrome). |
+| `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.           |
+| `AuthGuard`          | Behaviour-only redirect guard. Drop `<AuthGuard />` once at the top of any logged-in route — it `goto`s `redirectTo` (default `/`) when `userSignedIn` is false.     |
+| `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`.  |
+| `DealCard`           | Single-deal preview card (purple title bar + status icon + currency + signed amount + countdown). Optional `actions` snippet for inline buttons; optional `href`.    |
+| `DealStatusIcon`     | 24 px circular status badge (check / cross / dot / swap / refresh) for the right of the DealCard title bar.                                                          |
+| `DealsTable`         | List wrapper with loading / empty-state / `<ul>` of `DealCard` links + `filter` prop. Used by `/history`.                                                            |
+| `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` / `label` to the underlying Button.                                                                     |
+| `LogoutConfirmModal` | Sign-out confirmation. Solid `#3B2370` backdrop, both buttons filled purple per Figma.                                                                               |
+| `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                 |
+| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                              |
+| `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                    |
 
 ### Icons — `$lib/components/icons/`
 
-| Icon          | What                                |
-| ------------- | ----------------------------------- |
-| `FilterIcon`  | Funnel — used by `DealFilterChips`. |
-| `HomeIcon`    | House — bottom-nav centre.          |
-| `ProfileIcon` | Person — bottom-nav right.          |
-| `SwapIcon`    | Arrows — bottom-nav left.           |
+| Icon              | What                                                                |
+| ----------------- | ------------------------------------------------------------------- |
+| `BackIcon`        | Chevron-left for `BrandHeader.leading` "back" buttons.              |
+| `ChevronDownIcon` | Dropdown indicator for FilterChip + future menus.                   |
+| `FilterIcon`      | Funnel — used by FilterChip.                                        |
+| `HomeIcon`        | House — bottom-nav centre.                                          |
+| `InfoIcon`        | Circle-i — used by InfoLink.                                        |
+| `PencilIcon`      | Inline-edit affordance — used by ProfileFieldRow + Profile heading. |
+| `PlusIcon`        | "+" badge floating on the big Profile avatar.                       |
+| `ProfileIcon`     | Person — bottom-nav right.                                          |
+| `SwapIcon`        | Arrows — bottom-nav left (Transitions).                             |
 
 Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 `currentColor`. Add new icons as their own files; consider
-`lucide-svelte` once the count crosses ~10.
+`lucide-svelte` once the count crosses ~12.
 
 ### Services — `$lib/services/`
 

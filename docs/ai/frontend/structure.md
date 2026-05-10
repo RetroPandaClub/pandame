@@ -16,23 +16,20 @@ src/
 ├── routes/                 SvelteKit file-based routing (mobile-first)
 │   ├── +layout.svelte      Phone-frame shell (max-w-[420px], safe-area, mounts <Auth />)
 │   ├── +layout.ts          ssr=false, prerender=false (SPA fallback)
-│   ├── +page.svelte        / — logged-in History dashboard, logged-out WelcomeScreen
+│   ├── +page.svelte        / — chatbot wizard (logged-in) / WelcomeScreen (logged-out)
 │   │
 │   ├── claim/[deal_id]/+page.svelte       /claim/[id]?code=xxx  Public claim page
 │   │
 │   ├── deals/
-│   │   ├── new/+page.svelte               /deals/new           Create-deal flow
+│   │   ├── new/+page.svelte               /deals/new           Create-deal full-screen form
 │   │   └── [deal_id]/
 │   │       ├── +page.svelte               /deals/[id]          Deal detail
 │   │       └── dispute/+page.svelte       /deals/[id]/dispute  Dispute flow (stubbed v2)
 │   │
-│   ├── profile/
-│   │   ├── +page.svelte                   /profile             User profile
-│   │   ├── edit/+page.svelte              /profile/edit        Edit form (Juno `profiles` collection)
-│   │   ├── arbitrator/+page.svelte        /profile/arbitrator  Stub (v2)
-│   │   └── admin/+page.svelte             /profile/admin       Stub (v2)
+│   ├── history/+page.svelte               /history             History list (FilterChip + DealCards)
+│   ├── transitions/+page.svelte           /transitions         Pending / Created / Disputate tabs
 │   │
-│   └── send/+page.svelte                  /send                Stub (v2)
+│   └── profile/+page.svelte               /profile             Profile (inline editable rows)
 │
 ├── declarations/           Generated Candid bindings (DO NOT hand-edit)
 │   ├── _factory.ts
@@ -65,49 +62,53 @@ one fits.
 
 ### Primitives
 
-- `Avatar.svelte` — round image with text-initials fallback (sm / md / lg / xl).
+- `Avatar.svelte` — round image with text-initials fallback (sm 32 / md 48 / lg 76 / xl 134 px).
 - `Backdrop.svelte` — full-screen dim + optional spinner.
-- `BottomNav.svelte` — sticky three-slot nav (left / right + raised centre).
-- `BrandHeader.svelte` — purple full-bleed header (title + leading / trailing / children slots).
-- `Button.svelte` — pill button (primary / secondary / ghost; sm / md / lg; loading state).
+- `BottomNav.svelte` — rounded-top white card with the ambient lift shadow + raised centre button.
+- `BrandHeader.svelte` — full-bleed coloured header (`tone="primary"` purple or `tone="success"` green) + Tabs / FilterChip slot.
+- `Button.svelte` — CTA button (primary / secondary / ghost; xs 31 / sm 36 / md 40 / lg 54 px; loading state).
+- `ChatBubble.svelte` — bot / user speech bubble (panda avatar + soft-bg bubble or right-aligned brand bubble).
+- `ChatChoiceRow.svelte` — array-driven row of outlined / filled reply pills aligned under the bot.
 - `Chip.svelte` — small chip / badge / filter pill (solid / outline / soft / success / warning / danger).
 - `Countdown.svelte` — live `<time>` element ticking every second.
 - `EmptyState.svelte` — dashed "nothing here yet" placeholder.
-- `FormField.svelte` — label + input wrapper with hint / error.
+- `FilterChip.svelte` — single dropdown-style filter chip (label + funnel + chevron).
+- `FormField.svelte` — label-above input wrapper. `labelFamily="sans" | "serif-ui"`.
 - `IconButton.svelte` — square / circular icon-only button (4 variants × 3 sizes).
+- `InfoLink.svelte` — info-icon + Poppins Light 15 px link ("Do you need help?").
 - `Modal.svelte` — generic dialog shell (title / children / footer + Esc to close).
 - `Money.svelte` — formatted token amount (signed / colorize / sm / md / lg).
-- `PandaMark.svelte` — brand mark (panda silhouette in a lavender squircle, real artwork from `static/brand/panda.png`).
-- `Tabs.svelte` — generic segmented control `<T extends string>`.
-- `TextInput.svelte` — themed `<input>` with focus-ring + invalid wiring.
-- `VoteQuorumPicker.svelte` — three-circle radio picker (stubbed in v1).
+- `PandaBotAvatar.svelte` — lavender disc with the panda silhouette (chat-bubble face).
+- `PandaMark.svelte` — brand mark (panda in a lavender squircle, real artwork from `static/brand/panda.png`).
+- `ProfileFieldRow.svelte` — label-left / green-value-right inline-editable row.
+- `Sheet.svelte` — white off-white card with `rounded-t-[40px]` sliding over the BrandHeader.
+- `Tabs.svelte` — generic segmented control `<T extends string>` (matches Toggle Pay/Receive).
+- `TermsCheckbox.svelte` — 14×14 checkbox with multi-color label.
+- `TextInput.svelte` — themed `<input>` (41 px h, 8 px radius, 1.5 px light-purple border, `variant="default" | "active"`).
+- `UploadCTA.svelte` — purple "Choose files to upload" + "Zip, Jpg or Pdf …" caption pair.
+- `VoteQuorumPicker.svelte` — concentric Roboto rings 3-radio picker.
 
 ### Composed
 
-- `AppBottomNav.svelte` — wires `BottomNav` to / · /send · /profile.
+- `AppBottomNav.svelte` — wires `BottomNav` to /transitions · / · /profile.
 - `Auth.svelte` — behaviour-only: subscribes to `onAuthStateChange`.
 - `AuthGuard.svelte` — behaviour-only redirect guard for logged-in routes.
-- `BalanceBadge.svelte` — caller's ICP balance pill (reads `balanceStore`).
 - `DealActions.svelte` — context-aware action bar (Consent / Reject / Cancel / Accept / Reclaim / Dispute).
-- `DealCard.svelte` — single-deal preview (header bar + amount + countdown).
-- `DealFilterChips.svelte` — All / Active / Settled / Refunded / Cancelled chip strip.
-- `DealStatusDot.svelte` — 24 px circular status badge (icon + colour per status).
+- `DealCard.svelte` — single-deal preview (purple title bar + status icon + signed amount + countdown + optional inline `actions` snippet).
+- `DealStatusIcon.svelte` — 24 px circular status badge (check / cross / dot / swap / refresh).
 - `DealsTable.svelte` — list wrapper (loading / empty / `<ul>` of `DealCard` links).
-- `Login.svelte` — Internet Identity sign-in button (forwards `fullWidth` / `size`).
-- `LogoutConfirmModal.svelte` — sign-out confirmation modal.
-- `ReliabilityCard.svelte` — caller's reliability score (3-row card).
-- `RoleStubScreen.svelte` — shared Arbitrator / Admin v2 stub layout.
-- `RoleSwitcher.svelte` — User / Arbitrator / Admin tablist.
+- `Login.svelte` — Internet Identity sign-in button (forwards `fullWidth` / `size` / `label`).
+- `LogoutConfirmModal.svelte` — sign-out confirmation (solid `#3B2370` backdrop, both purple CTAs).
 - `ShareLinkModal.svelte` — post-create QR + copyable share link.
 - `UserPrincipalBadge.svelte` — short-principal + Avatar pair for the BrandHeader trailing slot.
 - `WelcomeScreen.svelte` — full-screen logged-out connect-wallet hero.
 
 ### Icons (`components/icons/`)
 
-`FilterIcon`, `HomeIcon`, `ProfileIcon`, `SwapIcon`. Each is a single
+`BackIcon`, `ChevronDownIcon`, `FilterIcon`, `HomeIcon`, `InfoIcon`,
+`PencilIcon`, `PlusIcon`, `ProfileIcon`, `SwapIcon`. Each is a single
 24-viewBox stroked path keyed by `currentColor`. Add new icons as
-their own files; only consider adding `lucide-svelte` once we cross
-~10 icons.
+their own files; consider `lucide-svelte` once we cross ~12.
 
 ## Naming conventions
 

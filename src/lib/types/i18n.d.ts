@@ -31,7 +31,6 @@ interface I18nNav {
 	aria_label: string;
 	home: string;
 	transitions: string;
-	send: string;
 	profile: string;
 }
 
@@ -101,7 +100,6 @@ interface I18nDetail {
 interface I18nProfile {
 	title: string;
 	section_edit: string;
-	copy_principal: string;
 	username_label: string;
 	name_label: string;
 	surname_label: string;
@@ -109,20 +107,12 @@ interface I18nProfile {
 	email_label: string;
 	reliability_label: string;
 	reliability_yes: string;
-	reliability_no: string;
 	weight_label: string;
 	role_user: string;
-	role_arbitrator: string;
-	role_admin: string;
-	switch_accounts: string;
 	history_action: string;
-	logout_action: string;
 	add_avatar_aria: string;
 	edit_save: string;
-	edit_saving: string;
-	edit_save_success: string;
 	edit_save_error: string;
-	loading: string;
 	username_placeholder: string;
 	name_placeholder: string;
 	surname_placeholder: string;
@@ -137,14 +127,7 @@ interface I18nLogout_confirm {
 	cancel: string;
 }
 
-interface I18nSend {
-	title: string;
-	coming_soon_title: string;
-	coming_soon_description: string;
-}
-
 interface I18nDeals {
-	create_cta: string;
 	empty_title: string;
 	empty_description: string;
 	row: {
@@ -164,21 +147,13 @@ interface I18nDeals {
 		dispute: string;
 		dispute_tooltip: string;
 	};
-	status: {
-		created: string;
-		funded: string;
-		settled: string;
-		refunded: string;
-		cancelled: string;
-		rejected: string;
-	};
+	status: { refunded: string };
 }
 
 interface I18nCreate {
 	title: string;
 	submit: string;
 	submitting: string;
-	recipient_placeholder: string;
 	mode_pay: string;
 	mode_receive: string;
 	payer_wallet_label: string;
@@ -190,7 +165,6 @@ interface I18nCreate {
 	votes_disabled_hint: string;
 	summary_label: string;
 	summary_amount: string;
-	summary_rate: string;
 	summary_fee: string;
 	summary_total: string;
 	title_deal_label: string;
@@ -245,7 +219,6 @@ interface I18n {
 	detail: I18nDetail;
 	profile: I18nProfile;
 	logout_confirm: I18nLogout_confirm;
-	send: I18nSend;
 	deals: I18nDeals;
 	create: I18nCreate;
 	share: I18nShare;
