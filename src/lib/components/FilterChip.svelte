@@ -1,5 +1,4 @@
 <script lang="ts">
-	import ChevronDownIcon from '$lib/components/icons/ChevronDownIcon.svelte';
 	import FilterIcon from '$lib/components/icons/FilterIcon.svelte';
 
 	interface Props {
@@ -13,23 +12,23 @@
 </script>
 
 <!--
-  Single dropdown-style filter chip: ~134 × 38 px white pill
-  (`rounded-xl` 20 px, 1.5 px light-purple border). Label is 14 px
-  Poppins Medium Blu Night, with a small funnel icon + chevron-down
-  on the right. `aria-expanded` lets a future menu wire its state in.
+  Single dropdown-style filter chip: a transparent capsule outlined
+  in `rgba(133,88,237,0.67)` (the Figma "shape-primary" stroke)
+  with white 16 px Poppins Regular copy at 24 px line-height — same
+  visual family as the home greeting pill, so it reads as a quiet
+  badge layered on the purple BrandHeader. Trailing funnel icon is
+  10 × 13 px and inherits text colour. `aria-expanded` lets a
+  future menu wire its state in.
 -->
 <button
 	type="button"
 	{onclick}
 	aria-label={ariaLabel ?? label}
 	aria-expanded={ariaExpanded}
-	class="bg-bg-elevated border-border text-default hover:border-primary-stroke inline-flex h-[38px] items-center gap-[10px] rounded-xl border-[1.5px] px-[18px] font-sans text-[14px] font-medium transition-colors"
+	class="text-default-inverse inline-flex h-[36px] items-center gap-[10px] rounded-[55px] border border-[rgba(133,88,237,0.67)] bg-transparent px-[18px] font-sans text-[16px] leading-[24px] font-normal transition-opacity hover:opacity-80"
 >
 	<span>{label}</span>
-	<span class="text-default flex h-[14px] w-[14px] items-center">
+	<span class="flex h-[13px] w-[15px] items-center">
 		<FilterIcon />
-	</span>
-	<span class="text-default flex h-[10px] w-[10px] items-center">
-		<ChevronDownIcon />
 	</span>
 </button>
