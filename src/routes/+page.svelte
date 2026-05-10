@@ -14,9 +14,17 @@
 	type Mode = 'pay' | 'receive';
 	type Path = 'guided' | 'expert';
 
+	// Three-step reveal: clicking "Create new deals" only flips
+	// `intentCreate` so the Pay/Receive bubble appears; picking
+	// Pay or Receive then reveals the Guided/Expert bubble; that
+	// final pick navigates away.
+	let intentCreate = $state(false);
 	let mode: Mode | undefined = $state(undefined);
 	let path: Path | undefined = $state(undefined);
 
+	const startCreate = () => {
+		intentCreate = true;
+	};
 	const choosePay = () => {
 		mode = 'pay';
 	};
@@ -25,11 +33,13 @@
 	};
 	const chooseGuided = async () => {
 		path = 'guided';
-		await goto('/deals/new');
+		await goto(mode === 'receive' ? '/deals/new?side=receive' : '/deals/new');
 	};
 	const chooseExpert = async () => {
 		path = 'expert';
-		await goto('/deals/new?mode=expert');
+		await goto(
+			mode === 'receive' ? '/deals/new?side=receive&mode=expert' : '/deals/new?mode=expert'
+		);
 	};
 </script>
 
@@ -62,10 +72,8 @@
 				{
 					id: 'create',
 					label: $i18n.home.choice_create,
-					variant: mode !== undefined ? 'primary' : 'secondary',
-					onclick: () => {
-						mode = mode ?? 'pay';
-					}
+					variant: intentCreate ? 'primary' : 'secondary',
+					onclick: startCreate
 				},
 				{
 					id: 'history',
@@ -78,7 +86,7 @@
 			]}
 		/>
 
-		{#if mode !== undefined}
+		{#if intentCreate}
 			<ChatBubble side="bot">
 				{$i18n.home.bot_pay_or_receive}
 			</ChatBubble>

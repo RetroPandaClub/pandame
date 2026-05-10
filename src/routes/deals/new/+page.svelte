@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Principal } from '@icp-sdk/core/principal';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Backdrop from '$lib/components/Backdrop.svelte';
@@ -26,7 +27,9 @@
 
 	type Mode = 'pay' | 'receive';
 
-	let mode: Mode = $state('pay');
+	// Initial tab is taken from the `side` query param so the home
+	// chatbot's Pay / Receive pick lands on the matching variant.
+	let mode: Mode = $state(page.url.searchParams.get('side') === 'receive' ? 'receive' : 'pay');
 	let counterpartyText = $state('');
 	let amountText = $state('');
 	let tenorLocal = $state(defaultTenor());
