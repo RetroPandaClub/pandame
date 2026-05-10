@@ -37,7 +37,9 @@ interface I18nNav {
 interface I18nHome {
 	title: string;
 	opening_chip: string;
-	bot_greeting: string;
+	bot_greeting_prefix: string;
+	bot_greeting_brand: string;
+	bot_greeting_suffix: string;
 	bot_pay_or_receive: string;
 	bot_wizard_or_expert: string;
 	choice_create: string;

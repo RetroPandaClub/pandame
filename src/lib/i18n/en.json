@@ -30,7 +30,9 @@
 	"home": {
 		"title": "Home",
 		"opening_chip": "Hello!",
-		"bot_greeting": "Hello. Welcome to PandaMe! What would you like to do?",
+		"bot_greeting_prefix": "Hello. Welcome to ",
+		"bot_greeting_brand": "PandaMe!",
+		"bot_greeting_suffix": " What would you like to do?",
 		"bot_pay_or_receive": "Sure, do you pay or receive?",
 		"bot_wizard_or_expert": "Do you continue with the wizard or switch to the Expert version?",
 		"choice_create": "Create new deals",

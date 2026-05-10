@@ -41,10 +41,12 @@
 			<UserPrincipalBadge />
 		{/snippet}
 
-		<!-- The "Hello!" greeting pill — a white outlined capsule that
-		     sits on top of the purple header below the title row. -->
+		<!-- The greeting pill — a transparent capsule outlined in
+		     `rgba(133,88,237,0.67)` (Figma's "shape-primary" stroke)
+		     with white 16 px Poppins Regular copy, sitting on the
+		     purple header below the title row. -->
 		<span
-			class="rounded-button border-default-inverse/30 bg-bg-elevated text-default flex h-[34px] items-center justify-center border-[0.846px] px-[28px] font-sans text-[14px] font-semibold"
+			class="text-default-inverse flex h-[36px] items-center justify-center rounded-[55px] border border-[rgba(133,88,237,0.67)] bg-transparent px-[24px] font-sans text-[16px] leading-[24px] font-normal"
 		>
 			{$i18n.home.opening_chip}
 		</span>
@@ -52,7 +54,11 @@
 
 	<Sheet paddingClass="px-[19px] pt-[28px] pb-[120px]" class="gap-[20px]">
 		<ChatBubble side="bot">
-			<span><span class="font-bold">PandaMe!</span> {$i18n.home.bot_greeting}</span>
+			<span
+				>{$i18n.home.bot_greeting_prefix}<span class="font-medium"
+					>{$i18n.home.bot_greeting_brand}</span
+				>{$i18n.home.bot_greeting_suffix}</span
+			>
 		</ChatBubble>
 
 		<ChatChoiceRow
