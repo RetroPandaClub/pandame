@@ -6,18 +6,20 @@
 	let { ariaLabel }: Props = $props();
 </script>
 
+<!--
+  Info icon — outlined circle, vertical bar, dot. The bar uses
+  `currentColor` for stroke; the dot uses `currentColor` fill.
+-->
 <svg
 	viewBox="0 0 24 24"
 	fill="none"
 	stroke="currentColor"
-	stroke-width="2"
-	stroke-linecap="round"
-	stroke-linejoin="round"
+	stroke-width="1.1875"
 	role="img"
 	aria-label={ariaLabel}
 	aria-hidden={ariaLabel === undefined ? true : undefined}
 >
 	<circle cx="12" cy="12" r="10" />
-	<line x1="12" y1="16" x2="12" y2="12" />
-	<line x1="12" y1="8" x2="12.01" y2="8" />
+	<path d="M12 17V11" stroke-linecap="round" />
+	<circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
 </svg>
