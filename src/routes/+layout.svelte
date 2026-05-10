@@ -29,9 +29,12 @@
 
 <!-- Mobile-first phone shell: edge-to-edge on phones, centered 420 px
      "device frame" on tablet / desktop. Pages render directly inside —
-     no global hero, footer or chrome. -->
-<div class="bg-bg-soft min-h-[100dvh] pb-[env(safe-area-inset-bottom)]">
-	<div class="bg-bg shadow-primary/10 mx-auto flex min-h-[100dvh] max-w-[420px] flex-col shadow-xl">
+     no global hero, footer or chrome. The inner frame uses `w-full`
+     so it reliably fills its allotted width (rather than collapsing to
+     the intrinsic width of flex children — which would skip absolute
+     content like the welcome panda artwork). -->
+<div class="bg-bg-soft flex min-h-[100dvh] justify-center pb-[env(safe-area-inset-bottom)]">
+	<div class="bg-bg shadow-primary/10 flex min-h-[100dvh] w-full max-w-[420px] flex-col shadow-xl">
 		{@render children()}
 	</div>
 </div>

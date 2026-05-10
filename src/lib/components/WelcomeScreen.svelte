@@ -3,14 +3,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<section class="relative flex min-h-[100dvh] flex-col items-center overflow-hidden">
+<section class="bg-bg relative flex min-h-[100dvh] w-full flex-col items-center overflow-hidden">
 	<!--
-    Background plate + decorative ambient blur, both positioned
-    behind the content. Rendered as siblings so the blur reads
-    against the off-white canvas without bleeding through the
-    content cards.
+    Decorative ambient blur underlay — bleeds in from below. Positioned
+    absolutely so it doesn't affect the column flow; `pointer-events-none`
+    so it never blocks the CTA.
   -->
-	<div class="bg-bg absolute inset-0"></div>
 	<img
 		src="/brand/welcome-blur.svg"
 		alt=""
@@ -21,7 +19,7 @@
 	<div
 		class="relative flex w-full flex-1 flex-col items-center pt-[max(env(safe-area-inset-top),42px)]"
 	>
-		<div class="flex w-full flex-col items-center gap-[56px] px-[29px] pt-[71px]">
+		<div class="flex w-full flex-col items-center gap-[56px] px-6 pt-[60px]">
 			<h1 class="text-default text-h5 text-center font-semibold">
 				{$i18n.welcome.greeting_prefix}<span class="font-bold">{$i18n.layout.title}</span>{$i18n
 					.welcome.greeting_suffix}
@@ -31,21 +29,24 @@
 				<!--
           Logo animation: animated dashed rings + scattered particles
           layered behind the panda silhouette. Both assets are larger
-          than the visible window and intentionally crop on every
-          side so the rings appear to extend off-frame.
+          than their viewport and intentionally crop on every side so
+          the rings appear to extend off-frame. Sizes are
+          percentage-based so the artwork scales cleanly from a 320 px
+          phone up to the 420 px device-frame max-width without
+          breaking the crop ratios.
         -->
-				<div class="relative h-[317px] w-[345px] overflow-hidden">
+				<div class="relative aspect-[345/317] w-full max-w-[345px] overflow-hidden">
 					<img
 						src="/brand/welcome-rings.gif"
 						alt=""
 						aria-hidden="true"
-						class="absolute -top-[72px] -left-[48px] h-[430px] w-[430px]"
+						class="absolute top-[-22.7%] left-[-13.9%] h-[135.6%] w-[124.6%] max-w-none"
 					/>
 					<img
 						src="/brand/panda.png"
 						alt=""
 						aria-hidden="true"
-						class="absolute -top-[93px] -left-[64px] h-[435px] w-[436px]"
+						class="absolute top-[-29.3%] left-[-18.6%] h-[137.2%] w-[126.4%] max-w-none"
 					/>
 				</div>
 
