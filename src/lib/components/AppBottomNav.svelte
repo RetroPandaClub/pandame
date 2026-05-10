@@ -18,10 +18,10 @@
 	{#snippet left()}
 		<button
 			type="button"
-			aria-label={$i18n.nav.transitions}
-			aria-current={isActive('/transitions') ? 'page' : undefined}
-			onclick={() => goto('/transitions')}
-			class="flex h-[26px] w-[26px] items-center justify-center {isActive('/transitions')
+			aria-label={$i18n.nav.transactions}
+			aria-current={isActive('/transactions') ? 'page' : undefined}
+			onclick={() => goto('/transactions')}
+			class="flex h-[26px] w-[26px] items-center justify-center {isActive('/transactions')
 				? 'text-primary'
 				: 'text-default'}"
 		>

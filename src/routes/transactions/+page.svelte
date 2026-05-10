@@ -69,7 +69,7 @@
 			const deals = await listMyDeals();
 			dealsStore.set(deals);
 		} catch (err) {
-			console.error('Failed to refresh transitions:', err);
+			console.error('Failed to refresh transactions:', err);
 		}
 	};
 
@@ -98,35 +98,35 @@
 	let emptyDescription = $derived.by(() => {
 		switch (tab) {
 			case 'pending':
-				return $i18n.transitions.empty_pending;
+				return $i18n.transactions.empty_pending;
 			case 'created':
-				return $i18n.transitions.empty_created;
+				return $i18n.transactions.empty_created;
 			case 'disputed':
-				return $i18n.transitions.empty_disputed;
+				return $i18n.transactions.empty_disputed;
 		}
 	});
 </script>
 
 <svelte:head>
-	<title>{$i18n.transitions.title} · {$i18n.layout.title}</title>
+	<title>{$i18n.transactions.title} · {$i18n.layout.title}</title>
 </svelte:head>
 
 <svelte:window onjunoExampleReload={reload} />
 
 <AuthGuard />
 
-<BrandHeader title={$i18n.transitions.title}>
+<BrandHeader title={$i18n.transactions.title}>
 	{#snippet trailing()}
 		<UserPrincipalBadge />
 	{/snippet}
 
 	<Tabs
 		bind:value={tab}
-		ariaLabel="Transition status"
+		ariaLabel="Transaction status"
 		tabs={[
-			{ id: 'pending', label: $i18n.transitions.tab_pending },
-			{ id: 'created', label: $i18n.transitions.tab_created },
-			{ id: 'disputed', label: $i18n.transitions.tab_disputed, disabled: true }
+			{ id: 'pending', label: $i18n.transactions.tab_pending },
+			{ id: 'created', label: $i18n.transactions.tab_created },
+			{ id: 'disputed', label: $i18n.transactions.tab_disputed, disabled: true }
 		]}
 	/>
 </BrandHeader>
@@ -135,7 +135,7 @@
 	{#if !$dealsLoaded}
 		<p class="text-body2 text-muted" aria-live="polite">{$i18n.core.text.loading}</p>
 	{:else if visibleDeals.length === 0}
-		<EmptyState title={$i18n.transitions.empty_title} description={emptyDescription} />
+		<EmptyState title={$i18n.transactions.empty_title} description={emptyDescription} />
 	{:else}
 		<ul class="flex flex-col gap-[16px]">
 			{#each visibleDeals as deal (deal.id)}

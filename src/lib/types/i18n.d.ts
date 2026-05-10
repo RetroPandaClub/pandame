@@ -30,7 +30,7 @@ interface I18nWelcome {
 interface I18nNav {
 	aria_label: string;
 	home: string;
-	transitions: string;
+	transactions: string;
 	profile: string;
 }
 
@@ -60,7 +60,7 @@ interface I18nHistory {
 	filter_cancelled: string;
 }
 
-interface I18nTransitions {
+interface I18nTransactions {
 	title: string;
 	tab_pending: string;
 	tab_created: string;
@@ -210,7 +210,7 @@ interface I18n {
 	nav: I18nNav;
 	home: I18nHome;
 	history: I18nHistory;
-	transitions: I18nTransitions;
+	transactions: I18nTransactions;
 	dispute: I18nDispute;
 	detail: I18nDetail;
 	profile: I18nProfile;

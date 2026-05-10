@@ -63,25 +63,25 @@
 | `Tabs`             | Generic `<T extends string>` segmented control matching the Figma "Toggle Pay Receive": Inter Medium 11.85 px, `rounded-tab` (23 px) active pill on a translucent-white outlined `rounded-xl` (20 px) container.           |
 | `TermsCheckbox`    | 14 × 14 checkbox + multi-color label (prefix + brand + linked term). Used by `/deals/new`.                                                                                                                                 |
 | `TextInput`        | Themed `<input>` (h-[41px], `rounded-input` 8 px, 1.5 px light-purple border). `variant="default" \| "active"` (active = 1 px primary-stroke border).                                                                      |
-| `UploadCTA`        | Purple "Choose files to upload" button + "Zip, Jpg or Pdf — Maximum files 10 MB" caption pair. Used by `/deals/new` and `/transitions` (Created tab).                                                                      |
+| `UploadCTA`        | Purple "Choose files to upload" button + "Zip, Jpg or Pdf — Maximum files 10 MB" caption pair. Used by `/deals/new` and `/transactions` (Created tab).                                                                     |
 | `VoteQuorumPicker` | Concentric SVG rings with Roboto numbers + labels (3 sizes 83 / 102 / 83 px, default Fast / Fair / Slow with 3 / 7 / 11 votes). `disabled` flips the whole group. Stubbed today — canister doesn't expose jury params.     |
 
 ### Composed components — `$lib/components/`
 
-| Component            | Use it for                                                                                                                                                           |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AppBottomNav`       | Wires `BottomNav` to the project's three destinations (/transitions · / · /profile) with active-route colour swaps. Side icons are bare SVGs (no IconButton chrome). |
-| `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.           |
-| `AuthGuard`          | Behaviour-only redirect guard. Drop `<AuthGuard />` once at the top of any logged-in route — it `goto`s `redirectTo` (default `/`) when `userSignedIn` is false.     |
-| `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`.  |
-| `DealCard`           | Single-deal preview card (purple title bar + status icon + currency + signed amount + countdown). Optional `actions` snippet for inline buttons; optional `href`.    |
-| `DealStatusIcon`     | 24 px circular status badge (check / cross / dot / swap / refresh) for the right of the DealCard title bar.                                                          |
-| `DealsTable`         | List wrapper with loading / empty-state / `<ul>` of `DealCard` links + `filter` prop. Used by `/history`.                                                            |
-| `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` / `label` to the underlying Button.                                                                     |
-| `LogoutConfirmModal` | Sign-out confirmation. Solid `#3B2370` backdrop, both buttons filled purple per Figma.                                                                               |
-| `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                 |
-| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                              |
-| `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                    |
+| Component            | Use it for                                                                                                                                                            |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AppBottomNav`       | Wires `BottomNav` to the project's three destinations (/transactions · / · /profile) with active-route colour swaps. Side icons are bare SVGs (no IconButton chrome). |
+| `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.            |
+| `AuthGuard`          | Behaviour-only redirect guard. Drop `<AuthGuard />` once at the top of any logged-in route — it `goto`s `redirectTo` (default `/`) when `userSignedIn` is false.      |
+| `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`.   |
+| `DealCard`           | Single-deal preview card (purple title bar + status icon + currency + signed amount + countdown). Optional `actions` snippet for inline buttons; optional `href`.     |
+| `DealStatusIcon`     | 24 px circular status badge (check / cross / dot / swap / refresh) for the right of the DealCard title bar.                                                           |
+| `DealsTable`         | List wrapper with loading / empty-state / `<ul>` of `DealCard` links + `filter` prop. Used by `/history`.                                                             |
+| `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` / `label` to the underlying Button.                                                                      |
+| `LogoutConfirmModal` | Sign-out confirmation. Solid `#3B2370` backdrop, both buttons filled purple per Figma.                                                                                |
+| `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                  |
+| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                               |
+| `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                     |
 
 ### Icons — `$lib/components/icons/`
 

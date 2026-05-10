@@ -27,7 +27,7 @@ src/
 │   │       └── dispute/+page.svelte       /deals/[id]/dispute  Dispute flow (stubbed v2)
 │   │
 │   ├── history/+page.svelte               /history             History list (FilterChip + DealCards)
-│   ├── transitions/+page.svelte           /transitions         Pending / Created / Disputate tabs
+│   ├── transactions/+page.svelte          /transactions        Pending / Created / Disputate tabs
 │   │
 │   └── profile/+page.svelte               /profile             Profile (inline editable rows)
 │
@@ -90,7 +90,7 @@ one fits.
 
 ### Composed
 
-- `AppBottomNav.svelte` — wires `BottomNav` to /transitions · / · /profile.
+- `AppBottomNav.svelte` — wires `BottomNav` to /transactions · / · /profile.
 - `Auth.svelte` — behaviour-only: subscribes to `onAuthStateChange`.
 - `AuthGuard.svelte` — behaviour-only redirect guard for logged-in routes.
 - `DealActions.svelte` — context-aware action bar (Consent / Reject / Cancel / Accept / Reclaim / Dispute).

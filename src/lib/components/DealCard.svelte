@@ -60,7 +60,7 @@
 <!--
   Title bar is INSET (mx/mt 11 px) rather than edge-to-edge so it
   reads as a label inside the card. The optional `actions` snippet
-  is used by /transitions for inline Approve / Decline (Pending)
+  is used by /transactions for inline Approve / Decline (Pending)
   and Choose-files (Created) rows.
 -->
 {#snippet body()}
