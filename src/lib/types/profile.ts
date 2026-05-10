@@ -10,8 +10,6 @@ export interface UserProfile {
 	username: string;
 	name: string;
 	surname: string;
-	address: string;
-	email: string;
 }
 
 /**
@@ -21,7 +19,5 @@ export const emptyProfile = (owner: CanisterIdText): UserProfile => ({
 	owner,
 	username: '',
 	name: '',
-	surname: '',
-	address: '',
-	email: ''
+	surname: ''
 });

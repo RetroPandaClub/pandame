@@ -105,8 +105,6 @@ interface I18nProfile {
 	username_label: string;
 	name_label: string;
 	surname_label: string;
-	address_label: string;
-	email_label: string;
 	reliability_label: string;
 	reliability_yes: string;
 	weight_label: string;
@@ -118,9 +116,6 @@ interface I18nProfile {
 	username_placeholder: string;
 	name_placeholder: string;
 	surname_placeholder: string;
-	address_placeholder: string;
-	email_placeholder: string;
-	email_invalid: string;
 }
 
 interface I18nLogout_confirm {

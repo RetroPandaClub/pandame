@@ -25,8 +25,6 @@
 	let username = $state('');
 	let name = $state('');
 	let surname = $state('');
-	let address = $state('');
-	let email = $state('');
 
 	$effect(() => {
 		const text = principalText;
@@ -51,19 +49,11 @@
 		username = profile.username;
 		name = profile.name;
 		surname = profile.surname;
-		address = profile.address;
-		email = profile.email;
 	});
-
-	const isValidEmail = (text: string) => text.length === 0 || /[^@\s]+@[^@\s]+\.[^@\s]+/.test(text);
 
 	const save = async (next: Partial<UserProfile>) => {
 		const text = principalText;
 		if (text === undefined || text.length === 0) {
-			return;
-		}
-		if (next.email !== undefined && !isValidEmail(next.email)) {
-			saveError = $i18n.profile.email_invalid;
 			return;
 		}
 		saveError = undefined;
@@ -73,9 +63,7 @@
 					owner: text,
 					username: '',
 					name: '',
-					surname: '',
-					address: '',
-					email: ''
+					surname: ''
 				}),
 				...next,
 				owner: text
@@ -155,20 +143,6 @@
 			placeholder={$i18n.profile.surname_placeholder}
 			bind:value={surname}
 			onsave={(next) => save({ surname: next })}
-		/>
-		<ProfileFieldRow
-			id="profile-address"
-			label={$i18n.profile.address_label}
-			placeholder={$i18n.profile.address_placeholder}
-			bind:value={address}
-			onsave={(next) => save({ address: next })}
-		/>
-		<ProfileFieldRow
-			id="profile-email"
-			label={$i18n.profile.email_label}
-			placeholder={$i18n.profile.email_placeholder}
-			bind:value={email}
-			onsave={(next) => save({ email: next })}
 		/>
 		<ProfileFieldRow
 			id="profile-reliability"

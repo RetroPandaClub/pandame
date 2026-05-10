@@ -93,8 +93,6 @@
 		"username_label": "Username",
 		"name_label": "Name",
 		"surname_label": "Surname",
-		"address_label": "Address",
-		"email_label": "Email",
 		"reliability_label": "Reliability",
 		"reliability_yes": "YES",
 		"weight_label": "Weight",
@@ -105,10 +103,7 @@
 		"edit_save_error": "Couldn't save the profile. Please try again.",
 		"username_placeholder": "Pick a public nickname",
 		"name_placeholder": "Your first name",
-		"surname_placeholder": "Your last name",
-		"address_placeholder": "Where you'd ship a deal-related parcel to",
-		"email_placeholder": "you@example.com",
-		"email_invalid": "That doesn't look like a valid email."
+		"surname_placeholder": "Your last name"
 	},
 	"logout_confirm": {
 		"title": "Are You Sure?",
