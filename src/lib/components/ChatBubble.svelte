@@ -14,13 +14,13 @@
 </script>
 
 <!--
-  Figma chat row (`159:1207` / `159:1246`):
-    - Bot:   60-76 px lavender avatar on the LEFT, gap-[12px], speech
-             bubble on the right, bg #ECECF6 (light surface), rounded
-             with a top-left "tail" (we use plain rounded-[20px]).
-    - User:  no avatar; right-aligned bubble bg-primary text-white
-             outlined pill (rare in Figma — the user mostly replies
-             via ChatChoiceRow).
+  Chat row:
+    - Bot:   60–76 px lavender bot avatar on the LEFT, `gap-[12px]`,
+             then a speech bubble on a soft surface with a 6 px
+             rounded-bl tail.
+    - User:  no avatar; right-aligned bubble on the brand purple
+             with a 6 px rounded-br tail. The user mostly replies
+             via `<ChatChoiceRow>`, so this side is rare.
 -->
 <div
 	class="flex w-full items-end gap-[12px] {side === 'bot'

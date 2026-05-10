@@ -11,10 +11,10 @@
 		 */
 		overlap?: number;
 		/**
-		 * Inner padding token mapping (defaults to the Figma-spec
-		 * px-[19px] py-[34px] from the Create-Deal screen). Pass
-		 * `paddingClass` to override for screens that need different
-		 * insets without losing the rest of the chrome.
+		 * Inner padding token mapping (defaults to `px-[19px] pt-[34px]
+		 * pb-[120px]` — the create-deal layout, which doubles as a
+		 * safe baseline because the bottom padding leaves room for the
+		 * BottomNav). Pass `paddingClass` to override per route.
 		 */
 		paddingClass?: string;
 		/** Optional extra classes (gap / bg / etc.). */

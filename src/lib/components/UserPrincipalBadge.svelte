@@ -11,13 +11,13 @@
 </script>
 
 <!--
-  Figma trailing slot (`159:1128 / 166:401`):
-    - Username: Poppins Regular 15px white underlined
-    - Avatar: 48 x 48 (NFT-style image, fall back to initials)
-    - gap 12px between them
+  BrandHeader trailing pair: 15 px Poppins Regular underlined
+  username + 48 px Avatar with `gap-[12px]` between them. The
+  Avatar falls back to caller-principal initials when no image is
+  set.
 -->
 <span
-	class="text-default-inverse text-figma-15 inline-flex items-center gap-[12px] font-sans font-normal underline underline-offset-2"
+	class="text-default-inverse inline-flex items-center gap-[12px] font-sans text-[15px] font-normal underline underline-offset-2"
 >
 	<span>{$userPrincipalShort}</span>
 	<Avatar fallback={$userPrincipalShort} {size} alt={$userPrincipalShort} />

@@ -4,13 +4,15 @@
 	type Variant = 'primary' | 'secondary' | 'ghost';
 
 	/**
-	 * Sizes mirror the Figma button instances exactly:
-	 *   - `xs` (31 × any, rounded-[9px])      — "Choose files to upload"
-	 *   - `sm` (36 px, rounded-button)        — chat reply pills
-	 *   - `md` (40 px, rounded-button)        — canonical CTA, e.g.
-	 *                                          "Create new deals"
-	 *   - `lg` (54 px, rounded-button)        — hero CTA, e.g.
-	 *                                          "Bottone Home" / Welcome "Connect"
+	 * Each size maps to a real CTA archetype in the design:
+	 *   - `xs` (31 × any, `rounded-[9px]`)  — small inline CTA, e.g.
+	 *                                        "Choose files to upload".
+	 *   - `sm` (36 px, `rounded-button`)    — chat reply pills.
+	 *   - `md` (40 px, `rounded-button`)    — canonical CTA on most
+	 *                                        screens, e.g. "Create
+	 *                                        new deals".
+	 *   - `lg` (54 px, `rounded-button`)    — hero CTA on full-bleed
+	 *                                        screens (Welcome "Connect").
 	 */
 	type Size = 'xs' | 'sm' | 'md' | 'lg';
 
@@ -54,7 +56,7 @@
 	const SIZE: Record<Size, string> = {
 		xs: 'h-[31px] px-[14px] text-[11.4px] rounded-[9px]',
 		sm: 'h-9 px-[18px] text-[12px] rounded-button',
-		md: 'h-[40px] px-[20px] text-figma-12 rounded-button',
+		md: 'h-[40px] px-[20px] text-[12px] rounded-button',
 		lg: 'h-[54px] px-[28px] text-body1 rounded-button'
 	};
 

@@ -41,16 +41,14 @@
 </script>
 
 <!--
-  Figma vote-quorum picker (`311:7575..7604`):
-    - Three concentric-circle radios laid out gap-[22px], align-items-start.
-    - Active option (`fair`):  outer 102 × 102, inner 90.667 (filled purple),
-                              number 18.133 px, label 9.067 px / 7.933 px.
-    - Inactive option:         outer 83.571 × 83.571, inner 74.286 (filled
-                              light purple), number 14.857 px, label 7.429
-                              px / 6.5 px.
-    - Number font:  Roboto Bold, fontVariationSettings 'wdth' 100.
-    - Label font:   Roboto Medium, two lines, lh ~4.6 px.
-    - Active text colour: white. Inactive: Blu Night.
+  Three concentric-circle radios laid out with `gap-[22px]`. The
+  active option grows: outer 102 × 102 + inner 90.7 px filled solid
+  purple; the inactive options stay at outer 83.6 × 83.6 + inner
+  74.3 px on a light-purple wash with a thin purple ring. Numbers
+  are Roboto Bold (18.1 / 14.9 px); labels are Roboto Medium two
+  lines underneath the number (Fast / Little debated, Fair /
+  Recommended, Less fast / More discussed). Active text is white,
+  inactive text is Blu Night.
 -->
 <div role="radiogroup" aria-label={ariaLabel} class="flex items-center justify-center gap-[22px]">
 	{#each options as option (option.id)}

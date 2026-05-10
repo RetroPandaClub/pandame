@@ -10,12 +10,11 @@
 </script>
 
 <!--
-  Figma `311:8232` "Choose files to upload" + caption pair:
-    - Purple button (`xs` size = 31 × full-width, rounded-[9px],
-      Poppins Medium 11.4 px white, bg #6200EE — i.e. `bg-primary`,
-      not the slightly darker `primary-stroke` other CTAs use).
-    - Caption underneath: Poppins Medium 10.26 px lh 1.49 light
-      purple `--color-primary-light`, centered.
+  Purple full-width button (31 × any, `rounded-[9px]`, Poppins
+  Medium 11.4 px white) plus a small caption underneath (Poppins
+  Medium ~10 px / lh 1.49 in `primary-light`). The button uses the
+  lighter `bg-primary` (`#6200EE`) — not `primary-stroke` like the
+  other CTAs — so the upload affordance reads as secondary chrome.
 -->
 <div class="flex flex-col items-stretch gap-[2.28px]">
 	<button

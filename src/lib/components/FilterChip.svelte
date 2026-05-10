@@ -13,10 +13,10 @@
 </script>
 
 <!--
-  Figma "All Filter ▽" chip (`244:2621` / icon `270:1383`):
-    - 134 × 38 px white pill, rounded-[20px], border 1.5px #D5C4F9
-    - Inter / Poppins Medium 14 px Blu Night label
-    - Funnel icon on the right + small chevron-down
+  Single dropdown-style filter chip: ~134 × 38 px white pill
+  (`rounded-xl` 20 px, 1.5 px light-purple border). Label is 14 px
+  Poppins Medium Blu Night, with a small funnel icon + chevron-down
+  on the right. `aria-expanded` lets a future menu wire its state in.
 -->
 <button
 	type="button"

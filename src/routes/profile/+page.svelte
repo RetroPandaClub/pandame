@@ -105,9 +105,9 @@
 
 <Sheet paddingClass="px-[25px] pt-[80px] pb-[120px]" class="gap-[18px]">
 	<!--
-    Big avatar overlapping the green→white seam (Figma `71:302`,
-    134 × 134, with a `+` purple badge floating bottom-right).
-    Positioned absolutely so it bleeds out of the Sheet's top edge.
+    Big 134 × 134 avatar overlapping the green→white seam, with a
+    purple `+` badge floating bottom-right. Positioned absolutely so
+    it bleeds out of the Sheet's top edge.
   -->
 	<div class="absolute -top-[60px] left-1/2 -translate-x-1/2">
 		<div class="relative">

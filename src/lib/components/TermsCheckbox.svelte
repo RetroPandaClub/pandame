@@ -36,12 +36,12 @@
 </script>
 
 <!--
-  Figma `166:1549` "Agree terms":
-    - 14 × 14 checkbox, rounded-[4px], bg rgba(213,196,249,0.12),
-      border 1 px #6200EE.
-    - Label: Inter Regular 14 px lh 20 px Blu Night, with the link
-      label rendered in `--color-terms-link` (#A57FF6).
-    - Layout: gap-[8px] between checkbox and label.
+  14 × 14 checkbox (`rounded-[4px]`, lavender-tint fill, primary
+  border) + a 14 px / 20 px label rendered in three slots so the
+  link colour stays inside the dictionary:
+    {prefix}{brand}{linkLabel}{suffix}
+  e.g. "I agree with " + "PandaMe" + " " + "Terms & Agreement".
+  The link label renders in `--color-terms-link`.
 -->
 <label class="flex items-center gap-[8px]" for={id}>
 	<input

@@ -13,13 +13,13 @@
 </script>
 
 <!--
-  Wires `BottomNav` to the three Figma destinations:
-    - left:   /transitions  (swap-arrows icon — "Transazioni" in Figma)
+  Wires `BottomNav` to the app's three primary destinations:
+    - left:   /transitions  (swap-arrows icon)
     - center: /              (raised home button)
-    - right:  /profile       (person icon — "Profilo" in Figma)
+    - right:  /profile       (person icon)
 
-  Per Figma the side icons are bare SVGs (no IconButton chrome) —
-  active vs inactive is conveyed by colour only.
+  Side icons are bare SVGs (no IconButton chrome); active vs inactive
+  is conveyed by colour only.
 -->
 <BottomNav ariaLabel={$i18n.nav.aria_label}>
 	{#snippet left()}

@@ -15,7 +15,7 @@
 		tone?: Tone;
 		leading?: Snippet;
 		trailing?: Snippet;
-		/** Slot below the title row — Figma uses this for the Tabs strip. */
+		/** Slot below the title row — typically a Tabs / FilterChip strip. */
 		children?: Snippet;
 		ariaLabel?: string;
 	}
@@ -37,20 +37,20 @@
 </script>
 
 <!--
-  Figma BrandHeader spec (`159:1128` Header `166:404`):
-    - bg #6200EE (or #1DBB8E for the success tone)
-    - top inset 31px from device edge (above safe-area)
-    - left/right padding 20px
-    - title: Poppins Regular 20px / lh 1 / white
-    - subtitle: Poppins Regular ~12px white/80
-    - trailing: username (Poppins Regular 15px white underlined)
-                + Avatar 48x48
-    - optional children (Tabs strip): floats at top=98px in Figma —
-      we render it with mt-[18px] which lands at the same y once the
-      31px top inset + ~48px for the title row are added.
-  Decorative illustration-shadow ellipses behind the row are inlined
-  as a CSS radial-gradient so the header reads "lit from inside" on
-  desktop without an extra raster asset.
+  Full-bleed coloured header:
+    - tone="primary" (purple) by default; tone="success" (green) on
+      the Profile screens
+    - 31 px top inset above the iOS safe-area, 20 px horizontal
+      padding, ~57 px bottom padding so the Sheet's 40 px overlap
+      leaves a visible band of header behind the rounded corners
+    - title: Poppins Regular 20 px white
+    - optional subtitle (small Poppins Regular 12 px white/80)
+    - trailing: username + 48 px Avatar
+    - optional children (Tabs / FilterChip strip) sit `mt-[18px]`
+      below the title row
+  Two decorative blurred ellipses are layered behind the row as a
+  CSS radial-gradient so the header reads "lit from inside" without
+  an extra raster asset.
 -->
 <header
 	class="{TONE_BG[
@@ -74,7 +74,7 @@
 		<div class="flex flex-1 flex-col {leading ? 'items-center text-center' : ''}">
 			<h1 class="text-h6 font-sans leading-none font-normal">{title}</h1>
 			{#if subtitle}
-				<p class="text-figma-12 mt-[2px] font-sans opacity-80">{subtitle}</p>
+				<p class="mt-[2px] font-sans text-[12px] opacity-80">{subtitle}</p>
 			{/if}
 		</div>
 

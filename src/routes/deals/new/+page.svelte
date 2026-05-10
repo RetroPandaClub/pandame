@@ -164,10 +164,10 @@
 
 		<div class="flex flex-col gap-[8px]">
 			<div class="flex items-center justify-between">
-				<span class="text-default text-figma-16 font-serif-ui font-medium tracking-[-0.32px]">
+				<span class="text-default text-label font-serif-ui font-medium tracking-[-0.32px]">
 					{$i18n.create.amount_label}
 				</span>
-				<span class="text-default text-figma-16 font-serif-ui font-medium tracking-[-0.32px]">
+				<span class="text-default text-label font-serif-ui font-medium tracking-[-0.32px]">
 					{$i18n.create.currency_label}
 				</span>
 			</div>
@@ -192,7 +192,7 @@
 		</FormField>
 
 		<div class="flex flex-col gap-[12px]">
-			<span class="text-default text-figma-16 font-sans font-medium tracking-[-0.32px]">
+			<span class="text-default text-label font-sans font-medium tracking-[-0.32px]">
 				{$i18n.create.votes_label}
 			</span>
 			<VoteQuorumPicker bind:value={quorum} disabled />
@@ -200,11 +200,11 @@
 		</div>
 
 		<section class="flex flex-col gap-[8px]">
-			<h3 class="text-default text-figma-16 font-sans font-medium tracking-[-0.32px]">
+			<h3 class="text-default text-label font-sans font-medium tracking-[-0.32px]">
 				{$i18n.create.summary_label}
 			</h3>
 			<dl
-				class="text-default font-serif-ui text-figma-14 grid grid-cols-[1fr_auto] gap-y-[6px] font-medium tracking-[-0.28px]"
+				class="text-default font-serif-ui grid grid-cols-[1fr_auto] gap-y-[6px] text-[14px] font-medium tracking-[-0.28px]"
 			>
 				<dt>{$i18n.create.summary_amount}</dt>
 				<dd class="text-right">
@@ -237,7 +237,7 @@
 		</FormField>
 
 		<div class="flex flex-col gap-[8px]">
-			<span class="text-default text-figma-16 font-serif-ui font-medium tracking-[-0.32px]">
+			<span class="text-default text-label font-serif-ui font-medium tracking-[-0.32px]">
 				{$i18n.create.add_documents_label}
 			</span>
 			<UploadCTA label={$i18n.create.upload_cta} caption={$i18n.create.upload_caption} />

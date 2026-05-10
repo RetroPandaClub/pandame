@@ -41,8 +41,8 @@
 			<UserPrincipalBadge />
 		{/snippet}
 
-		<!-- The "Hello!" white pill: stays under the BrandHeader title row.
-		     Figma uses a white outlined capsule on top of the purple. -->
+		<!-- The "Hello!" greeting pill — a white outlined capsule that
+		     sits on top of the purple header below the title row. -->
 		<span
 			class="rounded-button border-default-inverse/30 bg-bg-elevated text-default flex h-[34px] items-center justify-center border-[0.846px] px-[28px] font-sans text-[14px] font-semibold"
 		>

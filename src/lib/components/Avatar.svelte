@@ -11,10 +11,11 @@
 
 	let { src, alt = '', fallback = '', size = 'md', ariaLabel }: Props = $props();
 
-	// Sizes mirror the Figma usage: 32 (status dot), 48 (BrandHeader
-	// trailing — matches `159:1128 / 166:403`), 76 (bot avatar in
-	// chat bubbles), 134 (big profile avatar overlapping the
-	// purple→white seam — `83:84 / 71:302`).
+	// Each named size matches a real avatar archetype:
+	//   sm: 32 px — status dot / inline thumbnail
+	//   md: 48 px — BrandHeader trailing
+	//   lg: 76 px — bot avatar inside a chat bubble
+	//   xl: 134 px — big profile avatar overlapping the header seam
 	const SIZE: Record<Size, string> = {
 		sm: 'h-8 w-8 text-body2',
 		md: 'h-12 w-12 text-body1',

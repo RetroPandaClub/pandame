@@ -21,12 +21,14 @@
 </script>
 
 <!--
-  Figma "Toggle Pay Receive" (`92:600` / `159:1205`):
-    - Container: rounded-[20px], border 0.846px solid rgba(255,255,255,0.15),
-      sits on the purple BrandHeader.
-    - Each tab: ~121px wide × 34px tall, rounded-[23px].
-    - Active: bg #F7F7FA (off-white canvas), text Inter Medium 11.85px Blu Night.
-    - Inactive: transparent, text Inter Medium 11.85px white tracking -0.237px.
+  Segmented control sized to sit on the purple BrandHeader:
+    - Container: `rounded-xl` (20 px) with a translucent-white
+      0.846 px border, transparent fill.
+    - Each tab: ~121 × 34 px, `rounded-tab` (23 px).
+    - Active:   off-white canvas fill, Blu Night text.
+    - Inactive: transparent, white text @ 90 %.
+  Typography is Inter Medium 11.85 px tracking `-0.237 px` per the
+  brand spec for compact controls.
 -->
 <div
 	role="tablist"

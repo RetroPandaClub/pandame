@@ -30,8 +30,8 @@
 
 	let title = $derived(fromNullable(deal.title) ?? `Deal ${deal.id.toString()}`);
 
-	// Sign as in Figma: positive when funds flow TO the caller (recipient),
-	// negative when leaving (payer).
+	// Sign from the caller's PoV: positive when funds flow TO them
+	// (recipient), negative when leaving (payer).
 	let signedAmount = $derived.by(() => {
 		if (mySide === 'recipient') {
 			return deal.amount;
@@ -58,19 +58,19 @@
 </script>
 
 <!--
-  Figma deal card (`244:1111` "Deal Concluded Correctly" + `228:1437`
-  "Pending"):
-    - Outer: bg-bg-elevated, rounded-[12px], shadow-deal-card, border 0.
-    - Title bar: bg-primary px-4 py-1.5, deal title white Poppins
-      Bold ~14 px on the left, DealStatusIcon (24 px circle) on the
-      right. Bar has its own rounded-t-[8px] (slightly tighter than
-      the card so it reads as a label inside).
-    - Body row 1: currency name (Poppins Bold ~18 px Blu Night) on
-      the left, signed amount (Money, colorized) on the right.
-    - Body row 2: "Time to conclude" (Poppins Regular ~14 px Blu
-      Night/.7) on the left, Countdown on the right.
-    - Optional `actions` slot at the bottom for the inline Approve /
-      Decline / Choose-files-to-upload row.
+  Single-deal preview card:
+    - Outer: `bg-bg-elevated`, `rounded-[12px]`, `shadow-deal-card`,
+      no border.
+    - Title bar: an INSET purple pill (mx-2 mt-2 rounded-[8px]) with
+      the deal title (Poppins Bold 14 px white) on the left and
+      `<DealStatusIcon>` (24 px circle) on the right. Inset rather
+      than edge-to-edge so it reads as a label inside the card.
+    - Body row 1: currency name (Poppins Bold 18 px Blu Night) +
+      signed amount (`<Money>`, colorize + signed).
+    - Body row 2: "Time to conclude" (14 px @ 70 % opacity) +
+      `<Countdown>`.
+    - Optional `actions` snippet at the bottom for inline Approve /
+      Decline / Choose-files rows on Pending / Created lists.
 -->
 {#snippet body()}
 	<header
@@ -86,7 +86,7 @@
 	</div>
 
 	<div class="flex items-center justify-between px-[18px] pt-[6px] pb-[14px]">
-		<span class="text-default text-figma-14 font-sans opacity-70">
+		<span class="text-default font-sans text-[14px] opacity-70">
 			{$i18n.deals.row.expires}
 		</span>
 		<Countdown expiresAtNs={deal.expires_at_ns} />

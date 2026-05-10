@@ -16,10 +16,11 @@
 		ariaDescribedby?: string;
 		ariaLabel?: string;
 		/**
-		 * `default` (Figma `159:1132`): 1.5px solid `#D5C4F9` border —
-		 * resting state for every form input.
-		 * `active` (Figma `166:751`): 1px solid `#632AE8` border —
-		 * the highlighted variant used by the Amount/Currency input.
+		 * `default`: 1.5 px solid light-purple border — the resting
+		 * state for every form input.
+		 * `active`: 1 px solid primary-stroke border — the highlighted
+		 * variant used by the Amount/Currency input on the
+		 * Create-Deal screen.
 		 */
 		variant?: Variant;
 	}
@@ -54,10 +55,9 @@
 </script>
 
 <!--
-  Figma input field (`159:1132` / `166:751`):
-    h-[41px] (or 40 in some places), w-full inside a 334px column,
-    rounded-[8px], px-[10px], placeholder Poppins Regular 14px,
-    value Poppins Regular 14px Blu Night.
+  41 px tall, full-width, `rounded-input` (8 px), 10 px inset.
+  Placeholder + value rendered in Poppins Regular 14 px Blu Night
+  with the resting / active border defined by `VARIANT`.
 -->
 <input
 	{id}

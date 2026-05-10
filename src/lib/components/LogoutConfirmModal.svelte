@@ -34,13 +34,11 @@
 <svelte:window onkeydown={onKeydown} />
 
 <!--
-  Figma `281:1411` "Logout confirm":
-    - Backdrop: solid dark-purple `#3B2370`-ish covering the whole
-      device frame.
-    - Modal: small white rounded card centered, padding ~24px.
-    - Heading "Are You Sure?" Poppins Regular ~20px Blu Night.
-    - Two buttons side-by-side, BOTH filled purple `rounded-button`
-      (~80 × 30 px each).
+  Solid dark-purple `#3B2370` backdrop covering the whole device
+  frame. Centred white `rounded-[16px]` card (max-w-[280px], 24 px
+  padding). Heading is Poppins Regular 20 px Blu Night; the two
+  CTAs are BOTH filled purple `<Button size="sm">` sitting in a
+  single row with `gap-[16px]`.
 -->
 {#if open}
 	<div

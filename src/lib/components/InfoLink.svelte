@@ -12,9 +12,9 @@
 </script>
 
 <!--
-  Figma `159:1194` "Help?":
-    - 24 × 24 info icon + Poppins Light 15 px / lh 1.49 #6B36E8 link
-    - gap-[6px] between icon and text
+  Footer-style help link: 24 × 24 info icon + Poppins Light 15 px /
+  lh 1.49 in `--color-link-purple`, with `gap-[6px]` between them.
+  Renders as `<a>` if `href` is given, otherwise as `<button>`.
 -->
 {#if href !== undefined}
 	<a

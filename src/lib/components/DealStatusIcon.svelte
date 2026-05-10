@@ -13,11 +13,14 @@
 		glyph: 'check' | 'cross' | 'dot' | 'swap' | 'refresh';
 	}
 
-	// Figma "icon created" / status badges (`244:1398`, `244:1400`,
-	// `228:777`): a 22-26 px circle on the right of the deal-card
-	// title bar. Settled = green check, Rejected = red cross, Pending /
-	// Created funded but not yet completed = blue swap, Refunded =
-	// orange dot.
+	// 24 px circular status badge that sits on the right of the
+	// DealCard title bar. Glyph + colour per status:
+	//   Settled   = green check
+	//   Rejected  = red cross
+	//   Cancelled = muted cross (less alarming than rejection)
+	//   Refunded  = warning dot
+	//   Funded    = white-bg blue swap-arrows ("in progress")
+	//   Created   = warning refresh
 	const SPEC: Record<DealStatusName, Spec> = {
 		[DealStatuses.Settled]: { class: 'bg-success', glyph: 'check' },
 		[DealStatuses.Rejected]: { class: 'bg-danger', glyph: 'cross' },

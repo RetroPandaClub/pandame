@@ -108,10 +108,10 @@
 	 * blocks below override them at runtime so theme switching works
 	 * without a rebuild. */
 
-	/* Brand — purple. `primary` is the header / hero / hover purple
-	 * straight from Figma; `primary-stroke` is the slightly darker
-	 * purple used as the canonical CTA fill (`Bottone Home`) and as
-	 * the active-input border on the Create-Deal screen. */
+	/* Brand — purple. `primary` is the header / hero / hover purple;
+	 * `primary-stroke` is the slightly darker purple used as the
+	 * canonical CTA fill and as the active-input border on the
+	 * Create-Deal screen. */
 	--color-primary: #6200ee;
 	--color-primary-stroke: #632ae8;
 	--color-primary-light: #d5c4f9;
@@ -157,8 +157,7 @@
 		'Roboto', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-	/* Type scale — the Figma actual usage, not the ratio-based
-	 * marketing scale. Each utility names the role, not the size. */
+	/* Type scale — modular scale (base 16, ratio 1.25). */
 	--text-xxs: 0.625rem; /* 10 px — micro captions ("Maximum files 10 MB") */
 	--text-xxs--line-height: 1.49;
 	--text-body2: 0.8125rem; /* 13 px — body small */
@@ -178,21 +177,12 @@
 	--text-h1: 3.8125rem; /* 61 px */
 	--text-h1--line-height: 1.6;
 
-	/* Per-Figma-screen literal sizes (used inline with explicit
-	 * tracking — keep them as utilities so Prettier sorts them
-	 * predictably). */
-	--text-figma-12: 0.75rem; /* 12 px — small CTA copy ("Create new deals") */
-	--text-figma-12--line-height: 1.4;
-	--text-figma-14: 0.875rem; /* 14 px — Inter Medium summary rows */
-	--text-figma-14--line-height: 1.4;
-	--text-figma-15: 0.9375rem; /* 15 px — Username link, Help link */
-	--text-figma-15--line-height: 1.5;
-	--text-figma-16: 1rem; /* 16 px — form labels */
-	--text-figma-16--line-height: 1.19; /* matches Figma 19px lh on 16px */
-	--text-figma-21: 1.3375rem; /* 21.4 px — welcome caption */
-	--text-figma-21--line-height: 1.68;
-	--text-figma-26: 1.6625rem; /* 26.5 px — welcome heading */
-	--text-figma-26--line-height: 1.32;
+	/* Form label — 16 px / 19 px line-height. Used by `FormField`,
+	 * `ProfileFieldRow`, and the inline section headings on the
+	 * Create-Deal screen. Other one-off pixel sizes inline as
+	 * `text-[12px]` / `text-[14px]` / `text-[15px]` at the call site. */
+	--text-label: 1rem; /* 16 px */
+	--text-label--line-height: 1.19; /* 19 px */
 
 	/* Radius — design-system tokens. Theme-independent. */
 	--radius-sm: 0.5rem; /* 8 px — also the canonical input radius */
@@ -206,7 +196,7 @@
 	--radius-sheet: 2.5rem; /* 40 px — Sheet top corners (the white card sliding over the header) */
 	--radius-pill: 9999px; /* reserved for chips / badges */
 
-	/* Shadows — Figma specs. */
+	/* Shadows. */
 	--shadow-bottom-nav: 0 0 80px 0 rgba(55, 62, 125, 0.25);
 	--shadow-raised-button: 0 4px 4px 0 rgba(0, 0, 0, 0.16), 0 -4px 8.1px 0 rgba(55, 62, 125, 0.08);
 	--shadow-deal-card: 0 4px 12px 0 rgba(99, 42, 232, 0.08);

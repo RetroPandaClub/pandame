@@ -32,7 +32,7 @@
           Logo animation: animated dashed rings + scattered particles
           layered behind the panda silhouette. Both assets are larger
           than the visible window and intentionally crop on every
-          side, matching the Figma `Logo animation` frame (151:536).
+          side so the rings appear to extend off-frame.
         -->
 				<div class="relative h-[317px] w-[345px] overflow-hidden">
 					<img

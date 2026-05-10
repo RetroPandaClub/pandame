@@ -27,16 +27,11 @@
 </script>
 
 <!--
-  Figma chat reply row (`159:1207`, `159:1246`):
-    - 2-3 outlined / filled pills aligned under the previous bot
-      bubble.
-    - Each pill: `rounded-button` (22 px), border 1.5 px primary-stroke,
-      Poppins SemiBold 14 px, h-[40px], px-[20px].
-    - "Primary" choice = filled purple, "secondary" choice = white
-      outline.
-    - Layout: gap-[16px] between pills, padded so they sit indented
-      under the bot avatar (~12 + 60 + 12 = ~84 px from the left
-      edge) — we use `pl-[72px]` to mimic.
+  2–3 outlined / filled reply pills aligned under the previous bot
+  bubble. Each pill: `rounded-button` (22 px), 1.5 px purple-stroke
+  border, Poppins SemiBold 14 px, 40 × variable. `primary` = filled
+  purple, `secondary` = white outline. `pl-[72px]` indents the row
+  under the 60 px bot avatar + 12 px gap.
 -->
 <div class="flex flex-wrap items-center gap-[16px] pl-[72px]" role="group" aria-label={ariaLabel}>
 	{#each choices as choice (choice.id)}

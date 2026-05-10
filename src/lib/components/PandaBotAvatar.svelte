@@ -16,10 +16,10 @@
 </script>
 
 <!--
-  Figma chat-bubble bot avatar (lavender disc with the panda
-  silhouette inside, ~76 px on the home chat). Same artwork as
-  `PandaMark` / favicon — different chrome (full circle here vs
-  squircle on PandaMark).
+  Chat-bubble bot avatar — the panda silhouette inside a soft
+  lavender full-circle disc. Same artwork as `PandaMark` / the
+  favicon, but rendered as a full circle (vs PandaMark's squircle)
+  to read as a chat face.
 -->
 <figure
 	class="bg-primary-light/55 relative inline-flex shrink-0 items-center justify-center rounded-full {SIZE[
