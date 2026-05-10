@@ -31,9 +31,10 @@
 	{/if}
 
 	<div
-		class="text-link-purple font-sans text-[16px] leading-[1.4] font-light {side === 'bot'
-			? 'rounded-tl-[50px] rounded-tr-[26px] rounded-br-[26px] rounded-bl-none bg-[#ececec] pt-[20px] pr-[12px] pb-[14px] pl-[32px] shadow-[0_4px_2px_rgba(0,0,0,0.25)]'
-			: 'text-default-inverse bg-primary rounded-tl-[26px] rounded-tr-[50px] rounded-br-none rounded-bl-[26px] pt-[20px] pr-[32px] pb-[14px] pl-[12px] shadow-[0_4px_2px_rgba(0,0,0,0.25)]'} max-w-[78%]"
+		class="text-link-purple shadow-bubble font-sans text-[16px] leading-[1.4] font-light {side ===
+		'bot'
+			? 'bg-bubble-bot rounded-tl-[50px] rounded-tr-[26px] rounded-br-[26px] rounded-bl-none pt-[20px] pr-[12px] pb-[14px] pl-[32px]'
+			: 'text-default-inverse bg-primary rounded-tl-[26px] rounded-tr-[50px] rounded-br-none rounded-bl-[26px] pt-[20px] pr-[32px] pb-[14px] pl-[12px]'} max-w-[78%]"
 	>
 		{@render children()}
 	</div>

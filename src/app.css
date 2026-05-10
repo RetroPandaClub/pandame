@@ -111,10 +111,13 @@
 	/* Brand — purple. `primary` is the header / hero / hover purple;
 	 * `primary-stroke` is the slightly darker purple used as the
 	 * canonical CTA fill and as the active-input border on the
-	 * Create-Deal screen. */
+	 * Create-Deal screen; `shape-primary` is a lighter variant
+	 * used (often at partial opacity, e.g. `/67`) to outline
+	 * transparent pills on the purple header. */
 	--color-primary: #6200ee;
 	--color-primary-stroke: #632ae8;
 	--color-primary-light: #d5c4f9;
+	--color-shape-primary: #8558ed;
 
 	/* Brand — green (success / positive / Arbitrator chrome) */
 	--color-success: #1dbb8e;
@@ -129,6 +132,10 @@
 	--color-bg-elevated: #ffffff;
 	--color-bg-soft: #f4eefb;
 	--color-bg-inverse: #191c32;
+
+	/* Surfaces — chat */
+	--color-bubble-bot: #ececec;
+	--color-chat-bot-disc: #e0e2ff;
 
 	/* Text — "Blu Night" + variants */
 	--color-default: #191c32;
@@ -200,6 +207,9 @@
 	--shadow-bottom-nav: 0 0 80px 0 rgba(55, 62, 125, 0.25);
 	--shadow-raised-button: 0 4px 4px 0 rgba(0, 0, 0, 0.16), 0 -4px 8.1px 0 rgba(55, 62, 125, 0.08);
 	--shadow-deal-card: 0 4px 12px 0 rgba(99, 42, 232, 0.08);
+	--shadow-bubble: 0 4px 2px rgba(0, 0, 0, 0.25);
+	--shadow-pill-primary: 0 4px 2px var(--color-primary-light);
+	--shadow-pill-stroke: 0 4px 4px rgba(133, 88, 237, 0.67);
 
 	/* Animations */
 	--animate-fade: fadeIn 0.25s ease-in-out;
@@ -227,6 +237,7 @@
 		--color-primary: #6200ee;
 		--color-primary-stroke: #632ae8;
 		--color-primary-light: #d5c4f9;
+		--color-shape-primary: #8558ed;
 
 		--color-success: #1dbb8e;
 		--color-success-light: #29e8b1;
@@ -238,6 +249,9 @@
 		--color-bg-elevated: #ffffff;
 		--color-bg-soft: #f4eefb;
 		--color-bg-inverse: #191c32;
+
+		--color-bubble-bot: #ececec;
+		--color-chat-bot-disc: #e0e2ff;
 
 		--color-default: #191c32;
 		--color-default-inverse: #ffffff;

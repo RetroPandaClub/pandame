@@ -21,10 +21,8 @@
 	let { choices, ariaLabel = 'Reply choices', extra }: Props = $props();
 
 	const VARIANT: Record<Variant, string> = {
-		primary:
-			'bg-primary-stroke text-default-inverse border-primary-stroke shadow-[0_4px_2px_#d5c4f9]',
-		secondary:
-			'bg-transparent text-primary-stroke border-primary-stroke shadow-[0_4px_4px_rgba(133,88,237,0.67)]'
+		primary: 'bg-primary-stroke text-default-inverse border-primary-stroke shadow-pill-primary',
+		secondary: 'bg-transparent text-primary-stroke border-primary-stroke shadow-pill-stroke'
 	};
 </script>
 

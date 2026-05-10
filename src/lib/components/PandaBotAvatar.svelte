@@ -21,7 +21,7 @@
   purple header rather than melting into it.
 -->
 <figure
-	class="relative inline-flex shrink-0 items-center justify-center rounded-full bg-[#e0e2ff] {SIZE[
+	class="bg-chat-bot-disc relative inline-flex shrink-0 items-center justify-center rounded-full {SIZE[
 		size
 	]}"
 	aria-label={ariaLabel}

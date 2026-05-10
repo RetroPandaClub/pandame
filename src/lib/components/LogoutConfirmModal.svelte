@@ -35,13 +35,13 @@
 
 {#if open}
 	<div
-		class="animate-fade fixed inset-0 z-50 flex items-center justify-center bg-[rgba(99,42,232,0.32)] p-6"
+		class="bg-primary-stroke/32 animate-fade fixed inset-0 z-50 flex items-center justify-center p-6"
 		role="dialog"
 		aria-modal="true"
 		aria-label={$i18n.logout_confirm.title}
 	>
 		<div
-			class="bg-bg-elevated text-default flex h-[161px] w-[302px] flex-col items-center justify-center gap-[14px] rounded-[12px] px-[28px] shadow-[0_4px_2px_rgba(0,0,0,0.25)]"
+			class="bg-bg-elevated text-default shadow-bubble flex h-[161px] w-[302px] flex-col items-center justify-center gap-[14px] rounded-[12px] px-[28px]"
 		>
 			<h2 class="text-h5 text-default text-center font-sans font-normal">
 				{$i18n.logout_confirm.title}

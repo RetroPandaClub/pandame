@@ -49,9 +49,17 @@ Claude-specific runtime layer. Anything not contradicted here defers to
   `<html data-theme="light">`). A future dark theme is a single-file
   change — fill the `[data-theme='dark']` block in
   [`src/app.css`](./src/app.css). Components must use the semantic
-  tokens (`bg-bg`, `text-default`, `text-default-inverse`, …) — **no
-  raw `text-white`/`bg-black`/`border-black` literals and no `dark:`
-  utility variants** (those bypass the variable swap). See
+  tokens (`bg-bg`, `text-default`, `text-default-inverse`, …) —
+  **no raw colours, anywhere.** That means no `bg-[#hex]`, no
+  `border-[rgba(...)]`, no `shadow-[0_4px_2px_#abc]`, no inline
+  `style="color:…"`, no `text-white`/`bg-black`/`border-black`
+  literals, and no `dark:` utility variants. When the design needs
+  a colour you don't yet have, add a token to `@theme` (and mirror
+  it in `[data-theme='light']`) — even for one-off needs — then
+  use it as a normal Tailwind utility. Same rule for coloured
+  shadows: define a `--shadow-*` token, then `shadow-{name}`. Use
+  the `/n` opacity modifier on existing tokens before inventing a
+  new one (`border-shape-primary/67`, `bg-primary-stroke/32`). See
   [`docs/ai/frontend/stack-and-patterns.md#theming--dark-mode-readiness`](./docs/ai/frontend/stack-and-patterns.md#theming--dark-mode-readiness).
 
 ---

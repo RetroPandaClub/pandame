@@ -52,7 +52,7 @@
 		{/snippet}
 
 		<span
-			class="text-default-inverse flex h-[36px] items-center justify-center rounded-[55px] border border-[rgba(133,88,237,0.67)] bg-transparent px-[24px] font-sans text-[16px] leading-[24px] font-normal"
+			class="text-default-inverse border-shape-primary/67 flex h-[36px] items-center justify-center rounded-[55px] border bg-transparent px-[24px] font-sans text-[16px] leading-[24px] font-normal"
 		>
 			{$i18n.home.opening_chip}
 		</span>

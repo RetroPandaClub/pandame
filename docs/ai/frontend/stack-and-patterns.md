@@ -203,22 +203,31 @@ Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
 
   Brand palette (semantic — always reach for these first):
 
-  | Token           | Hex       | Use it for                                |
-  | --------------- | --------- | ----------------------------------------- |
-  | `primary`       | `#632AE8` | CTAs, headings emphasis, brand chrome.    |
-  | `primary-light` | `#D5C4F9` | Soft chips, status backgrounds, dividers. |
-  | `success`       | `#1DBB8E` | Settled deals, positive outcomes.         |
-  | `success-light` | `#29E8B1` | Subtle success accents.                   |
-  | `warning`       | `#F3A712` | "Coming soon" notices, refunded state.    |
-  | `danger`        | `#E64545` | Errors, cancelled / rejected state.       |
+  | Token            | Hex       | Use it for                                           |
+  | ---------------- | --------- | ---------------------------------------------------- |
+  | `primary`        | `#6200EE` | Header / hero / hover purple.                        |
+  | `primary-stroke` | `#632AE8` | CTAs, active input borders, heading emphasis.        |
+  | `primary-light`  | `#D5C4F9` | Soft chips, status backgrounds, dividers.            |
+  | `shape-primary`  | `#8558ED` | Outline / shadow on transparent pills (incl. `/67`). |
+  | `success`        | `#1DBB8E` | Settled deals, positive outcomes.                    |
+  | `success-light`  | `#29E8B1` | Subtle success accents.                              |
+  | `warning`        | `#F3A712` | "Coming soon" notices, refunded state.               |
+  | `danger`         | `#E64545` | Errors, cancelled / rejected state.                  |
 
-  Surface / text / border tokens (full list in `src/app.css`):
-  `bg` (off-white canvas, `#F7F7FA`), `bg-elevated` (`#FFFFFF`
-  cards / inputs / modals on top of the canvas), `bg-soft` (lavender
-  wash for the device-frame chrome), `bg-inverse` (Blu Night),
-  `default` (Blu Night text `#191C32`), `default-inverse` (white text
-  on brand fills), `muted`, `subtle`, `border`, `border-soft`,
-  `border-strong`.
+  Surface / chat / text / border tokens (full list in
+  `src/app.css`): `bg` (off-white canvas, `#F7F7FA`), `bg-elevated`
+  (`#FFFFFF` cards / inputs / modals on top of the canvas),
+  `bg-soft` (lavender wash for the device-frame chrome),
+  `bg-inverse` (Blu Night), `bubble-bot` / `chat-bot-disc` (chat
+  surfaces), `default` (Blu Night text `#191C32`), `default-inverse`
+  (white text on brand fills), `muted`, `subtle`, `border`,
+  `border-soft`, `border-strong`.
+
+  Named shadows live in the same file under `--shadow-*`:
+  `shadow-bottom-nav`, `shadow-raised-button`, `shadow-deal-card`,
+  `shadow-bubble` (chat bubble + modal card lift), `shadow-pill-primary`
+  (filled chat-choice button), `shadow-pill-stroke` (outlined
+  chat-choice button).
 
 - **Typography** is the modular scale base 16 / ratio 1.25 — utilities
   are `text-{xxs,body2,body1,h6,h5,h4,h3,h2,h1}` with paired
@@ -233,14 +242,26 @@ Pandame uses Tailwind v4. There is **no `tailwind.config.ts`**.
   `Button`), `rounded-pill` (9999 px — reserved for chips, badges,
   filter strips, the BalanceBadge).
 
-- **No raw hex** (`bg-[#0f0]`), no inline `style="color:…"`, **no
-  `text-white` / `bg-black` / `border-black` literals** in component
-  markup — those bypass the theme. Use the inverse tokens
-  (`text-default-inverse`, `bg-bg-inverse`) when you need the
-  light-on-brand pattern (e.g. `bg-primary text-default-inverse`).
-  Arbitrary values are tolerated for non-colour props (e.g.
-  `shadow-[5px_5px_0px_rgba(0,0,0,1)]`) but prefer a named token when
-  you can.
+- **No raw colours, anywhere.** That covers `bg-[#0f0]`,
+  `border-[rgba(...)]`, `shadow-[0_4px_2px_#abc]`, inline
+  `style="color:…"`, and `text-white` / `bg-black` / `border-black`
+  literals. Every one of those bypasses the theme.
+
+  When the design needs a colour you don't yet have, **add a token
+  to `@theme`** (and mirror it in `[data-theme='light']`) — even
+  for one-off needs. Then use it as a normal Tailwind utility.
+  Use the `/n` opacity modifier on existing tokens before inventing
+  a new one (e.g. `border-shape-primary/67`,
+  `bg-primary-stroke/32`). Use the inverse tokens
+  (`text-default-inverse`, `bg-bg-inverse`) for the light-on-brand
+  pattern (e.g. `bg-primary text-default-inverse`).
+
+  The same rule applies to **shadows** that include colour: define
+  a `--shadow-*` token in `app.css` and reference it as
+  `shadow-{name}`. Don't paste `rgba()` literals into component
+  markup. Arbitrary numeric values are still fine for non-colour
+  props (sizes, radii, etc.) — prefer a named token when one exists.
+
 - **Class order** is auto-sorted by `prettier-plugin-tailwindcss`. Don't
   bikeshed it.
 - **Variants & responsive:** prefer Tailwind variants (`md:`, `tall:`)
