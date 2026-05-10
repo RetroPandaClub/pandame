@@ -146,14 +146,14 @@
 								<button
 									type="button"
 									onclick={approve(deal)}
-									class="bg-success text-default-inverse rounded-button h-[31px] px-[18px] font-sans text-[12px] font-semibold transition-opacity hover:opacity-90"
+									class="bg-success text-default-inverse flex h-[24px] w-[58px] items-center justify-center rounded-[5px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
 								>
 									{$i18n.deals.actions.consent}
 								</button>
 								<button
 									type="button"
 									onclick={decline(deal)}
-									class="bg-danger text-default-inverse rounded-button h-[31px] px-[18px] font-sans text-[12px] font-semibold transition-opacity hover:opacity-90"
+									class="bg-danger text-default-inverse flex h-[24px] w-[58px] items-center justify-center rounded-[5px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
 								>
 									{$i18n.deals.actions.reject}
 								</button>

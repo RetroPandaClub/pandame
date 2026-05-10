@@ -59,41 +59,43 @@
 
 <!--
   Single-deal preview card:
-    - Outer: `bg-bg-elevated`, `rounded-[12px]`, `shadow-deal-card`,
+    - Outer: `bg-bg-elevated`, `rounded-[10px]`, `shadow-deal-card`,
       no border.
-    - Title bar: an INSET purple pill (mx-2 mt-2 rounded-[8px]) with
-      the deal title (Poppins Bold 14 px white) on the left and
-      `<DealStatusIcon>` (24 px circle) on the right. Inset rather
-      than edge-to-edge so it reads as a label inside the card.
-    - Body row 1: currency name (Poppins Bold 18 px Blu Night) +
+    - Title bar: an INSET `primary-stroke` (#632AE8) pill (mx/mt 11
+      px, `rounded-[4px]`, `h-[24px]`) with the deal title (Poppins
+      SemiBold 12 px white tracking 0.48 px, centred) on the left
+      and `<DealStatusIcon>` (24 px circle) on the right. Inset
+      rather than edge-to-edge so it reads as a label inside the
+      card.
+    - Body row 1: currency name (Poppins Medium 16 px Blu Night) +
       signed amount (`<Money>`, colorize + signed).
-    - Body row 2: "Time to conclude" (14 px @ 70 % opacity) +
-      `<Countdown>`.
+    - Body row 2: "Time to conclude" (Poppins Regular 14 px) +
+      `<Countdown>` with a small letter-spacing nudge.
     - Optional `actions` snippet at the bottom for inline Approve /
       Decline / Choose-files rows on Pending / Created lists.
 -->
 {#snippet body()}
 	<header
-		class="bg-primary text-default-inverse mx-[8px] mt-[8px] flex items-center justify-between rounded-[8px] px-[14px] py-[6px]"
+		class="bg-primary-stroke text-default-inverse mx-[11px] mt-[11px] flex h-[24px] items-center justify-between rounded-[4px] px-[10px]"
 	>
-		<span class="font-sans text-[14px] leading-tight font-bold">{title}</span>
+		<span class="font-sans text-[12px] leading-none font-semibold tracking-[0.48px]">{title}</span>
 		<DealStatusIcon {status} />
 	</header>
 
-	<div class="flex items-baseline justify-between px-[18px] pt-[12px]">
-		<span class="text-default font-sans text-[18px] font-bold">{ICP_TOKEN.name}</span>
+	<div class="flex items-baseline justify-between px-[18px] pt-[14px]">
+		<span class="text-default font-sans text-[16px] font-medium">{ICP_TOKEN.name}</span>
 		<Money amount={signedAmount} colorize signed size="md" />
 	</div>
 
-	<div class="flex items-center justify-between px-[18px] pt-[6px] pb-[14px]">
-		<span class="text-default font-sans text-[14px] opacity-70">
+	<div class="flex items-center justify-between px-[18px] pt-[4px] pb-[14px]">
+		<span class="text-default font-sans text-[14px] font-normal">
 			{$i18n.deals.row.expires}
 		</span>
 		<Countdown expiresAtNs={deal.expires_at_ns} />
 	</div>
 
 	{#if actions}
-		<div class="border-border-soft flex items-center gap-[8px] border-t px-[14px] py-[10px]">
+		<div class="flex items-center gap-[16px] px-[18px] pb-[12px]">
 			{@render actions()}
 		</div>
 	{/if}
@@ -103,14 +105,14 @@
 	<a
 		{href}
 		data-tid="deal-card"
-		class="bg-bg-elevated shadow-deal-card block overflow-hidden rounded-[12px] transition-shadow hover:shadow-md"
+		class="bg-bg-elevated shadow-deal-card block overflow-hidden rounded-[10px] transition-shadow hover:shadow-md"
 	>
 		{@render body()}
 	</a>
 {:else}
 	<article
 		data-tid="deal-card"
-		class="bg-bg-elevated shadow-deal-card overflow-hidden rounded-[12px]"
+		class="bg-bg-elevated shadow-deal-card overflow-hidden rounded-[10px]"
 	>
 		{@render body()}
 	</article>
