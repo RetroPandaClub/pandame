@@ -108,7 +108,6 @@ interface I18nProfile {
 	reliability_label: string;
 	reliability_yes: string;
 	weight_label: string;
-	role_user: string;
 	history_action: string;
 	add_avatar_aria: string;
 	edit_save: string;

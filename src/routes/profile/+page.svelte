@@ -41,7 +41,7 @@
 
 <AuthGuard />
 
-<BrandHeader title={$i18n.profile.title} subtitle={$i18n.profile.role_user} tone="success">
+<BrandHeader title={$i18n.profile.title} tone="success">
 	{#snippet trailing()}
 		<UserPrincipalBadge />
 	{/snippet}

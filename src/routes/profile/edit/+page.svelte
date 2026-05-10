@@ -83,7 +83,7 @@
 
 <AuthGuard />
 
-<BrandHeader title={$i18n.profile.section_edit} subtitle={$i18n.profile.role_user} tone="success">
+<BrandHeader title={$i18n.profile.section_edit} tone="success">
 	{#snippet leading()}
 		<button
 			type="button"
