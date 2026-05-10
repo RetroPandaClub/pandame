@@ -36,14 +36,19 @@
 	};
 </script>
 
-<!-- Bottom padding (`pb-[57px]`) is sized so the Sheet's 40 px
-     overlap leaves a visible band of header behind the rounded
-     corners. Decorative ellipses below are CSS radial-gradients
-     to avoid shipping a raster asset. -->
+<!-- Bottom padding pairs with the Sheet's 40 px overlap so a visible
+     band of header stays behind the rounded corners. With children
+     (Tabs / FilterChip), the children row carries its own height; on
+     screens without children (Profile / Profile Edit) we widen the
+     band so absolute-positioned content like a profile avatar can
+     straddle the seam without crossing the title row. Decorative
+     ellipses are CSS radial-gradients (no raster asset). -->
 <header
 	class="{TONE_BG[
 		tone
-	]} text-default-inverse relative px-[20px] pt-[max(env(safe-area-inset-top),31px)] pb-[57px]"
+	]} text-default-inverse relative px-[20px] pt-[max(env(safe-area-inset-top),31px)] {children
+		? 'pb-[57px]'
+		: 'pb-[110px]'}"
 	aria-label={ariaLabel ?? title}
 >
 	<div
@@ -62,7 +67,7 @@
 		<div class="flex flex-1 flex-col {leading ? 'items-center text-center' : ''}">
 			<h1 class="text-h6 font-sans leading-none font-normal">{title}</h1>
 			{#if subtitle}
-				<p class="mt-[3px] font-sans text-[10px] font-extralight tracking-[0.4px]">
+				<p class="mt-[12px] font-sans text-[10px] leading-[15px] font-extralight tracking-[0.4px]">
 					{subtitle}
 				</p>
 			{/if}
