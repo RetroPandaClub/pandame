@@ -9,7 +9,6 @@
 	import ProfileFieldRow from '$lib/components/ProfileFieldRow.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
-	import PencilIcon from '$lib/components/icons/PencilIcon.svelte';
 	import PlusIcon from '$lib/components/icons/PlusIcon.svelte';
 	import { profileDisplayName } from '$lib/derived/profile.derived';
 	import { userPrincipalShort, userPrincipalText } from '$lib/derived/user.derived';
@@ -125,12 +124,11 @@
 		</div>
 	</div>
 
-	<header class="flex items-center gap-[10px]">
-		<h2 class="text-default text-h6 font-sans font-bold">{$i18n.profile.section_edit}</h2>
-		<span class="text-default flex h-[16px] w-[16px] items-center"><PencilIcon /></span>
+	<header class="flex items-center">
+		<h2 class="text-default text-h6 font-sans font-semibold">{$i18n.profile.section_edit}</h2>
 	</header>
 
-	<div class="flex flex-col gap-[18px]">
+	<div class="flex flex-col gap-[22px]">
 		<ProfileFieldRow
 			id="profile-username"
 			label={$i18n.profile.username_label}

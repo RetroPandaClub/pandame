@@ -59,25 +59,22 @@
 </script>
 
 <!--
-  Profile row pattern: label LEFT (Poppins Regular 16 px Blu Night,
-  19 px lh), value RIGHT (Poppins Bold 16 px green, same lh) + a
-  14 × 14 pencil icon to the right of the value. Click the row to
-  enter inline-edit mode (text input replaces the value, Enter
-  commits, Esc cancels, blur commits). `editable={false}` skips the
-  pencil and disables the click target — used for read-only rows
-  (Reliability, Weight).
+  Profile row pattern: label LEFT (Poppins Regular 16 px / 24 px lh,
+  Blu Night), value RIGHT (Inter Medium ~16 px tracking `-0.32 px`,
+  success green) + a 14 × 14 pencil icon to the right of the value.
+  The label uses 24 px line-height to match Figma's `leading-[24px]`
+  baseline. Click the row to enter inline-edit mode (text input
+  replaces the value, Enter commits, Esc cancels, blur commits).
+  `editable={false}` skips the pencil and disables the click
+  target — used for read-only rows (Reliability, Weight).
 -->
-<div
-	class="flex h-[19px] items-center justify-between"
-	role="group"
-	aria-label={ariaLabel ?? label}
->
-	<label class="text-default text-label font-sans font-normal" for={id}>
+<div class="flex items-center justify-between" role="group" aria-label={ariaLabel ?? label}>
+	<label class="text-default font-sans text-[16px] leading-[24px] font-normal" for={id}>
 		{label}
 	</label>
 
 	{#if editing}
-		<div class="flex items-center gap-[10px]">
+		<div class="flex items-center gap-[8px]">
 			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				{id}
@@ -87,7 +84,7 @@
 				autofocus
 				onblur={commit}
 				onkeydown={onKeydown}
-				class="text-success text-label border-success/40 focus:border-success max-w-[180px] min-w-[120px] border-b text-right font-sans leading-[19px] font-bold outline-none"
+				class="text-success font-serif-ui border-success/40 focus:border-success max-w-[180px] min-w-[120px] border-b text-right text-[16px] leading-none font-medium tracking-[-0.32px] outline-none"
 			/>
 		</div>
 	{:else}
@@ -95,7 +92,7 @@
 			type="button"
 			onclick={startEdit}
 			disabled={!editable}
-			class="text-success text-label inline-flex items-center gap-[10px] font-sans leading-[19px] font-bold {editable
+			class="text-success font-serif-ui inline-flex items-center gap-[8px] text-[16px] leading-none font-medium tracking-[-0.32px] {editable
 				? 'cursor-pointer hover:opacity-80'
 				: 'cursor-default'}"
 		>
