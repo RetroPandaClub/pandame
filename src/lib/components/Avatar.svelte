@@ -15,12 +15,12 @@
 	//   sm: 32 px — status dot / inline thumbnail
 	//   md: 48 px — BrandHeader trailing
 	//   lg: 76 px — bot avatar inside a chat bubble
-	//   xl: 134 px — big profile avatar overlapping the header seam
+	//   xl: 122 px — big profile avatar overlapping the header seam
 	const SIZE: Record<Size, string> = {
 		sm: 'h-8 w-8 text-body2',
 		md: 'h-12 w-12 text-body1',
 		lg: 'h-[76px] w-[76px] text-h6',
-		xl: 'h-[134px] w-[134px] text-h4'
+		xl: 'h-[122px] w-[122px] text-h4'
 	};
 
 	let initials = $derived(

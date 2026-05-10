@@ -74,7 +74,9 @@
 		<div class="flex flex-1 flex-col {leading ? 'items-center text-center' : ''}">
 			<h1 class="text-h6 font-sans leading-none font-normal">{title}</h1>
 			{#if subtitle}
-				<p class="mt-[2px] font-sans text-[12px] opacity-80">{subtitle}</p>
+				<p class="mt-[3px] font-sans text-[10px] font-extralight tracking-[0.4px]">
+					{subtitle}
+				</p>
 			{/if}
 		</div>
 

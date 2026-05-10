@@ -182,24 +182,34 @@
 		<p class="text-danger text-body2" role="alert">{saveError}</p>
 	{/if}
 
-	<div class="mt-auto flex flex-col gap-[10px] pt-[20px]">
-		<button
-			type="button"
-			onclick={() => (logoutOpen = true)}
-			class="text-link-purple font-sans text-[15px] font-light underline-offset-2 hover:underline"
-		>
-			{$i18n.core.text.sign_out}
-		</button>
+	<!--
+    Inline-list footer mirroring the Figma `83:84` Profile screen,
+    where History + Log Out are simple Poppins Regular 16 px rows
+    on the white sheet rather than the underlined text-links the
+    edit screen used to render. Visually quieter, but still the
+    only paths to sign out / jump to history from this page.
+  -->
+	<nav
+		class="mt-auto flex flex-col items-start gap-[16px] pt-[24px]"
+		aria-label={$i18n.profile.title}
+	>
 		<button
 			type="button"
 			onclick={async () => {
 				await goto('/history');
 			}}
-			class="text-default font-sans text-[14px] font-medium hover:underline"
+			class="text-default font-sans text-[16px] font-normal transition-opacity hover:opacity-70"
 		>
 			{$i18n.profile.history_action}
 		</button>
-	</div>
+		<button
+			type="button"
+			onclick={() => (logoutOpen = true)}
+			class="text-default font-sans text-[16px] font-normal transition-opacity hover:opacity-70"
+		>
+			{$i18n.core.text.sign_out}
+		</button>
+	</nav>
 </Sheet>
 
 <AppBottomNav />
