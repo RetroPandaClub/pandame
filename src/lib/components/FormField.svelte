@@ -10,14 +10,10 @@
 		error?: string;
 		required?: boolean;
 		/**
-		 * The design alternates between two 16 px / 19 px label faces:
-		 *   - `sans`     (Poppins Medium) — Payer wallet, Title Deal,
-		 *                Agreement details, Summary, Votes in case of
-		 *                dispute.
-		 *   - `serif-ui` (Inter Medium) — Amount, Currency, Tenor,
-		 *                Rate, Deposit fee, Total payment, Add Documents.
-		 * Both share `tracking-[-0.32px]`. Default to `sans` since
-		 * that's the broader case.
+		 * Two label faces, both at 16 / 19 px and `tracking-[-0.32px]`:
+		 *   - `sans`     (Poppins Medium) — broader copy / section labels.
+		 *   - `serif-ui` (Inter Medium)   — dense numeric / summary copy.
+		 * Defaults to `sans`.
 		 */
 		labelFamily?: LabelFamily;
 		children: Snippet;
@@ -47,12 +43,8 @@
 	};
 </script>
 
-<!--
-  Label above input with `gap-[8px]`. Label is 16 px tracking
-  `-0.32px` in either Poppins Medium (`sans`) or Inter Medium
-  (`serif-ui`). Hint / error are wired via `aria-describedby` so the
-  caller can drop any input primitive into the slot.
--->
+<!-- Hint / error are wired via `aria-describedby` so the caller can
+     drop any input primitive into the slot. -->
 <label class="flex flex-col gap-[8px]" for={htmlFor}>
 	<span class="text-default text-label tracking-[-0.32px] {LABEL_FAMILY[labelFamily]}">
 		{label}

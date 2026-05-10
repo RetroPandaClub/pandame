@@ -162,7 +162,7 @@ interface I18nCreate {
 	recipient_wallet_label: string;
 	currency_label: string;
 	amount_label: string;
-	tenor_label: string;
+	expiry_label: string;
 	votes_label: string;
 	votes_disabled_hint: string;
 	summary_label: string;

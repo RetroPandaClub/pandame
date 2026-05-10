@@ -149,7 +149,7 @@
 		"recipient_wallet_label": "Recipient wallet",
 		"currency_label": "Currency",
 		"amount_label": "Amount",
-		"tenor_label": "Tenor",
+		"expiry_label": "Expiry",
 		"votes_label": "Votes in case of dispute",
 		"votes_disabled_hint": "Dispute jury voting will land in a future canister upgrade.",
 		"summary_label": "Summary",

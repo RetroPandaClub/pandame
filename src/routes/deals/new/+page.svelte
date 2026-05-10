@@ -32,7 +32,7 @@
 	let mode: Mode = $state(page.url.searchParams.get('side') === 'receive' ? 'receive' : 'pay');
 	let counterpartyText = $state('');
 	let amountText = $state('');
-	let tenorLocal = $state(defaultTenor());
+	let expiryLocal = $state(defaultExpiry());
 	let titleDeal = $state('');
 	let agreement = $state('');
 	let quorum: Quorum = $state('fair');
@@ -46,22 +46,22 @@
 
 	let amount = $derived(parseTokenAmount(amountText, token));
 	let counterparty = $derived(parsePrincipal(counterpartyText));
-	let tenorMs = $derived(Date.parse(tenorLocal));
-	let tenorNs = $derived(Number.isFinite(tenorMs) ? msToNs(tenorMs) : undefined);
+	let expiryMs = $derived(Date.parse(expiryLocal));
+	let expiryNs = $derived(Number.isFinite(expiryMs) ? msToNs(expiryMs) : undefined);
 
 	let valid = $derived(
 		termsAgreed &&
 			amount !== undefined &&
 			amount > 0n &&
-			tenorNs !== undefined &&
-			tenorMs > Date.now() &&
+			expiryNs !== undefined &&
+			expiryMs > Date.now() &&
 			(counterpartyText.trim().length === 0 || counterparty !== undefined)
 	);
 
 	let totalAmount = $derived(amount !== undefined ? amount + token.fee : undefined);
 
 	const submit = async () => {
-		if (!valid || amount === undefined || tenorNs === undefined) {
+		if (!valid || amount === undefined || expiryNs === undefined) {
 			return;
 		}
 
@@ -76,7 +76,7 @@
 
 			const { funded } = await createAndFundDeal({
 				amount,
-				expires_at_ns: tenorNs,
+				expires_at_ns: expiryNs,
 				recipient: recipientPrincipal,
 				payer: payerPrincipal,
 				title: titleDeal.trim() || undefined,
@@ -109,7 +109,7 @@
 		}
 	}
 
-	function defaultTenor(): string {
+	function defaultExpiry(): string {
 		const nowMs = Date.now();
 		const tzOffsetMs = new Date(nowMs).getTimezoneOffset() * 60_000;
 		const localNowMs = nowMs - tzOffsetMs;
@@ -190,8 +190,8 @@
 			</div>
 		</div>
 
-		<FormField label={$i18n.create.tenor_label} htmlFor="tenor" labelFamily="serif-ui">
-			<TextInput id="tenor" type="datetime-local" bind:value={tenorLocal} />
+		<FormField label={$i18n.create.expiry_label} htmlFor="expiry" labelFamily="serif-ui">
+			<TextInput id="expiry" type="datetime-local" bind:value={expiryLocal} />
 		</FormField>
 
 		<div class="flex flex-col gap-[12px]">
