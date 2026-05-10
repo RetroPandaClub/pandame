@@ -33,7 +33,11 @@
      so it reliably fills its allotted width (rather than collapsing to
      the intrinsic width of flex children — which would skip absolute
      content like the welcome panda artwork). -->
-<div class="bg-bg-soft flex min-h-[100dvh] justify-center pb-[env(safe-area-inset-bottom)]">
+<!-- Bottom safe-area is owned by the BottomNav (logged-in routes) or
+     the page footer (WelcomeScreen) — adding it to the wash too makes
+     the page taller than the viewport on iOS, which is where the
+     few-pixel scroll on the home screen was coming from. -->
+<div class="bg-bg-soft flex min-h-[100dvh] justify-center">
 	<div class="bg-bg shadow-primary/10 flex min-h-[100dvh] w-full max-w-[420px] flex-col shadow-xl">
 		{@render children()}
 	</div>
