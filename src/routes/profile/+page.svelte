@@ -47,19 +47,6 @@
 	{/snippet}
 </BrandHeader>
 
-<!--
-  Canonical Profile screen mirroring Figma `83:84`:
-    - 122 px avatar with a `+` badge overlapping the green→white
-      seam
-    - simple list of action rows on the white sheet (Poppins Regular
-      18 px Blu-Night), each with a quiet chevron-right indicator
-    - rows are: Edit Profile (→ /profile/edit, the form), History
-      (→ /history), Log Out (opens `LogoutConfirmModal`)
-
-  Skipped from the Figma frame: the "Switch Accounts" dropdown
-  (the canister has no role-switching today) and the "Save" CTA
-  (nothing is editable on this view — the form lives behind /edit).
--->
 <Sheet paddingClass="px-[34px] pt-[80px] pb-[120px]" class="gap-[28px]">
 	<div class="absolute -top-[60px] left-1/2 -translate-x-1/2">
 		<div class="relative">

@@ -33,16 +33,6 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<!--
-  Translucent `rgba(99,42,232,0.32)` brand-purple backdrop covering
-  the whole device frame (the Figma "logout confirm" frame washes
-  the page in 32 % primary-stroke, not a solid dark fill). Centred
-  white `rounded-[12px]` card (302 px wide, 161 px tall, ~25 px
-  vertical padding) with a subtle `0 4px 2px rgba(0,0,0,0.25)`
-  drop. Heading is Poppins Regular `text-h5` (≈ 25 px) Blu Night;
-  the two CTAs are BOTH filled purple `<Button size="sm">` sitting
-  in a single row with `gap-[12px]`.
--->
 {#if open}
 	<div
 		class="animate-fade fixed inset-0 z-50 flex items-center justify-center bg-[rgba(99,42,232,0.32)] p-6"

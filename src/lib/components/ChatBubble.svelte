@@ -14,15 +14,10 @@
 </script>
 
 <!--
-  Chat row:
-    - Bot:   70 px lavender bot avatar on the LEFT, `gap-[18px]`,
-             then a soft-grey speech bubble whose corners are cut
-             into the canonical "blob": tl-50, tr-26, br-26, bl-0
-             so the flat edge tucks into the avatar. Body copy is
-             16 px Poppins Light Link-Purple.
-    - User:  no avatar; right-aligned bubble on the brand purple
-             with mirrored "blob" corners. The user mostly replies
-             via `<ChatChoiceRow>`, so this side is rare.
+  The bubble's flat corner (bl on bot, br on user) tucks into the
+  side that owns the avatar — that's why the radius is 0 there.
+  The user variant is rare: most user replies go through
+  `<ChatChoiceRow>` instead of a bubble.
 -->
 <div
 	class="flex w-full items-end gap-[18px] {side === 'bot'

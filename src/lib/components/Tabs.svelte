@@ -20,16 +20,6 @@
 	};
 </script>
 
-<!--
-  Segmented control sized to sit on the purple BrandHeader:
-    - Container: `rounded-xl` (20 px) with a translucent-white
-      0.846 px border, transparent fill.
-    - Each tab: ~121 × 34 px, `rounded-tab` (23 px).
-    - Active:   off-white canvas fill, Blu Night text.
-    - Inactive: transparent, white text @ 90 %.
-  Typography is Inter Medium 11.85 px tracking `-0.237 px` per the
-  brand spec for compact controls.
--->
 <div
 	role="tablist"
 	aria-label={ariaLabel}

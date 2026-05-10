@@ -41,10 +41,6 @@
 			<UserPrincipalBadge />
 		{/snippet}
 
-		<!-- The greeting pill — a transparent capsule outlined in
-		     `rgba(133,88,237,0.67)` (Figma's "shape-primary" stroke)
-		     with white 16 px Poppins Regular copy, sitting on the
-		     purple header below the title row. -->
 		<span
 			class="text-default-inverse flex h-[36px] items-center justify-center rounded-[55px] border border-[rgba(133,88,237,0.67)] bg-transparent px-[24px] font-sans text-[16px] leading-[24px] font-normal"
 		>

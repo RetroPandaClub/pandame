@@ -58,21 +58,10 @@
 </script>
 
 <!--
-  Single-deal preview card:
-    - Outer: `bg-bg-elevated`, `rounded-[10px]`, `shadow-deal-card`,
-      no border.
-    - Title bar: an INSET `primary-stroke` (#632AE8) pill (mx/mt 11
-      px, `rounded-[4px]`, `h-[24px]`) with the deal title (Poppins
-      SemiBold 12 px white tracking 0.48 px, centred) on the left
-      and `<DealStatusIcon>` (24 px circle) on the right. Inset
-      rather than edge-to-edge so it reads as a label inside the
-      card.
-    - Body row 1: currency name (Poppins Medium 16 px Blu Night) +
-      signed amount (`<Money>`, colorize + signed).
-    - Body row 2: "Time to conclude" (Poppins Regular 14 px) +
-      `<Countdown>` with a small letter-spacing nudge.
-    - Optional `actions` snippet at the bottom for inline Approve /
-      Decline / Choose-files rows on Pending / Created lists.
+  Title bar is INSET (mx/mt 11 px) rather than edge-to-edge so it
+  reads as a label inside the card. The optional `actions` snippet
+  is used by /transitions for inline Approve / Decline (Pending)
+  and Choose-files (Created) rows.
 -->
 {#snippet body()}
 	<header

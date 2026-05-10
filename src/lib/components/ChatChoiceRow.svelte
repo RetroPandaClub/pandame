@@ -29,12 +29,8 @@
 </script>
 
 <!--
-  Reply pills mirroring the bot bubble's "blob" shape — tl-50 / br-50
-  / tr-22 / bl-22 — with a 1 px purple-stroke border and the Figma
-  drop-shadow (lavender on filled, translucent purple on outlined).
-  Typography is Poppins Medium 12 px. `primary` = filled purple,
-  `secondary` = transparent outline. `pl-[88px]` indents the row
-  under the 70 px bot avatar + 18 px gap.
+  `pl-[88px]` indents the row under the 70 px bot avatar + 18 px
+  gap so each choice sits beneath the bubble, not its avatar.
 -->
 <div class="flex flex-wrap items-center gap-[16px] pl-[88px]" role="group" aria-label={ariaLabel}>
 	{#each choices as choice (choice.id)}

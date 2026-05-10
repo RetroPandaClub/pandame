@@ -10,12 +10,7 @@
 	let { size = 'md' }: Props = $props();
 </script>
 
-<!--
-  BrandHeader trailing pair: 15 px Poppins Regular underlined
-  username + 48 px Avatar with `gap-[12px]` between them. The
-  Avatar falls back to caller-principal initials when no image is
-  set.
--->
+<!-- Avatar falls back to caller-principal initials when no image is set. -->
 <span
 	class="text-default-inverse inline-flex items-center gap-[12px] font-sans text-[15px] font-normal underline underline-offset-2"
 >

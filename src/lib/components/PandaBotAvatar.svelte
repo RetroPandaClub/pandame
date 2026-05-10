@@ -16,12 +16,9 @@
 </script>
 
 <!--
-  Chat-bubble bot avatar — the panda silhouette inside a soft
-  lavender full-circle disc. Same artwork as `PandaMark` / the
-  favicon, but rendered as a full circle (vs PandaMark's squircle)
-  to read as a chat face. Disc fill is pinned to the Figma chat
-  spec (`#e0e2ff`) — slightly bluer than `--color-primary-light`
-  so the disc reads as a halo against the purple header.
+  Disc fill `#e0e2ff` is intentional — slightly bluer than
+  `--color-primary-light` so the disc reads as a halo against the
+  purple header rather than melting into it.
 -->
 <figure
 	class="relative inline-flex shrink-0 items-center justify-center rounded-full bg-[#e0e2ff] {SIZE[

@@ -59,14 +59,9 @@
 </script>
 
 <!--
-  Profile row pattern: label LEFT (Poppins Regular 16 px / 24 px lh,
-  Blu Night), value RIGHT (Inter Medium ~16 px tracking `-0.32 px`,
-  success green) + a 14 × 14 pencil icon to the right of the value.
-  The label uses 24 px line-height to match Figma's `leading-[24px]`
-  baseline. Click the row to enter inline-edit mode (text input
-  replaces the value, Enter commits, Esc cancels, blur commits).
-  `editable={false}` skips the pencil and disables the click
-  target — used for read-only rows (Reliability, Weight).
+  Inline-editable row: click to enter edit mode, Enter / blur
+  commits, Esc cancels. `editable={false}` disables the click
+  target and hides the pencil — used for read-only rows.
 -->
 <div class="flex items-center justify-between" role="group" aria-label={ariaLabel ?? label}>
 	<label class="text-default font-sans text-[16px] leading-[24px] font-normal" for={id}>

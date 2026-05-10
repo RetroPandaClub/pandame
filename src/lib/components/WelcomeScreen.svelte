@@ -4,12 +4,10 @@
 </script>
 
 <!--
-  Welcome screen is a single-viewport experience: pinned to the
-  device frame's height, never scrolls. Three rows stack with the
-  artwork claiming `flex-1` so it absorbs all the slack on tall
-  phones (centred via `justify-center`) and shrinks gracefully on
-  small phones via `min-h-0`. The blur underlay bleeds in from
-  below as decoration only.
+  Single-viewport screen — `h-[100dvh] overflow-hidden` so it never
+  scrolls. The middle row owns `flex-1 min-h-0` so the artwork
+  absorbs slack on tall phones and shrinks rather than overflowing
+  on short ones.
 -->
 <section
 	class="bg-bg relative flex h-[100dvh] w-full flex-col items-center overflow-hidden pt-[max(env(safe-area-inset-top),42px)] pb-[max(env(safe-area-inset-bottom),24px)]"
@@ -32,12 +30,8 @@
 		class="relative flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-[32px] px-6"
 	>
 		<!--
-      Logo animation: animated dashed rings + scattered particles
-      layered behind the panda silhouette. Both assets are larger
-      than their viewport and intentionally crop on every side so
-      the rings appear to extend off-frame. The artwork scales with
-      the available slack — `min-h-0` lets it shrink on short
-      phones rather than overflowing the section.
+      Both layers are deliberately larger than their viewport and
+      crop on every side so the dashed rings extend off-frame.
     -->
 		<div class="relative aspect-[345/317] min-h-0 w-full max-w-[345px] flex-shrink overflow-hidden">
 			<img

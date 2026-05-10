@@ -12,15 +12,8 @@
 	const isActive = (segment: string) => (segment === '/' ? path === '/' : path.startsWith(segment));
 </script>
 
-<!--
-  Wires `BottomNav` to the app's three primary destinations:
-    - left:   /transitions  (swap-arrows icon)
-    - center: /              (raised home button)
-    - right:  /profile       (person icon)
-
-  Side icons are bare SVGs (no IconButton chrome); active vs inactive
-  is conveyed by colour only.
--->
+<!-- Active vs inactive is conveyed by colour only — `text-primary`
+     when on that route, `text-default` otherwise. -->
 <BottomNav ariaLabel={$i18n.nav.aria_label}>
 	{#snippet left()}
 		<button

@@ -36,22 +36,10 @@
 	};
 </script>
 
-<!--
-  Full-bleed coloured header:
-    - tone="primary" (purple) by default; tone="success" (green) on
-      the Profile screens
-    - 31 px top inset above the iOS safe-area, 20 px horizontal
-      padding, ~57 px bottom padding so the Sheet's 40 px overlap
-      leaves a visible band of header behind the rounded corners
-    - title: Poppins Regular 20 px white
-    - optional subtitle (small Poppins Regular 12 px white/80)
-    - trailing: username + 48 px Avatar
-    - optional children (Tabs / FilterChip strip) sit `mt-[18px]`
-      below the title row
-  Two decorative blurred ellipses are layered behind the row as a
-  CSS radial-gradient so the header reads "lit from inside" without
-  an extra raster asset.
--->
+<!-- Bottom padding (`pb-[57px]`) is sized so the Sheet's 40 px
+     overlap leaves a visible band of header behind the rounded
+     corners. Decorative ellipses below are CSS radial-gradients
+     to avoid shipping a raster asset. -->
 <header
 	class="{TONE_BG[
 		tone
