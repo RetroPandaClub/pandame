@@ -42,7 +42,7 @@
 			type="button"
 			disabled={choice.disabled}
 			onclick={choice.onclick}
-			class="flex h-[38px] min-w-0 shrink items-center justify-center truncate rounded-tl-[50px] rounded-tr-[22px] rounded-br-[50px] rounded-bl-[22px] border px-[16px] font-sans text-[12px] font-medium transition-colors {VARIANT[
+			class="flex h-[38px] min-w-0 shrink items-center justify-center truncate rounded-tl-[50px] rounded-tr-[22px] rounded-br-[50px] rounded-bl-[22px] border px-[20px] font-sans text-[12px] font-medium transition-colors {VARIANT[
 				choice.variant ?? 'secondary'
 			]} {choice.disabled ? 'cursor-not-allowed opacity-40' : 'hover:opacity-90 active:opacity-80'}"
 		>
