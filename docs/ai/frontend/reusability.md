@@ -95,7 +95,7 @@
 | `PencilIcon`      | Inline-edit affordance — used by ProfileFieldRow + Profile heading. |
 | `PlusIcon`        | "+" badge floating on the big Profile avatar.                       |
 | `ProfileIcon`     | Person — bottom-nav right.                                          |
-| `SwapIcon`        | Arrows — bottom-nav left (Transitions).                             |
+| `SwapIcon`        | Arrows — bottom-nav left (Transactions).                            |
 
 Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 `currentColor`. Add new icons as their own files; consider

@@ -9,8 +9,8 @@
 		subtitle?: string;
 		/**
 		 * Header tint. `primary` = brand purple (default — used by Home,
-		 * History, Transitions, Create Deal, Profile User). `success` =
-		 * brand green (used by Profile Arbitrator + Profile Edit).
+		 * History, Transactions, Create Deal). `success` = brand green
+		 * (used by Profile + Profile Edit).
 		 */
 		tone?: Tone;
 		leading?: Snippet;
