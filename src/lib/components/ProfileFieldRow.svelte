@@ -1,5 +1,8 @@
 <script lang="ts">
+	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
+	import CloseIcon from '$lib/components/icons/CloseIcon.svelte';
 	import PencilIcon from '$lib/components/icons/PencilIcon.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		id: string;
@@ -59,9 +62,12 @@
 </script>
 
 <!--
-  Inline-editable row: click to enter edit mode, Enter / blur
-  commits, Esc cancels. `editable={false}` disables the click
-  target and hides the pencil — used for read-only rows.
+  Inline-editable row: click the value to enter edit mode, then
+  use the explicit ✓ / ✗ buttons (or Enter / Esc on keyboard) to
+  commit / cancel. Buttons use `onmousedown.preventDefault` so a
+  tap on them doesn't trigger the input's `blur` first and swallow
+  the click. `editable={false}` disables the click target and hides
+  the pencil — used for read-only rows.
 -->
 <div class="flex items-center justify-between" role="group" aria-label={ariaLabel ?? label}>
 	<label class="text-default font-sans text-[16px] leading-[24px] font-normal" for={id}>
@@ -77,10 +83,27 @@
 				bind:value={draft}
 				{placeholder}
 				autofocus
-				onblur={commit}
 				onkeydown={onKeydown}
-				class="text-success font-serif-ui border-success/40 focus:border-success max-w-[180px] min-w-[120px] border-b text-right text-[16px] leading-none font-medium tracking-[-0.32px] outline-none"
+				class="text-success font-serif-ui border-success/40 focus:border-success max-w-[140px] min-w-[100px] border-b text-right text-[16px] leading-none font-medium tracking-[-0.32px] outline-none"
 			/>
+			<button
+				type="button"
+				aria-label={$i18n.profile.edit_save}
+				onmousedown={(event) => event.preventDefault()}
+				onclick={commit}
+				class="bg-success text-default-inverse flex h-[24px] w-[24px] items-center justify-center rounded-full transition-opacity hover:opacity-85"
+			>
+				<span class="flex h-[14px] w-[14px] items-center"><CheckIcon /></span>
+			</button>
+			<button
+				type="button"
+				aria-label={$i18n.profile.edit_cancel}
+				onmousedown={(event) => event.preventDefault()}
+				onclick={cancelEdit}
+				class="bg-danger text-default-inverse flex h-[24px] w-[24px] items-center justify-center rounded-full transition-opacity hover:opacity-85"
+			>
+				<span class="flex h-[12px] w-[12px] items-center"><CloseIcon /></span>
+			</button>
 		</div>
 	{:else}
 		<button

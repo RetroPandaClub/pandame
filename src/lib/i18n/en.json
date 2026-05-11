@@ -99,6 +99,7 @@
 		"history_action": "History",
 		"add_avatar_aria": "Add or change profile photo",
 		"edit_save": "Save",
+		"edit_cancel": "Cancel",
 		"edit_save_error": "Couldn't save the profile. Please try again.",
 		"username_placeholder": "Pick a public nickname",
 		"name_placeholder": "Your first name",

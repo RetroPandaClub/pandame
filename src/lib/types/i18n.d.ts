@@ -111,6 +111,7 @@ interface I18nProfile {
 	history_action: string;
 	add_avatar_aria: string;
 	edit_save: string;
+	edit_cancel: string;
 	edit_save_error: string;
 	username_placeholder: string;
 	name_placeholder: string;
