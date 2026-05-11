@@ -114,6 +114,13 @@ interface I18nProfile {
 	avatar_sheet_description: string;
 	avatar_take_photo: string;
 	avatar_choose_library: string;
+	avatar_camera_hint: string;
+	avatar_camera_preview_aria: string;
+	avatar_capture: string;
+	avatar_camera_back: string;
+	avatar_camera_unavailable: string;
+	avatar_camera_denied: string;
+	avatar_camera_unsupported: string;
 	avatar_too_large: string;
 	avatar_invalid: string;
 	edit_save: string;
