@@ -260,10 +260,4 @@
 			</Button>
 		</div>
 	{/if}
-
-	{#snippet footer()}
-		<Button variant="ghost" disabled={busy} onclick={close}>
-			{$i18n.profile.edit_cancel}
-		</Button>
-	{/snippet}
 </Modal>
