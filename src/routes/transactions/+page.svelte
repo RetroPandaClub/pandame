@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Principal } from '@icp-sdk/core/principal';
+	import { page } from '$app/state';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
@@ -20,7 +21,20 @@
 
 	type Tab = 'pending' | 'created' | 'disputed';
 
-	let tab: Tab = $state('pending');
+	const TABS: readonly Tab[] = ['pending', 'created', 'disputed'];
+
+	const isTab = (value: string | null): value is Tab =>
+		value !== null && (TABS as readonly string[]).includes(value);
+
+	// `?tab=` is the contract used by the home chatbot's "See Deal"
+	// branch (Figma 219:306). Anything we don't recognise falls back
+	// to the default Pending view rather than throwing.
+	const initialTab = (): Tab => {
+		const raw = page.url.searchParams.get('tab');
+		return isTab(raw) ? raw : 'pending';
+	};
+
+	let tab: Tab = $state(initialTab());
 
 	let principal = $derived.by(() => {
 		const text = $userPrincipalText;
