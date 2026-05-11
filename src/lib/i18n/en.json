@@ -38,12 +38,17 @@
 		"bot_greeting_suffix": " What would you like to do?",
 		"bot_pay_or_receive": "Sure, do you pay or receive?",
 		"bot_wizard_or_expert": "Do you continue with the wizard or switch to the Expert version?",
+		"bot_history_filter": "Sure, which deals would you like to see?",
 		"choice_create": "Create new deals",
 		"choice_history": "See your deals",
 		"choice_pay": "Pay",
 		"choice_receive": "Receive",
 		"choice_guided": "Guided",
 		"choice_expert": "Expert",
+		"choice_filter_all": "All",
+		"choice_filter_active": "Active",
+		"choice_filter_settled": "Settled",
+		"choice_filter_refunded": "Refunded",
 		"help_label": "Do you need help?"
 	},
 	"history": {

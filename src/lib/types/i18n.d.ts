@@ -45,12 +45,17 @@ interface I18nHome {
 	bot_greeting_suffix: string;
 	bot_pay_or_receive: string;
 	bot_wizard_or_expert: string;
+	bot_history_filter: string;
 	choice_create: string;
 	choice_history: string;
 	choice_pay: string;
 	choice_receive: string;
 	choice_guided: string;
 	choice_expert: string;
+	choice_filter_all: string;
+	choice_filter_active: string;
+	choice_filter_settled: string;
+	choice_filter_refunded: string;
 	help_label: string;
 }
 

@@ -13,23 +13,39 @@
 
 	type Mode = 'pay' | 'receive';
 	type Path = 'guided' | 'expert';
+	type HistoryFilter = 'all' | 'active' | 'settled' | 'refunded';
 
-	// Three-step reveal: clicking "Create new deals" only flips
-	// `intentCreate` so the Pay/Receive bubble appears; picking
-	// Pay or Receive then reveals the Guided/Expert bubble; that
-	// final pick navigates away.
+	// The chatbot is a single decision tree with two branches: Create
+	// (multi-step wizard ending in `/deals/new`) and History (one-step
+	// filter pick ending in `/history?filter=…`). Each branch is gated
+	// by a separate `intent…` flag so the two are mutually exclusive
+	// and the user can't end up in a half-finished state.
 	let intentCreate = $state(false);
+	let intentHistory = $state(false);
 	let mode: Mode | undefined = $state(undefined);
 	let path: Path | undefined = $state(undefined);
+	let historyFilter: HistoryFilter | undefined = $state(undefined);
 
 	// Header chip text mirrors the chatbot's current branch — Figma
-	// frames flip "Hello!" → "New Deal" once the user commits to the
-	// create flow (and "Your Deals" once they've picked the history
-	// branch, see `intentHistory` once that lands).
-	let headerChip = $derived(intentCreate ? $i18n.home.chip_new_deal : $i18n.home.chip_hello);
+	// frames flip "Hello!" → "New Deal" the moment the user commits
+	// to a branch. The history branch follows the same pattern.
+	let headerChip = $derived.by(() => {
+		if (intentCreate) {
+			return $i18n.home.chip_new_deal;
+		}
+		if (intentHistory) {
+			return $i18n.home.chip_your_deals;
+		}
+		return $i18n.home.chip_hello;
+	});
 
 	const startCreate = () => {
 		intentCreate = true;
+		intentHistory = false;
+	};
+	const startHistory = () => {
+		intentHistory = true;
+		intentCreate = false;
 	};
 	const choosePay = () => {
 		mode = 'pay';
@@ -46,6 +62,10 @@
 		await goto(
 			mode === 'receive' ? '/deals/new?side=receive&mode=expert' : '/deals/new?mode=expert'
 		);
+	};
+	const chooseFilter = (next: HistoryFilter) => async () => {
+		historyFilter = next;
+		await goto(`/history?filter=${next}`);
 	};
 </script>
 
@@ -84,13 +104,47 @@
 				{
 					id: 'history',
 					label: $i18n.home.choice_history,
-					variant: 'secondary',
-					onclick: async () => {
-						await goto('/history');
-					}
+					variant: intentHistory ? 'primary' : 'secondary',
+					onclick: startHistory
 				}
 			]}
 		/>
+
+		{#if intentHistory}
+			<ChatBubble side="bot">
+				{$i18n.home.bot_history_filter}
+			</ChatBubble>
+
+			<ChatChoiceRow
+				scroll
+				choices={[
+					{
+						id: 'filter-all',
+						label: $i18n.home.choice_filter_all,
+						variant: historyFilter === 'all' ? 'primary' : 'secondary',
+						onclick: chooseFilter('all')
+					},
+					{
+						id: 'filter-active',
+						label: $i18n.home.choice_filter_active,
+						variant: historyFilter === 'active' ? 'primary' : 'secondary',
+						onclick: chooseFilter('active')
+					},
+					{
+						id: 'filter-settled',
+						label: $i18n.home.choice_filter_settled,
+						variant: historyFilter === 'settled' ? 'primary' : 'secondary',
+						onclick: chooseFilter('settled')
+					},
+					{
+						id: 'filter-refunded',
+						label: $i18n.home.choice_filter_refunded,
+						variant: historyFilter === 'refunded' ? 'primary' : 'secondary',
+						onclick: chooseFilter('refunded')
+					}
+				]}
+			/>
+		{/if}
 
 		{#if intentCreate}
 			<ChatBubble side="bot">
