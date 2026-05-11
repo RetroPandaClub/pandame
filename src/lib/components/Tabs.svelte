@@ -20,10 +20,17 @@
 	};
 </script>
 
+<!--
+  Outer container is a full pill (Figma component `Toggle Pay Receive`
+  uses `rounded-[20px]` which collapses to a capsule at the 34 px
+  active-pill height we render). The thin white-15% border keeps it
+  visible against the purple BrandHeader without competing with the
+  active tab chip.
+-->
 <div
 	role="tablist"
 	aria-label={ariaLabel}
-	class="inline-flex items-center rounded-xl border-[0.846px] border-white/15 bg-transparent"
+	class="inline-flex items-center rounded-full border border-white/15 bg-transparent"
 >
 	{#each tabs as tab (tab.id)}
 		{@const active = value === tab.id}
