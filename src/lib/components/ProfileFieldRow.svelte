@@ -70,7 +70,10 @@
   the pencil — used for read-only rows.
 -->
 <div class="flex items-center justify-between" role="group" aria-label={ariaLabel ?? label}>
-	<label class="text-default font-sans text-[16px] leading-[24px] font-normal" for={id}>
+	<label
+		class="text-default font-serif-ui text-[16px] leading-[24px] font-medium tracking-[-0.32px]"
+		for={id}
+	>
 		{label}
 	</label>
 
