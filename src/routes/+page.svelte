@@ -22,6 +22,12 @@
 	let mode: Mode | undefined = $state(undefined);
 	let path: Path | undefined = $state(undefined);
 
+	// Header chip text mirrors the chatbot's current branch — Figma
+	// frames flip "Hello!" → "New Deal" once the user commits to the
+	// create flow (and "Your Deals" once they've picked the history
+	// branch, see `intentHistory` once that lands).
+	let headerChip = $derived(intentCreate ? $i18n.home.chip_new_deal : $i18n.home.chip_hello);
+
 	const startCreate = () => {
 		intentCreate = true;
 	};
@@ -54,7 +60,7 @@
 		<span
 			class="text-default-inverse border-shape-primary/67 flex h-[36px] items-center justify-center rounded-[55px] border bg-transparent px-[24px] font-sans text-[16px] leading-[24px] font-normal"
 		>
-			{$i18n.home.opening_chip}
+			{headerChip}
 		</span>
 	</BrandHeader>
 

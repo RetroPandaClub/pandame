@@ -36,6 +36,9 @@ interface I18nNav {
 
 interface I18nHome {
 	title: string;
+	chip_hello: string;
+	chip_new_deal: string;
+	chip_your_deals: string;
 	opening_chip: string;
 	bot_greeting_prefix: string;
 	bot_greeting_brand: string;

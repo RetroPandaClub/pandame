@@ -29,6 +29,9 @@
 	},
 	"home": {
 		"title": "Home",
+		"chip_hello": "Hello!",
+		"chip_new_deal": "New Deal",
+		"chip_your_deals": "Your Deals",
 		"opening_chip": "Hello!",
 		"bot_greeting_prefix": "Hello. Welcome to ",
 		"bot_greeting_brand": "PandaMe!",
