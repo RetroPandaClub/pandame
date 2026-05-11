@@ -83,7 +83,6 @@ one fits.
 - `ProfileFieldRow.svelte` — label-left / green-value-right inline-editable row.
 - `Sheet.svelte` — white off-white card with `rounded-t-[40px]` sliding over the BrandHeader.
 - `Tabs.svelte` — generic segmented control `<T extends string>` (matches Toggle Pay/Receive).
-- `TermsCheckbox.svelte` — 14×14 checkbox with multi-color label.
 - `TextInput.svelte` — themed `<input>` (41 px h, 8 px radius, 1.5 px light-purple border, `variant="default" | "active"`).
 - `UploadCTA.svelte` — purple "Choose files to upload" + "Zip, Jpg or Pdf …" caption pair.
 - `VoteQuorumPicker.svelte` — concentric Roboto rings 3-radio picker.

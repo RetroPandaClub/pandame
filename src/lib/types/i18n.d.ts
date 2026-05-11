@@ -192,9 +192,6 @@ interface I18nCreate {
 	add_documents_label: string;
 	upload_cta: string;
 	upload_caption: string;
-	terms_prefix: string;
-	terms_brand: string;
-	terms_link: string;
 	help_label: string;
 }
 

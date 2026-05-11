@@ -12,7 +12,6 @@
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
-	import TermsCheckbox from '$lib/components/TermsCheckbox.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import UploadCTA from '$lib/components/UploadCTA.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
@@ -36,7 +35,6 @@
 	let titleDeal = $state('');
 	let agreement = $state('');
 	let quorum: Quorum = $state('fair');
-	let termsAgreed = $state(false);
 
 	let progress = $state(false);
 	let error: string | undefined = $state(undefined);
@@ -50,8 +48,7 @@
 	let expiryNs = $derived(Number.isFinite(expiryMs) ? msToNs(expiryMs) : undefined);
 
 	let valid = $derived(
-		termsAgreed &&
-			amount !== undefined &&
+		amount !== undefined &&
 			amount > 0n &&
 			expiryNs !== undefined &&
 			expiryMs > Date.now() &&
@@ -245,16 +242,6 @@
 			</span>
 			<UploadCTA label={$i18n.create.upload_cta} caption={$i18n.create.upload_caption} />
 		</div>
-
-		<TermsCheckbox
-			id="terms"
-			bind:checked={termsAgreed}
-			prefix={$i18n.create.terms_prefix}
-			brand={$i18n.create.terms_brand}
-			linkLabel={$i18n.create.terms_link}
-			linkHref="https://github.com/AntonioVentilii/escrow"
-			suffix=""
-		/>
 
 		{#if error !== undefined}
 			<p class="text-danger text-body2" role="alert">{error}</p>
