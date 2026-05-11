@@ -20,7 +20,10 @@ export default defineConfig({
 			development: isEmulator ? EMULATOR_SATELLITE_ID : LOCAL_SATELLITE_ID,
 			production: 'wqhtf-fqaaa-aaaal-amssq-cai'
 		},
-		source: 'build'
+		hosting: {
+			source: 'build',
+			predeploy: ['npm run build']
+		}
 	},
 	orbiter: {
 		id: 'gfpjj-5iaaa-aaaal-amr4a-cai'
