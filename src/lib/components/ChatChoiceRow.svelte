@@ -44,7 +44,7 @@
 -->
 <div
 	class="flex flex-nowrap items-center gap-[9px] pr-[12px] pl-[88px] {scroll
-		? '[&::-webkit-scrollbar]:hidden overflow-x-auto [scrollbar-width:none]'
+		? '[scrollbar-width:none] overflow-x-auto [&::-webkit-scrollbar]:hidden'
 		: ''}"
 	role="group"
 	aria-label={ariaLabel}
@@ -56,9 +56,9 @@
 			onclick={choice.onclick}
 			class="flex h-[38px] items-center justify-center rounded-tl-[50px] rounded-tr-[22px] rounded-br-[50px] rounded-bl-[22px] border px-[20px] font-sans text-[12px] font-medium transition-colors {scroll
 				? 'shrink-0 whitespace-nowrap'
-				: 'min-w-0 shrink truncate'} {VARIANT[
-				choice.variant ?? 'secondary'
-			]} {choice.disabled ? 'cursor-not-allowed opacity-40' : 'hover:opacity-90 active:opacity-80'}"
+				: 'min-w-0 shrink truncate'} {VARIANT[choice.variant ?? 'secondary']} {choice.disabled
+				? 'cursor-not-allowed opacity-40'
+				: 'hover:opacity-90 active:opacity-80'}"
 		>
 			{choice.label}
 		</button>

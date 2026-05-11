@@ -12,13 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { DealFilter } from '$lib/types/deal';
 
-	const FILTER_ORDER: readonly DealFilter[] = [
-		'all',
-		'active',
-		'settled',
-		'refunded',
-		'cancelled'
-	];
+	const FILTER_ORDER: readonly DealFilter[] = ['all', 'active', 'settled', 'refunded', 'cancelled'];
 
 	const isDealFilter = (value: string | null): value is DealFilter =>
 		value !== null && (FILTER_ORDER as readonly string[]).includes(value);
