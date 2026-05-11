@@ -1,5 +1,6 @@
 import { Collection } from '$lib/constants/collections.constants';
 import { emptyProfile, type UserProfile } from '$lib/types/profile';
+import { defaultAvatarUrlForPrincipal } from '$lib/utils/avatar.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { getDoc, setDoc, type Doc } from '@junobuild/core';
 
@@ -77,13 +78,27 @@ export const upsertProfile = async (
  * freshly-created empty shell. Callers that just want to read should
  * use `getProfile` directly; this one is for "first-load on sign-in"
  * paths that want a guaranteed `version` so subsequent edits succeed.
+ *
+ * Also makes sure `avatar_url` is set: if the principal has no profile
+ * yet (or has one but never picked an avatar), the doc is persisted
+ * with a deterministic DiceBear URL derived from the principal alone.
+ * This guarantees every user has a stable default avatar without ever
+ * sending the raw principal to the image host.
  */
 export const ensureProfile = async (principal: string): Promise<Doc<UserProfile>> => {
 	const doc = await getProfile(principal);
 
-	if (nonNullish(doc.version)) {
+	const hasAvatar = nonNullish(doc.data.avatar_url) && doc.data.avatar_url.length > 0;
+
+	if (nonNullish(doc.version) && hasAvatar) {
 		return doc;
 	}
 
-	return await upsertProfile(doc);
+	return await upsertProfile({
+		...doc,
+		data: {
+			...doc.data,
+			avatar_url: hasAvatar ? doc.data.avatar_url : defaultAvatarUrlForPrincipal(principal)
+		}
+	});
 };
