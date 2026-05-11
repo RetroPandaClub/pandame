@@ -38,24 +38,24 @@ interface I18nHome {
 	title: string;
 	chip_hello: string;
 	chip_new_deal: string;
-	chip_your_deals: string;
+	chip_see_deal: string;
 	opening_chip: string;
 	bot_greeting_prefix: string;
 	bot_greeting_brand: string;
 	bot_greeting_suffix: string;
 	bot_pay_or_receive: string;
 	bot_wizard_or_expert: string;
-	bot_history_filter: string;
+	bot_see_deal_filter: string;
 	choice_create: string;
 	choice_history: string;
 	choice_pay: string;
 	choice_receive: string;
 	choice_guided: string;
 	choice_expert: string;
-	choice_filter_all: string;
-	choice_filter_active: string;
-	choice_filter_settled: string;
-	choice_filter_refunded: string;
+	choice_see_pending: string;
+	choice_see_created: string;
+	choice_see_disputed: string;
+	choice_see_history: string;
 	help_label: string;
 }
 

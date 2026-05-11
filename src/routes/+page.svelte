@@ -13,38 +13,40 @@
 
 	type Mode = 'pay' | 'receive';
 	type Path = 'guided' | 'expert';
-	type HistoryFilter = 'all' | 'active' | 'settled' | 'refunded';
+	type SeeDeal = 'pending' | 'created' | 'disputed' | 'history';
 
 	// The chatbot is a single decision tree with two branches: Create
-	// (multi-step wizard ending in `/deals/new`) and History (one-step
-	// filter pick ending in `/history?filter=…`). Each branch is gated
-	// by a separate `intent…` flag so the two are mutually exclusive
-	// and the user can't end up in a half-finished state.
+	// (multi-step wizard ending in `/deals/new`) and See Deal (one-step
+	// filter pick ending in `/transactions?tab=…` or `/history`). Each
+	// branch is gated by a separate `intent…` flag so the two are
+	// mutually exclusive and the user can't end up in a half-finished
+	// state.
 	let intentCreate = $state(false);
-	let intentHistory = $state(false);
+	let intentSeeDeal = $state(false);
 	let mode: Mode | undefined = $state(undefined);
 	let path: Path | undefined = $state(undefined);
-	let historyFilter: HistoryFilter | undefined = $state(undefined);
+	let seeDeal: SeeDeal | undefined = $state(undefined);
 
 	// Header chip text mirrors the chatbot's current branch — Figma
-	// frames flip "Hello!" → "New Deal" the moment the user commits
-	// to a branch. The history branch follows the same pattern.
+	// frames flip "Hello!" → "New Deal" once the user commits to the
+	// create flow, and → "See Deal" once they pick the see-deals
+	// branch (frame 219:306).
 	let headerChip = $derived.by(() => {
 		if (intentCreate) {
 			return $i18n.home.chip_new_deal;
 		}
-		if (intentHistory) {
-			return $i18n.home.chip_your_deals;
+		if (intentSeeDeal) {
+			return $i18n.home.chip_see_deal;
 		}
 		return $i18n.home.chip_hello;
 	});
 
 	const startCreate = () => {
 		intentCreate = true;
-		intentHistory = false;
+		intentSeeDeal = false;
 	};
-	const startHistory = () => {
-		intentHistory = true;
+	const startSeeDeal = () => {
+		intentSeeDeal = true;
 		intentCreate = false;
 	};
 	const choosePay = () => {
@@ -63,9 +65,18 @@
 			mode === 'receive' ? '/deals/new?side=receive&mode=expert' : '/deals/new?mode=expert'
 		);
 	};
-	const chooseFilter = (next: HistoryFilter) => async () => {
-		historyFilter = next;
-		await goto(`/history?filter=${next}`);
+	// Pending / Created / Disputed live on /transactions (one tab
+	// each); History is its own page. Selecting "Disputed" still
+	// lands on the right tab even though the underlying canister
+	// state isn't wired yet — the tab itself surfaces the future
+	// view.
+	const chooseSeeDeal = (next: SeeDeal) => async () => {
+		seeDeal = next;
+		if (next === 'history') {
+			await goto('/history');
+			return;
+		}
+		await goto(`/transactions?tab=${next}`);
 	};
 </script>
 
@@ -104,43 +115,47 @@
 				{
 					id: 'history',
 					label: $i18n.home.choice_history,
-					variant: intentHistory ? 'primary' : 'secondary',
-					onclick: startHistory
+					variant: intentSeeDeal ? 'primary' : 'secondary',
+					onclick: startSeeDeal
 				}
 			]}
 		/>
 
-		{#if intentHistory}
+		{#if intentSeeDeal}
 			<ChatBubble side="bot">
-				{$i18n.home.bot_history_filter}
+				{$i18n.home.bot_see_deal_filter}
 			</ChatBubble>
 
+			<!--
+        Four pills wrap onto two rows on a 375 px frame, matching
+        the 2 × 2 layout in Figma frame 219:306.
+      -->
 			<ChatChoiceRow
-				scroll
+				wrap
 				choices={[
 					{
-						id: 'filter-all',
-						label: $i18n.home.choice_filter_all,
-						variant: historyFilter === 'all' ? 'primary' : 'secondary',
-						onclick: chooseFilter('all')
+						id: 'see-pending',
+						label: $i18n.home.choice_see_pending,
+						variant: seeDeal === 'pending' ? 'primary' : 'secondary',
+						onclick: chooseSeeDeal('pending')
 					},
 					{
-						id: 'filter-active',
-						label: $i18n.home.choice_filter_active,
-						variant: historyFilter === 'active' ? 'primary' : 'secondary',
-						onclick: chooseFilter('active')
+						id: 'see-created',
+						label: $i18n.home.choice_see_created,
+						variant: seeDeal === 'created' ? 'primary' : 'secondary',
+						onclick: chooseSeeDeal('created')
 					},
 					{
-						id: 'filter-settled',
-						label: $i18n.home.choice_filter_settled,
-						variant: historyFilter === 'settled' ? 'primary' : 'secondary',
-						onclick: chooseFilter('settled')
+						id: 'see-disputed',
+						label: $i18n.home.choice_see_disputed,
+						variant: seeDeal === 'disputed' ? 'primary' : 'secondary',
+						onclick: chooseSeeDeal('disputed')
 					},
 					{
-						id: 'filter-refunded',
-						label: $i18n.home.choice_filter_refunded,
-						variant: historyFilter === 'refunded' ? 'primary' : 'secondary',
-						onclick: chooseFilter('refunded')
+						id: 'see-history',
+						label: $i18n.home.choice_see_history,
+						variant: seeDeal === 'history' ? 'primary' : 'secondary',
+						onclick: chooseSeeDeal('history')
 					}
 				]}
 			/>
