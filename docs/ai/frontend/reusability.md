@@ -160,12 +160,13 @@ related constants so the enum file stays purely about lifecycle states.)
 
 ### Common utils — `$lib/utils/`
 
-| Util            | Purpose                                                                                                                                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `format.utils`  | `formatTokenAmount`, `parseTokenAmount`, `nsToDate`, `msToNs`, `shortPrincipal`.                                                                                                                              |
-| `deal.utils`    | `dealStatus`, `consentState`, `isTerminal`, `isExpired`, `sideOf`, `isFullyConsented`.                                                                                                                        |
-| `storage.utils` | Typed `get` / `set` / `del` wrappers around `localStorage` (SSR-safe).                                                                                                                                        |
-| `image.utils`   | `fileToAvatarDataUrl` — center-crops, resizes, JPEG-compresses a picked `File` into a small data URL suitable for storing inline on the profile doc. Throws `AvatarPipelineError` for decode / size failures. |
+| Util              | Purpose                                                                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format.utils`    | `formatTokenAmount`, `parseTokenAmount`, `nsToDate`, `msToNs`, `shortPrincipal`.                                                                                                                              |
+| `deal.utils`      | `dealStatus`, `consentState`, `isTerminal`, `isExpired`, `sideOf`, `isFullyConsented`.                                                                                                                        |
+| `storage.utils`   | Typed `get` / `set` / `del` wrappers around `localStorage` (SSR-safe).                                                                                                                                        |
+| `clipboard.utils` | `copyToClipboard(text)` — `navigator.clipboard.writeText` wrapper that returns `true`/`false` and logs failures. Caller owns the "Copied!" feedback timing.                                                   |
+| `image.utils`     | `fileToAvatarDataUrl` — center-crops, resizes, JPEG-compresses a picked `File` into a small data URL suitable for storing inline on the profile doc. Throws `AvatarPipelineError` for decode / size failures. |
 
 ### Types — `$lib/types/`
 

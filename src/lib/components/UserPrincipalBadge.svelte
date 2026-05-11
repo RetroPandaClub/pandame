@@ -3,6 +3,7 @@
 	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
 	import { userPrincipalShort, userPrincipalText } from '$lib/derived/user.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
 	interface Props {
 		/** Avatar size (mirrors the underlying Avatar component). */
@@ -20,16 +21,15 @@
 			return;
 		}
 
-		try {
-			await navigator.clipboard.writeText(text);
-			copied = true;
-			if (resetTimer !== undefined) {
-				clearTimeout(resetTimer);
-			}
-			resetTimer = setTimeout(() => (copied = false), 1500);
-		} catch (err) {
-			console.error('Failed to copy principal:', err);
+		if (!(await copyToClipboard(text))) {
+			return;
 		}
+
+		copied = true;
+		if (resetTimer !== undefined) {
+			clearTimeout(resetTimer);
+		}
+		resetTimer = setTimeout(() => (copied = false), 1500);
 	};
 
 	$effect(() => () => {

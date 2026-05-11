@@ -5,6 +5,7 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import { SHARE_URL } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
 	interface Props {
 		open: boolean;
@@ -42,13 +43,12 @@
 			return;
 		}
 
-		try {
-			await navigator.clipboard.writeText(shareUrl);
-			copied = true;
-			setTimeout(() => (copied = false), 2000);
-		} catch (err) {
-			console.error('Failed to copy share link:', err);
+		if (!(await copyToClipboard(shareUrl))) {
+			return;
 		}
+
+		copied = true;
+		setTimeout(() => (copied = false), 2000);
 	};
 </script>
 
