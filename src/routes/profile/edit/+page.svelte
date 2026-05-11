@@ -4,6 +4,7 @@
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import AvatarUploadSheet from '$lib/components/AvatarUploadSheet.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import ProfileFieldRow from '$lib/components/ProfileFieldRow.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
@@ -16,11 +17,16 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { profileStore } from '$lib/stores/profile.store';
 	import type { UserProfile } from '$lib/types/profile';
+	import { AvatarPipelineError, fileToAvatarDataUrl } from '$lib/utils/image.utils';
 
 	let principalText = $derived($userPrincipalText);
 	let saveError: string | undefined = $state(undefined);
 
 	let profile = $derived($profileStore?.data);
+	let avatarUrl = $derived(profile?.avatar_url);
+
+	let avatarSheetOpen = $state(false);
+	let avatarUploading = $state(false);
 
 	let username = $state('');
 	let name = $state('');
@@ -75,6 +81,28 @@
 			saveError = $i18n.profile.edit_save_error;
 		}
 	};
+
+	const onAvatarPicked = async (file: File) => {
+		saveError = undefined;
+		avatarUploading = true;
+		try {
+			const dataUrl = await fileToAvatarDataUrl(file);
+			await save({ avatar_url: dataUrl });
+			avatarSheetOpen = false;
+		} catch (err) {
+			if (err instanceof AvatarPipelineError) {
+				saveError =
+					err.reason === 'too-large'
+						? $i18n.profile.avatar_too_large
+						: $i18n.profile.avatar_invalid;
+			} else {
+				saveError = $i18n.profile.edit_save_error;
+			}
+			console.error('Failed to set avatar:', err);
+		} finally {
+			avatarUploading = false;
+		}
+	};
 </script>
 
 <svelte:head>
@@ -108,14 +136,18 @@
   -->
 	<div class="absolute -top-[60px] left-1/2 -translate-x-1/2">
 		<div class="relative">
-			<Avatar size="xl" fallback={$profileDisplayName || $userPrincipalShort} />
+			<Avatar
+				size="xl"
+				src={avatarUrl}
+				alt={$profileDisplayName || $userPrincipalShort}
+				fallback={$profileDisplayName || $userPrincipalShort}
+			/>
 			<button
 				type="button"
-				class="bg-primary-stroke text-default-inverse shadow-deal-card absolute right-[6px] bottom-[6px] flex h-[30px] w-[30px] items-center justify-center rounded-full"
+				class="bg-primary-stroke text-default-inverse shadow-deal-card absolute right-[6px] bottom-[6px] flex h-[30px] w-[30px] items-center justify-center rounded-full disabled:opacity-40"
 				aria-label={$i18n.profile.add_avatar_aria}
-				onclick={() => {
-					/* TODO: avatar upload */
-				}}
+				disabled={avatarUploading}
+				onclick={() => (avatarSheetOpen = true)}
 			>
 				<span class="flex h-[15px] w-[15px] items-center"><PlusIcon /></span>
 			</button>
@@ -164,6 +196,13 @@
 </Sheet>
 
 <AppBottomNav />
+
+<AvatarUploadSheet
+	open={avatarSheetOpen}
+	busy={avatarUploading}
+	onclose={() => (avatarSheetOpen = false)}
+	onpicked={onAvatarPicked}
+/>
 
 {#if nonNullish(profile)}
 	<!-- profile is loaded; nothing extra to render here, but the

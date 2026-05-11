@@ -40,7 +40,7 @@
 
 | Component          | Use it for                                                                                                                                                                                                                 |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Avatar`           | Round image with text-initials fallback. Sizes sm 32 / md 48 / lg 76 / xl 134 px (matching Figma usage).                                                                                                                   |
+| `Avatar`           | Round image with text-initials fallback. Sizes sm 32 / md 48 / lg 76 / xl 134 px (matching Figma usage). Pass `src` (e.g. `profile.avatar_url`) to render the user's uploaded photo.                                       |
 | `Backdrop`         | Full-screen dimmed overlay; pass `spinner={true}` for the centred spinner.                                                                                                                                                 |
 | `BottomNav`        | White card with `rounded-t-bottom-nav` (14 px), `shadow-bottom-nav`, three snippet slots (`left`, `right`, `center`). Centre snippet is wrapped in a 75 px floating circle with `shadow-raised-button`.                    |
 | `BrandHeader`      | Coloured full-bleed header. `tone="primary"` (purple, default) or `tone="success"` (green for Profile). Snippet slots `leading` / `trailing` and `children` (Tabs / FilterChip strip). Honours iOS safe-area-top.          |
@@ -68,20 +68,21 @@
 
 ### Composed components — `$lib/components/`
 
-| Component            | Use it for                                                                                                                                                            |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AppBottomNav`       | Wires `BottomNav` to the project's three destinations (/transactions · / · /profile) with active-route colour swaps. Side icons are bare SVGs (no IconButton chrome). |
-| `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.            |
-| `AuthGuard`          | Behaviour-only redirect guard. Drop `<AuthGuard />` once at the top of any logged-in route — it `goto`s `redirectTo` (default `/`) when `userSignedIn` is false.      |
-| `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`.   |
-| `DealCard`           | Single-deal preview card (purple title bar + status icon + currency + signed amount + countdown). Optional `actions` snippet for inline buttons; optional `href`.     |
-| `DealStatusIcon`     | 24 px circular status badge (check / cross / dot / swap / refresh) for the right of the DealCard title bar.                                                           |
-| `DealsTable`         | List wrapper with loading / empty-state / `<ul>` of `DealCard` links + `filter` prop. Used by `/history`.                                                             |
-| `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` / `label` to the underlying Button.                                                                      |
-| `LogoutConfirmModal` | Sign-out confirmation. Solid `#3B2370` backdrop, both buttons filled purple per Figma.                                                                                |
-| `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                  |
-| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                               |
-| `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                     |
+| Component            | Use it for                                                                                                                                                                                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AppBottomNav`       | Wires `BottomNav` to the project's three destinations (/transactions · / · /profile) with active-route colour swaps. Side icons are bare SVGs (no IconButton chrome).                                                                               |
+| `Auth`               | Behaviour-only: subscribes to `onAuthStateChange` and hydrates `userStore` + listens for `junoSignOutAuthTimer`. Mounted once at the layout level — no UI.                                                                                          |
+| `AvatarUploadSheet`  | Modal with two action buttons — Take photo (front camera via `capture="user"`) and Choose from library — backed by hidden `<input type="file" accept="image/*">`s. Parent receives the `File` via `onpicked` and handles compression + persistence. |
+| `AuthGuard`          | Behaviour-only redirect guard. Drop `<AuthGuard />` once at the top of any logged-in route — it `goto`s `redirectTo` (default `/`) when `userSignedIn` is false.                                                                                    |
+| `DealActions`        | Context-aware action bar: per-side, per-status (Consent / Reject / Cancel / Accept / Reclaim) plus a "Dispute (soon)" stub that navigates to `/deals/[id]/dispute`.                                                                                 |
+| `DealCard`           | Single-deal preview card (purple title bar + status icon + currency + signed amount + countdown). Optional `actions` snippet for inline buttons; optional `href`.                                                                                   |
+| `DealStatusIcon`     | 24 px circular status badge (check / cross / dot / swap / refresh) for the right of the DealCard title bar.                                                                                                                                         |
+| `DealsTable`         | List wrapper with loading / empty-state / `<ul>` of `DealCard` links + `filter` prop. Used by `/history`.                                                                                                                                           |
+| `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` / `label` to the underlying Button.                                                                                                                                                    |
+| `LogoutConfirmModal` | Sign-out confirmation. Solid `#3B2370` backdrop, both buttons filled purple per Figma.                                                                                                                                                              |
+| `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                                                                                                |
+| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                                                                                                             |
+| `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                                                                                                   |
 
 ### Icons — `$lib/components/icons/`
 
@@ -160,11 +161,12 @@ related constants so the enum file stays purely about lifecycle states.)
 
 ### Common utils — `$lib/utils/`
 
-| Util            | Purpose                                                                                |
-| --------------- | -------------------------------------------------------------------------------------- |
-| `format.utils`  | `formatTokenAmount`, `parseTokenAmount`, `nsToDate`, `msToNs`, `shortPrincipal`.       |
-| `deal.utils`    | `dealStatus`, `consentState`, `isTerminal`, `isExpired`, `sideOf`, `isFullyConsented`. |
-| `storage.utils` | Typed `get` / `set` / `del` wrappers around `localStorage` (SSR-safe).                 |
+| Util            | Purpose                                                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format.utils`  | `formatTokenAmount`, `parseTokenAmount`, `nsToDate`, `msToNs`, `shortPrincipal`.                                                                                                                              |
+| `deal.utils`    | `dealStatus`, `consentState`, `isTerminal`, `isExpired`, `sideOf`, `isFullyConsented`.                                                                                                                        |
+| `storage.utils` | Typed `get` / `set` / `del` wrappers around `localStorage` (SSR-safe).                                                                                                                                        |
+| `image.utils`   | `fileToAvatarDataUrl` — center-crops, resizes, JPEG-compresses a picked `File` into a small data URL suitable for storing inline on the profile doc. Throws `AvatarPipelineError` for decode / size failures. |
 
 ### Types — `$lib/types/`
 

@@ -154,5 +154,11 @@ through `@junobuild/core`'s `getDoc` / `setDoc`. The collection key
 is `Collection.PROFILES` (string `'profiles'`) and rules in
 [`juno.dev.config.ts`](../../juno.dev.config.ts) are
 `memory: 'stable'`, `read: 'public'`, `write: 'private'`. If you change
-the schema, mirror it in [`src/lib/types/profile.ts`](../../src/lib/types/profile.ts)
-and re-run the local emulator to pick up the new rules.
+the schema, mirror it in
+[`src/lib/types/profile.ts`](../../src/lib/types/profile.ts) and
+re-run `juno config apply --mode development` to push the new rules
+into the running emulator (the freshly-started emulator boots empty —
+the collection only exists after `apply`). The avatar is stored
+inline on the profile doc as a JPEG data URL produced by
+[`fileToAvatarDataUrl`](../../src/lib/utils/image.utils.ts); see
+[`UserProfile.avatar_url`](../../src/lib/types/profile.ts).

@@ -110,6 +110,12 @@ interface I18nProfile {
 	weight_label: string;
 	history_action: string;
 	add_avatar_aria: string;
+	avatar_sheet_title: string;
+	avatar_sheet_description: string;
+	avatar_take_photo: string;
+	avatar_choose_library: string;
+	avatar_too_large: string;
+	avatar_invalid: string;
 	edit_save: string;
 	edit_cancel: string;
 	edit_save_error: string;
