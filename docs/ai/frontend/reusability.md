@@ -80,7 +80,7 @@
 | `Login`              | Internet Identity sign-in CTA. Forwards `fullWidth` / `size` / `label` to the underlying Button.                                                                                                                                                    |
 | `LogoutConfirmModal` | Sign-out confirmation. Solid `#3B2370` backdrop, both buttons filled purple per Figma.                                                                                                                                                              |
 | `ShareLinkModal`     | Post-create QR + copyable share link. No-ops gracefully when the deal already has a bound recipient.                                                                                                                                                |
-| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Reads `userPrincipalShort`.                                                                                                                             |
+| `UserPrincipalBadge` | `BrandHeader` `trailing` slot for authenticated routes — caller's short principal + Avatar. Click copies the full `userPrincipalText` to the clipboard with a brief inline check + "Copied!" swap (~1.5 s).                                         |
 | `WelcomeScreen`      | Full-screen logged-out connect-wallet hero (greeting + PandaMark + Connect pill).                                                                                                                                                                   |
 
 ### Icons — `$lib/components/icons/`

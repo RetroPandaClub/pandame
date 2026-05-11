@@ -3,6 +3,7 @@
 		"text": {
 			"copy": "Copy",
 			"copied": "Copied!",
+			"copy_principal_aria": "Copy your principal to clipboard",
 			"done": "Done",
 			"loading": "Loading…",
 			"sign_in": "Sign in",

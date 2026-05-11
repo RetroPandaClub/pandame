@@ -6,6 +6,7 @@ interface I18nCore {
 	text: {
 		copy: string;
 		copied: string;
+		copy_principal_aria: string;
 		done: string;
 		loading: string;
 		sign_in: string;
