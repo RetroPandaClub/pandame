@@ -12,7 +12,7 @@ import { defineConfig } from '@junobuild/config';
 const isEmulator = process.env.JUNO_EMULATOR === 'true';
 
 const EMULATOR_SATELLITE_ID = 'jx5yt-yyaaa-aaaal-abzbq-cai';
-const LOCAL_SATELLITE_ID = 'uqqxf-5h777-77774-qaaaa-cai';
+const LOCAL_SATELLITE_ID = 'auamu-4x777-77775-aaaaa-cai';
 
 export default defineConfig({
 	satellite: {
