@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
@@ -11,7 +12,26 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { DealFilter } from '$lib/types/deal';
 
-	let filter: DealFilter = $state('all');
+	const FILTER_ORDER: readonly DealFilter[] = [
+		'all',
+		'active',
+		'settled',
+		'refunded',
+		'cancelled'
+	];
+
+	const isDealFilter = (value: string | null): value is DealFilter =>
+		value !== null && (FILTER_ORDER as readonly string[]).includes(value);
+
+	// `?filter=` is the contract used by the home chatbot's "See your
+	// deals" branch (and by any future deep-link). Anything we don't
+	// recognise falls back to the safe `all` view rather than throwing.
+	const initialFilter = (): DealFilter => {
+		const raw = page.url.searchParams.get('filter');
+		return isDealFilter(raw) ? raw : 'all';
+	};
+
+	let filter: DealFilter = $state(initialFilter());
 
 	const FILTER_LABELS: Record<DealFilter, string> = {
 		all: $i18n.history.filter_all,
@@ -33,8 +53,7 @@
 	};
 
 	const cycleFilter = () => {
-		const order: DealFilter[] = ['all', 'active', 'settled', 'refunded', 'cancelled'];
-		filter = order[(order.indexOf(filter) + 1) % order.length];
+		filter = FILTER_ORDER[(FILTER_ORDER.indexOf(filter) + 1) % FILTER_ORDER.length];
 	};
 
 	$effect(() => {
