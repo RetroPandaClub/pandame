@@ -58,7 +58,7 @@
 		</span>
 	</BrandHeader>
 
-	<Sheet paddingClass="px-[19px] pt-[28px] pb-[120px]" class="gap-[20px]">
+	<Sheet paddingClass="px-[19px] pt-[28px] pb-[24px]" class="gap-[20px]">
 		<ChatBubble side="bot">
 			<span
 				>{$i18n.home.bot_greeting_prefix}<span class="font-medium"
