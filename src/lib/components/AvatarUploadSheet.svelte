@@ -14,11 +14,18 @@
 		 * host in the future.
 		 */
 		onpicked: (file: File) => void;
+		/**
+		 * Called when the user picks the "use generated avatar" option.
+		 * Parent computes the principal-derived default URL (via
+		 * `defaultAvatarUrlForPrincipal`) and persists it. Optional — when
+		 * omitted, the third button is hidden.
+		 */
+		onpickeddefault?: () => void;
 		/** Disables the action buttons while the parent is processing. */
 		busy?: boolean;
 	}
 
-	let { open, onclose, onpicked, busy = false }: Props = $props();
+	let { open, onclose, onpicked, onpickeddefault, busy = false }: Props = $props();
 
 	type Mode = 'choose' | 'camera' | 'error';
 	let mode: Mode = $state('choose');
@@ -148,6 +155,13 @@
 		libraryInput?.click();
 	};
 
+	const pickDefault = () => {
+		if (busy || onpickeddefault === undefined) {
+			return;
+		}
+		onpickeddefault();
+	};
+
 	const handleLibrary = (event: Event) => {
 		const target = event.currentTarget as HTMLInputElement;
 		const file = target.files?.[0];
@@ -225,6 +239,17 @@
 			>
 				{$i18n.profile.avatar_choose_library}
 			</Button>
+			{#if onpickeddefault !== undefined}
+				<Button
+					fullWidth
+					variant="ghost"
+					disabled={busy}
+					onclick={pickDefault}
+					ariaLabel={$i18n.profile.avatar_use_default}
+				>
+					{$i18n.profile.avatar_use_default}
+				</Button>
+			{/if}
 			<Button
 				fullWidth
 				variant="ghost"
@@ -258,6 +283,18 @@
 			>
 				{$i18n.profile.avatar_choose_library}
 			</Button>
+			{#if onpickeddefault !== undefined}
+				<Button
+					fullWidth
+					variant="ghost"
+					disabled={busy}
+					loading={busy}
+					onclick={pickDefault}
+					ariaLabel={$i18n.profile.avatar_use_default}
+				>
+					{$i18n.profile.avatar_use_default}
+				</Button>
+			{/if}
 		</div>
 	{/if}
 </Modal>

@@ -15,6 +15,7 @@
 	import { ensureProfile, upsertProfile } from '$lib/services/profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { profileStore } from '$lib/stores/profile.store';
+	import { defaultAvatarUrlForPrincipal } from '$lib/utils/avatar.utils';
 	import { AvatarPipelineError, fileToAvatarDataUrl } from '$lib/utils/image.utils';
 
 	let principalText = $derived($userPrincipalText);
@@ -43,6 +44,18 @@
 		})();
 	});
 
+	const saveAvatarUrl = async (text: string, nextUrl: string) => {
+		const updated = await upsertProfile({
+			key: text,
+			data: {
+				...(profile ?? { owner: text, username: '', name: '', surname: '' }),
+				avatar_url: nextUrl,
+				owner: text
+			}
+		});
+		profileStore.set(updated);
+	};
+
 	const onAvatarPicked = async (file: File) => {
 		const text = principalText;
 		if (text === undefined || text.length === 0) {
@@ -52,15 +65,7 @@
 		avatarUploading = true;
 		try {
 			const dataUrl = await fileToAvatarDataUrl(file);
-			const updated = await upsertProfile({
-				key: text,
-				data: {
-					...(profile ?? { owner: text, username: '', name: '', surname: '' }),
-					avatar_url: dataUrl,
-					owner: text
-				}
-			});
-			profileStore.set(updated);
+			await saveAvatarUrl(text, dataUrl);
 			avatarSheetOpen = false;
 		} catch (err) {
 			if (err instanceof AvatarPipelineError) {
@@ -72,6 +77,24 @@
 				avatarError = $i18n.profile.edit_save_error;
 			}
 			console.error('Failed to set avatar:', err);
+		} finally {
+			avatarUploading = false;
+		}
+	};
+
+	const onAvatarPickedDefault = async () => {
+		const text = principalText;
+		if (text === undefined || text.length === 0) {
+			return;
+		}
+		avatarError = undefined;
+		avatarUploading = true;
+		try {
+			await saveAvatarUrl(text, defaultAvatarUrlForPrincipal(text));
+			avatarSheetOpen = false;
+		} catch (err) {
+			avatarError = $i18n.profile.edit_save_error;
+			console.error('Failed to set default avatar:', err);
 		} finally {
 			avatarUploading = false;
 		}
@@ -159,6 +182,7 @@
 	busy={avatarUploading}
 	onclose={() => (avatarSheetOpen = false)}
 	onpicked={onAvatarPicked}
+	onpickeddefault={onAvatarPickedDefault}
 />
 
 <LogoutConfirmModal open={logoutOpen} onclose={() => (logoutOpen = false)} />

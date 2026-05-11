@@ -17,6 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { profileStore } from '$lib/stores/profile.store';
 	import type { UserProfile } from '$lib/types/profile';
+	import { defaultAvatarUrlForPrincipal } from '$lib/utils/avatar.utils';
 	import { AvatarPipelineError, fileToAvatarDataUrl } from '$lib/utils/image.utils';
 
 	let principalText = $derived($userPrincipalText);
@@ -99,6 +100,21 @@
 				saveError = $i18n.profile.edit_save_error;
 			}
 			console.error('Failed to set avatar:', err);
+		} finally {
+			avatarUploading = false;
+		}
+	};
+
+	const onAvatarPickedDefault = async () => {
+		const text = principalText;
+		if (text === undefined || text.length === 0) {
+			return;
+		}
+		saveError = undefined;
+		avatarUploading = true;
+		try {
+			await save({ avatar_url: defaultAvatarUrlForPrincipal(text) });
+			avatarSheetOpen = false;
 		} finally {
 			avatarUploading = false;
 		}
@@ -202,6 +218,7 @@
 	busy={avatarUploading}
 	onclose={() => (avatarSheetOpen = false)}
 	onpicked={onAvatarPicked}
+	onpickeddefault={onAvatarPickedDefault}
 />
 
 {#if nonNullish(profile)}

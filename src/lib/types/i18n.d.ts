@@ -123,6 +123,7 @@ interface I18nProfile {
 	avatar_sheet_description: string;
 	avatar_take_photo: string;
 	avatar_choose_library: string;
+	avatar_use_default: string;
 	avatar_camera_hint: string;
 	avatar_camera_preview_aria: string;
 	avatar_capture: string;
