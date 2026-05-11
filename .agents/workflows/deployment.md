@@ -82,7 +82,23 @@ This workflow covers the two flavours of deploy that pandame supports:
    browser's agent reaches the local replica via the dev-server
    origin.
 
-6. PandaMe provisions **one Juno datastore collection** locally —
+6. Once you've signed in with Internet Identity, your wallet starts
+   empty. Mint local ICP into it (and into any other test principals)
+   via the Juno emulator's faucet endpoint:
+
+   ```bash
+   npm run dev:tokens -- <principal>           # 10 ICP (default)
+   npm run dev:tokens -- <principal> 25        # 25 ICP
+   npm run dev:tokens -- <p1> <p2> <p3> 5      # 5 ICP to each
+   ```
+
+   The script ([`scripts/send-tokens.sh`](../../scripts/send-tokens.sh))
+   hits `http://localhost:5999/ledger/transfer/`, which mints from the
+   anonymous identity (the local ICP ledger's minter on PocketIC).
+   Pass `--ledger-id <canister-id>` to target a different ICRC-1
+   ledger.
+
+7. PandaMe provisions **one Juno datastore collection** locally —
    `profiles` — for editable user metadata (see
    [`juno.dev.config.ts`](../../juno.dev.config.ts):
    `memory: 'stable'`, `read: 'public'`, `write: 'private'`). The
@@ -97,7 +113,7 @@ This workflow covers the two flavours of deploy that pandame supports:
    and re-run `juno config apply --mode development` against the
    running emulator.
 
-7. (Optional) regenerate the candid bindings from upstream
+8. (Optional) regenerate the candid bindings from upstream
    [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
    (locally `../escrow/`) before starting:
 
@@ -107,7 +123,7 @@ This workflow covers the two flavours of deploy that pandame supports:
 
    See [`docs/ai/frontend/workflows/regenerate-bindings.md`](../../docs/ai/frontend/workflows/regenerate-bindings.md).
 
-8. (Optional) Run the Vitest unit suite or Playwright E2E:
+9. (Optional) Run the Vitest unit suite or Playwright E2E:
 
    ```bash
    npm run test -- --run
@@ -179,6 +195,10 @@ If CI is unavailable:
 - **`canister not found` (`IC0301`) calling escrow.** You haven't run
   `npm run dev:setup` yet, or `VITE_ESCROW_CANISTER_ID` in `.env.local`
   is stale. Re-deploy and copy the printed ID.
+- **`InsufficientFunds` / "sender not allowed to spend the requested
+  amount" when funding a deal.** The local wallet is empty. Mint some
+  local ICP into your principal with `npm run dev:tokens -- <principal>`
+  (see step 6 above).
 
 ## See also
 
