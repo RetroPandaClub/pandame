@@ -167,10 +167,10 @@
 
 		<div class="flex flex-col gap-[8px]">
 			<div class="flex items-center justify-between">
-				<span class="text-default text-label font-serif-ui font-medium tracking-[-0.32px]">
+				<span class="text-default text-label font-sans font-medium tracking-[-0.32px]">
 					{$i18n.create.amount_label}
 				</span>
-				<span class="text-default text-label font-serif-ui font-medium tracking-[-0.32px]">
+				<span class="text-default text-label font-sans font-medium tracking-[-0.32px]">
 					{$i18n.create.currency_label}
 				</span>
 			</div>
@@ -190,7 +190,7 @@
 			</div>
 		</div>
 
-		<FormField label={$i18n.create.expiry_label} htmlFor="expiry" labelFamily="serif-ui">
+		<FormField label={$i18n.create.expiry_label} htmlFor="expiry">
 			<TextInput id="expiry" type="datetime-local" bind:value={expiryLocal} />
 		</FormField>
 
@@ -207,7 +207,7 @@
 				{$i18n.create.summary_label}
 			</h3>
 			<dl
-				class="text-default font-serif-ui grid grid-cols-[1fr_auto] gap-y-[6px] text-[14px] font-medium tracking-[-0.28px]"
+				class="text-default grid grid-cols-[1fr_auto] gap-y-[6px] font-sans text-[14px] font-medium tracking-[-0.28px]"
 			>
 				<dt>{$i18n.create.summary_amount}</dt>
 				<dd class="text-right">
@@ -240,7 +240,7 @@
 		</FormField>
 
 		<div class="flex flex-col gap-[8px]">
-			<span class="text-default text-label font-serif-ui font-medium tracking-[-0.32px]">
+			<span class="text-default text-label font-sans font-medium tracking-[-0.32px]">
 				{$i18n.create.add_documents_label}
 			</span>
 			<UploadCTA label={$i18n.create.upload_cta} caption={$i18n.create.upload_caption} />
