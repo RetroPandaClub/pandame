@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fromNullable } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import { goto } from '$app/navigation';
 	import Backdrop from '$lib/components/Backdrop.svelte';
@@ -47,6 +48,7 @@
 	});
 
 	let expired = $derived(deal.expires_at_ns <= nowNs);
+	let disputeId = $derived(fromNullable(deal.dispute));
 
 	const canConsent = $derived(
 		mySide !== 'unknown' && status === DealStatuses.Created && myConsent !== ConsentStates.Accepted
@@ -57,7 +59,15 @@
 	const canCancel = $derived(mySide !== 'unknown' && status === DealStatuses.Created);
 	const canAccept = $derived(mySide === 'recipient' && status === DealStatuses.Funded);
 	const canReclaim = $derived(mySide === 'payer' && status === DealStatuses.Funded && expired);
-	const canDispute = $derived(status === DealStatuses.Funded);
+	// Disputes require a bound recipient (canister rejects open-recipient
+	// tip-flow deals via `DisputeRequiresBoundRecipient`). We mirror that
+	// gate here so the button doesn't appear for tip flows.
+	const canOpenDispute = $derived(
+		mySide !== 'unknown' &&
+			status === DealStatuses.Funded &&
+			fromNullable(deal.recipient) !== undefined
+	);
+	const canViewDispute = $derived(disputeId !== undefined);
 
 	const wrap = async (op: string, action: () => Promise<Deal>) => {
 		progress = true;
@@ -80,7 +90,8 @@
 	const onAccept = () => wrap('acceptDeal', () => acceptDeal({ dealId: deal.id }));
 	const onReclaim = () => wrap('reclaimDeal', () => reclaimDeal({ dealId: deal.id }));
 
-	const onDispute = () => goto(`/deals/${deal.id}/dispute`);
+	const onOpenDispute = () => goto(`/deals/${deal.id}/dispute`);
+	const onViewDispute = () => goto(`/deals/${deal.id}/dispute`);
 
 	function parsePrincipal(text: string | undefined): Principal | undefined {
 		if (text === undefined || text.length === 0) {
@@ -111,17 +122,14 @@
 	{#if canReclaim}
 		<Button onclick={onReclaim} disabled={progress}>{$i18n.deals.actions.reclaim}</Button>
 	{/if}
-	{#if canDispute}
-		<button
-			type="button"
-			onclick={onDispute}
-			disabled={progress}
-			class="border-border-soft text-default text-body2 rounded-md border-2 border-dashed px-3 py-1 font-bold opacity-70 hover:opacity-100"
-			title={$i18n.deals.actions.dispute_tooltip}
-			data-tid="dispute-stub"
-		>
+	{#if canViewDispute}
+		<Button variant="secondary" onclick={onViewDispute} disabled={progress}>
+			{$i18n.deals.actions.view_dispute}
+		</Button>
+	{:else if canOpenDispute}
+		<Button variant="secondary" onclick={onOpenDispute} disabled={progress}>
 			{$i18n.deals.actions.dispute}
-		</button>
+		</Button>
 	{/if}
 </div>
 

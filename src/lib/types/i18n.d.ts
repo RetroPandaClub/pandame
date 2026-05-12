@@ -66,6 +66,7 @@ interface I18nHistory {
 	filter_active: string;
 	filter_settled: string;
 	filter_refunded: string;
+	filter_disputed: string;
 	filter_cancelled: string;
 }
 
@@ -83,15 +84,116 @@ interface I18nTransactions {
 interface I18nDispute {
 	title: string;
 	intro: string;
+	loading: string;
+	deal_not_found: string;
 	evidence_label: string;
 	evidence_hint: string;
-	votes_label: string;
 	reason_label: string;
 	reason_placeholder: string;
 	open_cta: string;
 	cancel_cta: string;
-	stub_banner_title: string;
-	stub_banner_description: string;
+	back_to_deal: string;
+	open_warning_title: string;
+	open_warning_body: string;
+	deal_id_short: string;
+	phase_evidence: string;
+	phase_voting: string;
+	phase_resolved: string;
+	field_id: string;
+	field_panel_size: string;
+	field_arbitration_fee: string;
+	field_evidence_deadline: string;
+	field_voting_deadline: string;
+	field_resolved_at: string;
+	field_opened_by: string;
+	resolved_title: string;
+	outcome_settled: string;
+	outcome_refunded: string;
+	outcome_no_quorum: string;
+	outcome_withdrawn_settled: string;
+	outcome_withdrawn_refunded: string;
+	tally_cc: string;
+	tally_ic: string;
+	tally_abstain: string;
+	withdraw_title: string;
+	withdraw_description: string;
+	withdraw_my_proposal: string;
+	withdraw_their_proposal: string;
+	withdraw_none: string;
+	withdraw_propose_cta: string;
+	withdraw_retract_cta: string;
+	vote_title: string;
+	vote_description: string;
+	vote_current_label: string;
+	vote_cast_cta: string;
+	vote_change_cta: string;
+	vote_cc_title: string;
+	vote_cc_description: string;
+	vote_ic_title: string;
+	vote_ic_description: string;
+	vote_abstain_title: string;
+	vote_abstain_description: string;
+	finalize_title: string;
+	finalize_description: string;
+	finalize_cta: string;
+	evidence_section_title: string;
+	evidence_empty: string;
+	evidence_add_title: string;
+	evidence_add_description: string;
+	evidence_note_label: string;
+	evidence_note_placeholder: string;
+	evidence_url_label: string;
+	evidence_url_hint: string;
+	evidence_hash_label: string;
+	evidence_hash_hint: string;
+	evidence_hash_invalid: string;
+	evidence_hash_required: string;
+	evidence_required: string;
+	evidence_submit_cta: string;
+	panel_title: string;
+	panel_pending: string;
+	panel_no_vote: string;
+	panel_paid: string;
+}
+
+interface I18nArbitrator {
+	title: string;
+	subtitle: string;
+	loading: string;
+	not_registered_title: string;
+	not_registered_description: string;
+	profile_section: string;
+	assigned_section: string;
+	assigned_empty_title: string;
+	assigned_empty_description: string;
+	deregister_cta: string;
+	deregister_confirm: string;
+	score_not_yet: string;
+	status_active: string;
+	status_suspended: string;
+	status_deregistered: string;
+	field_principal: string;
+	field_status: string;
+	field_registered_at: string;
+	field_registered_by: string;
+	field_assigned: string;
+	field_voted: string;
+	field_with_majority: string;
+	field_score: string;
+}
+
+interface I18nAdmin {
+	title: string;
+	subtitle: string;
+	controller_warning: string;
+	register_section: string;
+	register_description: string;
+	register_label: string;
+	register_cta: string;
+	list_section: string;
+	list_empty_title: string;
+	list_empty_description: string;
+	invalid_principal: string;
 }
 
 interface I18nDetail {
@@ -118,6 +220,8 @@ interface I18nProfile {
 	reliability_yes: string;
 	weight_label: string;
 	history_action: string;
+	arbitrator_action: string;
+	admin_action: string;
 	add_avatar_aria: string;
 	avatar_sheet_title: string;
 	avatar_sheet_description: string;
@@ -165,9 +269,14 @@ interface I18nDeals {
 		accept: string;
 		reclaim: string;
 		dispute: string;
-		dispute_tooltip: string;
+		view_dispute: string;
 	};
-	status: { refunded: string };
+	status: {
+		refunded: string;
+		disputed: string;
+		arbitrated_settled: string;
+		arbitrated_refunded: string;
+	};
 }
 
 interface I18nCreate {
@@ -182,7 +291,7 @@ interface I18nCreate {
 	amount_label: string;
 	expiry_label: string;
 	votes_label: string;
-	votes_disabled_hint: string;
+	votes_panel_hint: string;
 	summary_label: string;
 	summary_amount: string;
 	summary_fee: string;
@@ -233,6 +342,8 @@ interface I18n {
 	history: I18nHistory;
 	transactions: I18nTransactions;
 	dispute: I18nDispute;
+	arbitrator: I18nArbitrator;
+	admin: I18nAdmin;
 	detail: I18nDetail;
 	profile: I18nProfile;
 	logout_confirm: I18nLogout_confirm;

@@ -2,7 +2,11 @@
 	import DealCard from '$lib/components/DealCard.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import { dealsLoaded } from '$lib/derived/deals.derived';
-	import { DealStatuses } from '$lib/enums/deal-status';
+	import {
+		DealStatuses,
+		REFUNDED_DEAL_STATUSES,
+		SETTLED_DEAL_STATUSES
+	} from '$lib/enums/deal-status';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal, DealFilter } from '$lib/types/deal';
@@ -23,11 +27,17 @@
 			case 'active':
 				return !isTerminal(status);
 			case 'settled':
-				return status === DealStatuses.Settled;
+				// Collapse `Settled` + `ArbitratedSettled` — both mean
+				// "funds released to recipient" from the user's PoV.
+				return SETTLED_DEAL_STATUSES.includes(status);
 			case 'refunded':
-				return status === DealStatuses.Refunded;
+				// Collapse `Refunded` + `ArbitratedRefunded` (incl. the
+				// no-quorum fallback) — both mean "funds back to payer".
+				return REFUNDED_DEAL_STATUSES.includes(status);
 			case 'cancelled':
 				return status === DealStatuses.Cancelled || status === DealStatuses.Rejected;
+			case 'disputed':
+				return status === DealStatuses.Disputed;
 		}
 	};
 

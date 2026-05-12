@@ -15,7 +15,6 @@
 	import TextInput from '$lib/components/TextInput.svelte';
 	import UploadCTA from '$lib/components/UploadCTA.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
-	import VoteQuorumPicker, { type Quorum } from '$lib/components/VoteQuorumPicker.svelte';
 	import BackIcon from '$lib/components/icons/BackIcon.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { createAndFundDeal } from '$lib/services/deal.services';
@@ -34,7 +33,6 @@
 	let expiryLocal = $state(defaultExpiry());
 	let titleDeal = $state('');
 	let agreement = $state('');
-	let quorum: Quorum = $state('fair');
 
 	let progress = $state(false);
 	let error: string | undefined = $state(undefined);
@@ -191,12 +189,11 @@
 			<TextInput id="expiry" type="datetime-local" bind:value={expiryLocal} />
 		</FormField>
 
-		<div class="flex flex-col gap-[12px]">
+		<div class="border-border-soft bg-bg-elevated flex flex-col gap-[6px] rounded-md border p-3">
 			<span class="text-default text-label font-sans font-medium tracking-[-0.32px]">
 				{$i18n.create.votes_label}
 			</span>
-			<VoteQuorumPicker bind:value={quorum} disabled />
-			<small class="text-muted text-xxs">{$i18n.create.votes_disabled_hint}</small>
+			<small class="text-muted text-body2">{$i18n.create.votes_panel_hint}</small>
 		</div>
 
 		<section class="flex flex-col gap-[8px]">

@@ -85,7 +85,11 @@ one fits.
 - `Tabs.svelte` — generic segmented control `<T extends string>` (matches Toggle Pay/Receive).
 - `TextInput.svelte` — themed `<input>` (41 px h, 8 px radius, 1.5 px light-purple border, `variant="default" | "active"`).
 - `UploadCTA.svelte` — purple "Choose files to upload" + "Zip, Jpg or Pdf …" caption pair.
-- `VoteQuorumPicker.svelte` — concentric Roboto rings 3-radio picker.
+- `VotePicker.svelte` — stacked CC / IC / Abstain radio cards (cast vote + withdraw proposal).
+- `DisputePhaseBadge.svelte` — 24 px phase pill (Evidence / Voting / Resolved).
+- `EvidenceList.svelte` — list view of `Evidence[]` (submitter + timestamp + note + URL + SHA-256).
+- `EvidenceForm.svelte` — three-field form (note / URL / hash) for `submit_evidence`.
+- `DisputeCard.svelte` — single-dispute preview (red title bar + phase + fee + countdown).
 
 ### Composed
 

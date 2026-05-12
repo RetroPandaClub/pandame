@@ -5,16 +5,20 @@
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
 	import DealCard from '$lib/components/DealCard.svelte';
+	import DisputeCard from '$lib/components/DisputeCard.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
 	import UploadCTA from '$lib/components/UploadCTA.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import { dealsLoaded } from '$lib/derived/deals.derived';
+	import { disputesLoaded } from '$lib/derived/disputes.derived';
 	import { userPrincipalText } from '$lib/derived/user.derived';
-	import { DealStatuses, ConsentStates } from '$lib/enums/deal-status';
+	import { ConsentStates, DealStatuses } from '$lib/enums/deal-status';
 	import { acceptDeal, listMyDeals, rejectDeal } from '$lib/services/deal.services';
+	import { listMyDisputes } from '$lib/services/dispute.services';
 	import { dealsStore } from '$lib/stores/deals.store';
+	import { disputesStore } from '$lib/stores/disputes.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal } from '$lib/types/deal';
 	import { consentState, dealStatus, sideOf } from '$lib/utils/deal.utils';
@@ -71,20 +75,36 @@
 				// the caller is waiting on someone else.
 				return status === DealStatuses.Funded || status === DealStatuses.Created;
 			case 'disputed':
-				// No `Disputed` lifecycle state in the canister yet.
+				// Live disputes come from `list_my_disputes` (rendered
+				// directly from `disputesStore`); the deal-side filter
+				// below is unused for this tab.
 				return false;
 		}
 	};
 
 	let visibleDeals = $derived(($dealsStore ?? []).filter((deal) => matches(deal, tab)));
+	let visibleDisputes = $derived($disputesStore ?? []);
 
-	const reload = async () => {
+	const reloadDeals = async () => {
 		try {
 			const deals = await listMyDeals();
 			dealsStore.set(deals);
 		} catch (err) {
-			console.error('Failed to refresh transactions:', err);
+			console.error('Failed to refresh deals:', err);
 		}
+	};
+
+	const reloadDisputes = async () => {
+		try {
+			const disputes = await listMyDisputes();
+			disputesStore.set(disputes);
+		} catch (err) {
+			console.error('Failed to refresh disputes:', err);
+		}
+	};
+
+	const reload = async () => {
+		await Promise.all([reloadDeals(), reloadDisputes()]);
 	};
 
 	$effect(() => {
@@ -94,7 +114,7 @@
 	const approve = (deal: Deal) => async () => {
 		try {
 			await acceptDeal({ dealId: deal.id });
-			await reload();
+			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to approve deal:', err);
 		}
@@ -103,7 +123,7 @@
 	const decline = (deal: Deal) => async () => {
 		try {
 			await rejectDeal({ dealId: deal.id });
-			await reload();
+			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to decline deal:', err);
 		}
@@ -119,6 +139,11 @@
 				return $i18n.transactions.empty_disputed;
 		}
 	});
+
+	let listLoaded = $derived(tab === 'disputed' ? $disputesLoaded : $dealsLoaded);
+	let listEmpty = $derived(
+		tab === 'disputed' ? visibleDisputes.length === 0 : visibleDeals.length === 0
+	);
 </script>
 
 <svelte:head>
@@ -140,16 +165,24 @@
 		tabs={[
 			{ id: 'pending', label: $i18n.transactions.tab_pending },
 			{ id: 'created', label: $i18n.transactions.tab_created },
-			{ id: 'disputed', label: $i18n.transactions.tab_disputed, disabled: true }
+			{ id: 'disputed', label: $i18n.transactions.tab_disputed }
 		]}
 	/>
 </BrandHeader>
 
 <Sheet paddingClass="px-[19px] pt-[26px] pb-[120px]" class="gap-[16px]">
-	{#if !$dealsLoaded}
+	{#if !listLoaded}
 		<p class="text-body2 text-muted" aria-live="polite">{$i18n.core.text.loading}</p>
-	{:else if visibleDeals.length === 0}
+	{:else if listEmpty}
 		<EmptyState title={$i18n.transactions.empty_title} description={emptyDescription} />
+	{:else if tab === 'disputed'}
+		<ul class="flex flex-col gap-[16px]">
+			{#each visibleDisputes as dispute (dispute.id)}
+				<li>
+					<DisputeCard {dispute} href={`/deals/${dispute.deal_id}/dispute`} />
+				</li>
+			{/each}
+		</ul>
 	{:else}
 		<ul class="flex flex-col gap-[16px]">
 			{#each visibleDeals as deal (deal.id)}
@@ -173,7 +206,7 @@
 								</button>
 							{/snippet}
 						</DealCard>
-					{:else if tab === 'created'}
+					{:else}
 						<DealCard {deal} href={`/deals/${deal.id}`}>
 							{#snippet actions()}
 								<UploadCTA
@@ -182,8 +215,6 @@
 								/>
 							{/snippet}
 						</DealCard>
-					{:else}
-						<DealCard {deal} href={`/deals/${deal.id}`} />
 					{/if}
 				</li>
 			{/each}

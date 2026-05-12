@@ -171,4 +171,215 @@ export class EscrowCanister extends Canister<EscrowService> {
 
 		return await get_reliability(principal);
 	};
+
+	openDispute = async ({
+		dealId,
+		...queryParams
+	}: {
+		dealId: bigint;
+	} & QueryParams): Promise<EscrowDid.DisputeView> => {
+		const { open_dispute } = this.caller(queryParams);
+
+		return unwrap(await open_dispute({ deal_id: dealId }), 'open dispute');
+	};
+
+	getDispute = async ({
+		disputeId,
+		...queryParams
+	}: {
+		disputeId: bigint;
+	} & QueryParams): Promise<EscrowDid.DisputeView> => {
+		const { get_dispute } = this.caller(queryParams);
+
+		return unwrap(await get_dispute(disputeId), 'get dispute');
+	};
+
+	getPublicDispute = async ({
+		disputeId,
+		...queryParams
+	}: {
+		disputeId: bigint;
+	} & QueryParams): Promise<EscrowDid.PublicDisputeView> => {
+		const { get_public_dispute } = this.caller(queryParams);
+
+		return unwrap(await get_public_dispute(disputeId), 'get public dispute');
+	};
+
+	listMyDisputes = async ({
+		offset,
+		limit,
+		phase,
+		...queryParams
+	}: {
+		offset?: bigint;
+		limit?: bigint;
+		phase?: EscrowDid.DisputePhase;
+	} & QueryParams): Promise<EscrowDid.DisputeView[]> => {
+		const { list_my_disputes } = this.caller(queryParams);
+
+		return await list_my_disputes({
+			offset: offset === undefined ? [] : [offset],
+			limit: limit === undefined ? [] : [limit],
+			phase: phase === undefined ? [] : [phase]
+		});
+	};
+
+	submitEvidence = async ({
+		disputeId,
+		note,
+		artefactUrl,
+		artefactSha256,
+		...queryParams
+	}: {
+		disputeId: bigint;
+		note?: string;
+		artefactUrl?: string;
+		artefactSha256?: Uint8Array;
+	} & QueryParams): Promise<EscrowDid.DisputeView> => {
+		const { submit_evidence } = this.caller(queryParams);
+
+		return unwrap(
+			await submit_evidence({
+				dispute_id: disputeId,
+				note: note === undefined ? [] : [note],
+				artefact_url: artefactUrl === undefined ? [] : [artefactUrl],
+				artefact_sha256: artefactSha256 === undefined ? [] : [artefactSha256]
+			}),
+			'submit evidence'
+		);
+	};
+
+	castVote = async ({
+		disputeId,
+		vote,
+		...queryParams
+	}: {
+		disputeId: bigint;
+		vote: EscrowDid.Vote;
+	} & QueryParams): Promise<EscrowDid.DisputeView> => {
+		const { cast_vote } = this.caller(queryParams);
+
+		return unwrap(await cast_vote({ dispute_id: disputeId, vote }), 'cast vote');
+	};
+
+	finalizeDispute = async ({
+		disputeId,
+		...queryParams
+	}: {
+		disputeId: bigint;
+	} & QueryParams): Promise<EscrowDid.DisputeView> => {
+		const { finalize_dispute } = this.caller(queryParams);
+
+		return unwrap(await finalize_dispute({ dispute_id: disputeId }), 'finalize dispute');
+	};
+
+	withdrawDispute = async ({
+		disputeId,
+		proposal,
+		...queryParams
+	}: {
+		disputeId: bigint;
+		proposal: EscrowDid.Vote | undefined;
+	} & QueryParams): Promise<EscrowDid.DisputeView> => {
+		const { withdraw_dispute } = this.caller(queryParams);
+
+		return unwrap(
+			await withdraw_dispute({
+				dispute_id: disputeId,
+				proposal: proposal === undefined ? [] : [proposal]
+			}),
+			'withdraw dispute'
+		);
+	};
+
+	getArbitrator = async ({
+		principal,
+		...queryParams
+	}: {
+		principal: Principal;
+	} & QueryParams): Promise<EscrowDid.ArbitratorProfile | undefined> => {
+		const { get_arbitrator } = this.caller(queryParams);
+
+		const result = await get_arbitrator(principal);
+
+		return result.length === 0 ? undefined : result[0];
+	};
+
+	listArbitrators = async ({
+		offset,
+		limit,
+		status,
+		minScore,
+		...queryParams
+	}: {
+		offset?: bigint;
+		limit?: bigint;
+		status?: EscrowDid.ArbitratorStatus;
+		minScore?: number;
+	} & QueryParams): Promise<EscrowDid.ArbitratorProfile[]> => {
+		const { list_arbitrators } = this.caller(queryParams);
+
+		return await list_arbitrators({
+			offset: offset === undefined ? [] : [offset],
+			limit: limit === undefined ? [] : [limit],
+			status: status === undefined ? [] : [status],
+			min_score: minScore === undefined ? [] : [minScore]
+		});
+	};
+
+	deregisterArbitrator = async (
+		queryParams?: QueryParams
+	): Promise<EscrowDid.ArbitratorProfile> => {
+		const { deregister_arbitrator } = this.caller(queryParams ?? {});
+
+		return unwrap(await deregister_arbitrator(), 'deregister arbitrator');
+	};
+
+	adminRegisterArbitrator = async ({
+		principal,
+		...queryParams
+	}: {
+		principal: Principal;
+	} & QueryParams): Promise<EscrowDid.ArbitratorProfile> => {
+		const { admin_register_arbitrator } = this.caller(queryParams);
+
+		return unwrap(await admin_register_arbitrator({ principal }), 'admin register arbitrator');
+	};
+
+	adminSetArbitratorStatus = async ({
+		principal,
+		status,
+		...queryParams
+	}: {
+		principal: Principal;
+		status: EscrowDid.ArbitratorStatus;
+	} & QueryParams): Promise<EscrowDid.ArbitratorProfile> => {
+		const { admin_set_arbitrator_status } = this.caller(queryParams);
+
+		return unwrap(
+			await admin_set_arbitrator_status({ principal, status }),
+			'admin set arbitrator status'
+		);
+	};
+
+	getConfig = async (queryParams?: QueryParams): Promise<EscrowDid.Config> => {
+		const { config } = this.caller(queryParams ?? {});
+
+		return await config();
+	};
+
+	updateConfig = async ({
+		config,
+		...queryParams
+	}: {
+		config: EscrowDid.Config;
+	} & QueryParams): Promise<void> => {
+		const { update_config } = this.caller(queryParams);
+
+		const result = await update_config(config);
+
+		if ('Err' in result) {
+			throw new Error(`Failed to update config: ${JSON.stringify(result.Err)}`);
+		}
+	};
 }

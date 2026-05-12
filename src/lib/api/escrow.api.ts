@@ -166,6 +166,201 @@ export const getReliability = async ({
 	return await getReliability({ principal, ...queryParams });
 };
 
+export const openDispute = async ({
+	identity,
+	dealId,
+	...queryParams
+}: {
+	identity: Identity;
+	dealId: bigint;
+} & QueryParams): Promise<EscrowDid.DisputeView> => {
+	const { openDispute } = await escrowCanister({ identity });
+
+	return await openDispute({ dealId, ...queryParams });
+};
+
+export const getDispute = async ({
+	identity,
+	disputeId,
+	...queryParams
+}: {
+	identity: Identity;
+	disputeId: bigint;
+} & QueryParams): Promise<EscrowDid.DisputeView> => {
+	const { getDispute } = await escrowCanister({ identity });
+
+	return await getDispute({ disputeId, ...queryParams });
+};
+
+export const getPublicDispute = async ({
+	identity,
+	disputeId,
+	...queryParams
+}: {
+	identity: Identity;
+	disputeId: bigint;
+} & QueryParams): Promise<EscrowDid.PublicDisputeView> => {
+	const { getPublicDispute } = await escrowCanister({ identity });
+
+	return await getPublicDispute({ disputeId, ...queryParams });
+};
+
+export const listMyDisputes = async ({
+	identity,
+	offset,
+	limit,
+	phase,
+	...queryParams
+}: {
+	identity: Identity;
+	offset?: bigint;
+	limit?: bigint;
+	phase?: EscrowDid.DisputePhase;
+} & QueryParams): Promise<EscrowDid.DisputeView[]> => {
+	const { listMyDisputes } = await escrowCanister({ identity });
+
+	return await listMyDisputes({ offset, limit, phase, ...queryParams });
+};
+
+export const submitEvidence = async ({
+	identity,
+	disputeId,
+	note,
+	artefactUrl,
+	artefactSha256,
+	...queryParams
+}: {
+	identity: Identity;
+	disputeId: bigint;
+	note?: string;
+	artefactUrl?: string;
+	artefactSha256?: Uint8Array;
+} & QueryParams): Promise<EscrowDid.DisputeView> => {
+	const { submitEvidence } = await escrowCanister({ identity });
+
+	return await submitEvidence({
+		disputeId,
+		note,
+		artefactUrl,
+		artefactSha256,
+		...queryParams
+	});
+};
+
+export const castVote = async ({
+	identity,
+	disputeId,
+	vote,
+	...queryParams
+}: {
+	identity: Identity;
+	disputeId: bigint;
+	vote: EscrowDid.Vote;
+} & QueryParams): Promise<EscrowDid.DisputeView> => {
+	const { castVote } = await escrowCanister({ identity });
+
+	return await castVote({ disputeId, vote, ...queryParams });
+};
+
+export const finalizeDispute = async ({
+	identity,
+	disputeId,
+	...queryParams
+}: {
+	identity: Identity;
+	disputeId: bigint;
+} & QueryParams): Promise<EscrowDid.DisputeView> => {
+	const { finalizeDispute } = await escrowCanister({ identity });
+
+	return await finalizeDispute({ disputeId, ...queryParams });
+};
+
+export const withdrawDispute = async ({
+	identity,
+	disputeId,
+	proposal,
+	...queryParams
+}: {
+	identity: Identity;
+	disputeId: bigint;
+	proposal: EscrowDid.Vote | undefined;
+} & QueryParams): Promise<EscrowDid.DisputeView> => {
+	const { withdrawDispute } = await escrowCanister({ identity });
+
+	return await withdrawDispute({ disputeId, proposal, ...queryParams });
+};
+
+export const getArbitrator = async ({
+	identity,
+	principal,
+	...queryParams
+}: {
+	identity: Identity;
+	principal: Principal;
+} & QueryParams): Promise<EscrowDid.ArbitratorProfile | undefined> => {
+	const { getArbitrator } = await escrowCanister({ identity });
+
+	return await getArbitrator({ principal, ...queryParams });
+};
+
+export const listArbitrators = async ({
+	identity,
+	offset,
+	limit,
+	status,
+	minScore,
+	...queryParams
+}: {
+	identity: Identity;
+	offset?: bigint;
+	limit?: bigint;
+	status?: EscrowDid.ArbitratorStatus;
+	minScore?: number;
+} & QueryParams): Promise<EscrowDid.ArbitratorProfile[]> => {
+	const { listArbitrators } = await escrowCanister({ identity });
+
+	return await listArbitrators({ offset, limit, status, minScore, ...queryParams });
+};
+
+export const deregisterArbitrator = async ({
+	identity,
+	...queryParams
+}: {
+	identity: Identity;
+} & QueryParams): Promise<EscrowDid.ArbitratorProfile> => {
+	const { deregisterArbitrator } = await escrowCanister({ identity });
+
+	return await deregisterArbitrator(queryParams);
+};
+
+export const adminRegisterArbitrator = async ({
+	identity,
+	principal,
+	...queryParams
+}: {
+	identity: Identity;
+	principal: Principal;
+} & QueryParams): Promise<EscrowDid.ArbitratorProfile> => {
+	const { adminRegisterArbitrator } = await escrowCanister({ identity });
+
+	return await adminRegisterArbitrator({ principal, ...queryParams });
+};
+
+export const adminSetArbitratorStatus = async ({
+	identity,
+	principal,
+	status,
+	...queryParams
+}: {
+	identity: Identity;
+	principal: Principal;
+	status: EscrowDid.ArbitratorStatus;
+} & QueryParams): Promise<EscrowDid.ArbitratorProfile> => {
+	const { adminSetArbitratorStatus } = await escrowCanister({ identity });
+
+	return await adminSetArbitratorStatus({ principal, status, ...queryParams });
+};
+
 const escrowCanister = async ({ identity }: { identity: Identity }): Promise<EscrowCanister> => {
 	const agent = await getAgent({ identity });
 

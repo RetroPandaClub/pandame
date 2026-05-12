@@ -28,5 +28,10 @@ export type DealSide = 'payer' | 'recipient' | 'unknown';
 
 /**
  * Deal-list filter narrowing — used by the History page + DealsTable.
+ *
+ * `disputed` covers the live `Disputed` lifecycle state (panel still
+ * deliberating); `settled` and `refunded` collapse their `Arbitrated…`
+ * counterparts so users don't have to think about how the deal got to
+ * its terminal state.
  */
-export type DealFilter = 'all' | 'active' | 'settled' | 'refunded' | 'cancelled';
+export type DealFilter = 'all' | 'active' | 'settled' | 'refunded' | 'cancelled' | 'disputed';

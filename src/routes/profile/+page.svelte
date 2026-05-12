@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Principal } from '@icp-sdk/core/principal';
 	import { goto } from '$app/navigation';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
@@ -10,9 +11,12 @@
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import PencilIcon from '$lib/components/icons/PencilIcon.svelte';
 	import PlusIcon from '$lib/components/icons/PlusIcon.svelte';
+	import { isArbitrator } from '$lib/derived/arbitrator.derived';
 	import { profileDisplayName } from '$lib/derived/profile.derived';
 	import { userPrincipalShort, userPrincipalText } from '$lib/derived/user.derived';
+	import { ensureArbitrator } from '$lib/services/arbitrator.services';
 	import { ensureProfile, upsertProfile } from '$lib/services/profile.services';
+	import { arbitratorStore } from '$lib/stores/arbitrator.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { profileStore } from '$lib/stores/profile.store';
 	import { defaultAvatarUrlForPrincipal } from '$lib/utils/avatar.utils';
@@ -32,6 +36,7 @@
 		const text = principalText;
 		if (text === undefined || text.length === 0) {
 			profileStore.reset();
+			arbitratorStore.reset();
 			return;
 		}
 		(async () => {
@@ -40,6 +45,15 @@
 				profileStore.set(doc);
 			} catch (err) {
 				console.error('Failed to ensure profile:', err);
+			}
+		})();
+		(async () => {
+			try {
+				const principal = Principal.fromText(text);
+				await ensureArbitrator({ principal });
+			} catch (err) {
+				// Non-fatal: the user simply isn't surfaced as an arbitrator.
+				console.error('Failed to load arbitrator profile:', err);
 			}
 		})();
 	});
@@ -161,6 +175,30 @@
 			class="text-default flex items-center justify-between border-b border-[var(--color-border-soft)] py-[14px] font-sans text-[18px] font-normal transition-opacity hover:opacity-70"
 		>
 			<span>{$i18n.profile.history_action}</span>
+			<span class="text-subtle font-sans text-[20px]" aria-hidden="true">›</span>
+		</button>
+
+		{#if $isArbitrator}
+			<button
+				type="button"
+				onclick={async () => {
+					await goto('/profile/arbitrator');
+				}}
+				class="text-default flex items-center justify-between border-b border-[var(--color-border-soft)] py-[14px] font-sans text-[18px] font-normal transition-opacity hover:opacity-70"
+			>
+				<span>{$i18n.profile.arbitrator_action}</span>
+				<span class="text-subtle font-sans text-[20px]" aria-hidden="true">›</span>
+			</button>
+		{/if}
+
+		<button
+			type="button"
+			onclick={async () => {
+				await goto('/profile/admin');
+			}}
+			class="text-default flex items-center justify-between border-b border-[var(--color-border-soft)] py-[14px] font-sans text-[18px] font-normal transition-opacity hover:opacity-70"
+		>
+			<span>{$i18n.profile.admin_action}</span>
 			<span class="text-subtle font-sans text-[20px]" aria-hidden="true">›</span>
 		</button>
 

@@ -43,7 +43,8 @@ the use case.
 5. **Compose, don't reinvent.** Build on the existing primitives —
    `Button`, `IconButton`, `Chip`, `Avatar`, `FormField`, `TextInput`,
    `Tabs`, `BrandHeader`, `BottomNav`, `Card`, `Modal`, `Backdrop`,
-   `Money`, `Countdown`, `EmptyState`, `PandaMark`, `VoteQuorumPicker`
+   `Money`, `Countdown`, `EmptyState`, `PandaMark`, `VotePicker`,
+   `DisputePhaseBadge`, `DisputeCard`, `EvidenceList`, `EvidenceForm`
    — before inventing new shapes. Reach for an icon under
    `$lib/components/icons/` instead of inlining yet another SVG.
 6. **Style with the project's tokens.** Look at the closest neighbour's

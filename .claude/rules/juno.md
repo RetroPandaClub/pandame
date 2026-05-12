@@ -132,20 +132,38 @@ push deal state into Juno.
   Both are typed in
   [`src/custom-events.d.ts`](../../src/custom-events.d.ts).
 
-## Dispute UI is stubbed
+## Dispute UI
 
-The `Disputed` lifecycle state is **not yet implemented in the canister**
-(see [`AntonioVentilii/escrow#future-expansion`](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion)).
-The `Dispute` button in
-[`DealActions.svelte`](../../src/lib/components/DealActions.svelte)
-navigates to
-[`/deals/[deal_id]/dispute`](../../src/routes/deals/%5Bdeal_id%5D/dispute/+page.svelte),
-a visual mockup with a "v2" warning banner, disabled inputs and a
-disabled `VoteQuorumPicker`. When the canister grows the
-`Disputed` state + dispute-jury params, replace the mockup with a real
-flow and update
-[`docs/ai/frontend/reusability.md`](../../docs/ai/frontend/reusability.md)
-in the same PR.
+The full dispute lifecycle (RFC-001) is wired:
+
+- `DealActions.svelte` exposes **Open dispute** for `Funded` deals with a
+  bound recipient, and **View dispute** when `deal.dispute` is `Some(_)`.
+- `/deals/[deal_id]/dispute/+page.svelte` is the single dispute screen —
+  it covers `open_dispute` (when the deal has no attached dispute),
+  `submit_evidence`, `withdraw_dispute` (parties only, Evidence phase),
+  `cast_vote` (panel arbitrators, Voting phase), and
+  `finalize_dispute` (anyone, after `voting_deadline_ns`). Outcome +
+  tally render once the dispute is `Resolved`.
+- The `disputed` tab on `/transactions` and the `disputed` filter on
+  `/history` are real — they're backed by `list_my_disputes` and the
+  new `Disputed` / `ArbitratedSettled` / `ArbitratedRefunded` deal
+  statuses.
+- Per-deal jury size has been removed from `/deals/new`: the canister
+  now treats `panel_size` as a global `DisputeConfig` field
+  (controllers tune it via `update_config`), so the create form just
+  shows an explanatory hint instead of asking the user to pick.
+
+Arbitrator + admin curation:
+
+- `arbitratorStore` + `arbitrator.derived.ts` track the signed-in
+  user's `ArbitratorProfile` (loaded by `ensureArbitrator` on the
+  Profile page). `/profile/arbitrator` surfaces the profile, the live
+  panel-assigned disputes, and the self-deregister CTA. The page link
+  appears on `/profile` only when `$isArbitrator` resolves true.
+- `/profile/admin` is the controller-only curation surface — it calls
+  `admin_register_arbitrator` and `admin_set_arbitrator_status`. The
+  link is visible to every signed-in user; the canister rejects
+  non-controllers with `NotAuthorised`.
 
 ## Profile collection is real
 
