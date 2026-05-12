@@ -31,6 +31,118 @@ export interface Account {
 	subaccount: [] | [Uint8Array];
 }
 /**
+ * Arguments for `admin_register_arbitrator`.
+ *
+ * Idempotent — calling for an already-registered principal returns
+ * the existing profile, with two side effects on every successful
+ * call (regardless of prior status):
+ *
+ * - Status is set to `Active` (reactivating `Suspended` / `Deregistered` profiles, no-op for
+ * already-`Active`).
+ * - `registered_by` is refreshed to the calling controller, so the audit trail reflects the most
+ * recent curation event.
+ *
+ * Score-related counters and `registered_at_ns` are preserved across
+ * re-registration.
+ */
+export interface AdminRegisterArbitratorArgs {
+	principal: Principal;
+}
+export type AdminRegisterArbitratorResult = { Ok: ArbitratorProfile } | { Err: EscrowError };
+/**
+ * Arguments for `admin_set_arbitrator_status`.
+ *
+ * All transitions are allowed (Active ↔ Suspended ↔ Deregistered).
+ * A self-transition (e.g. `Active → Active`) is a no-op success.
+ * `Deregistered → Active` reactivates a profile previously removed
+ * — but unlike `admin_register_arbitrator` it does NOT refresh
+ * `registered_by` (the audit trail still points at the original
+ * admin that first added the arbitrator) and does NOT re-run the
+ * `validate_arbitrator_principal` check (the principal was already
+ * validated at original registration time). To both reactivate AND
+ * refresh the audit trail, use `admin_register_arbitrator` instead.
+ */
+export interface AdminSetArbitratorStatusArgs {
+	status: ArbitratorStatus;
+	principal: Principal;
+}
+/**
+ * Public profile of a registered arbitrator.
+ *
+ * Score-related fields follow these rules:
+ *
+ * | Outcome                | Voter type              | `assigned` | `voted` | `with_majority` |
+ * | ---------------------- | ----------------------- | ---------- | ------- | --------------- |
+ * | `Settled` / `Refunded` | non-abstain w/ majority | +1         | +1      | +1              |
+ * | `Settled` / `Refunded` | non-abstain vs majority | +1         | +1      | +0              |
+ * | `Settled` / `Refunded` | abstain                 | +1         | +0      | +0              |
+ * | `NoQuorum`             | any (incl. non-abstain) | +1         | +0      | +0              |
+ * | `Withdrawn`            | any                     | +1         | +0      | +0              |
+ *
+ * `NoQuorum` and `Withdrawn` deliberately don't update `voted` or
+ * `with_majority` — there's no on-canister verdict against which to
+ * score votes, and counting them would create a perverse incentive
+ * to abstain on hard-to-quorum disputes.
+ *
+ * `score` is computed via [`ArbitratorProfile::compute_score`] and is
+ * `None` until `disputes_voted >= MIN_VOTES_FOR_SCORE`.
+ *
+ * Human-readable description (name, jurisdiction, languages, contact,
+ * etc.) is intentionally **not** stored on-canister — it lives in the
+ * consuming app's off-chain directory keyed by `principal`. The
+ * canister only carries data its own logic actually reads.
+ */
+export interface ArbitratorProfile {
+	status: ArbitratorStatus;
+	principal: Principal;
+	registered_at_ns: bigint;
+	/**
+	 * Total disputes the arbitrator was selected for.
+	 */
+	disputes_assigned: number;
+	/**
+	 * 0–100 reliability score, or `None` until enough scored votes
+	 * accumulate (`disputes_voted >= MIN_VOTES_FOR_SCORE`).
+	 */
+	score: [] | [number];
+	/**
+	 * Disputes the arbitrator submitted a non-abstain vote on, excluding
+	 * `NoQuorum` and `Withdrawn` outcomes.
+	 */
+	disputes_voted: number;
+	/**
+	 * Disputes where the arbitrator's non-abstain vote matched the
+	 * eventual majority. `NoQuorum` / `Withdrawn` outcomes never
+	 * increment this counter.
+	 */
+	disputes_with_majority: number;
+	/**
+	 * The controller principal that registered this arbitrator. Audit
+	 * trail for the curated registration model.
+	 */
+	registered_by: Principal;
+}
+/**
+ * Lifecycle status of an arbitrator. Transitions:
+ *
+ * ```text
+ * (unregistered) ──admin_register──▶ Active ──admin──▶ Suspended
+ * │                │
+ * └──self──▶ Deregistered ◀──admin──┘
+ * │
+ * └──admin_register──▶ Active (reactivation)
+ * ```
+ *
+ * `Suspended` and `Deregistered` arbitrators cannot be selected for
+ * new disputes, but in-flight assignments are honoured — a non-vote
+ * from a non-Active panel member counts as `Vote::Abstain` at
+ * finalize time. Both statuses are recoverable: admin can flip the
+ * arbitrator back to `Active` via `admin_set_arbitrator_status`, and
+ * an `admin_register_arbitrator` call on a `Deregistered` profile
+ * reactivates it (idempotent).
+ */
+export type ArbitratorStatus = { Deregistered: null } | { Active: null } | { Suspended: null };
+/**
  * Arguments for cancelling an unfunded deal.
  */
 export interface CancelDealArgs {
@@ -39,6 +151,19 @@ export interface CancelDealArgs {
 	 */
 	deal_id: bigint;
 }
+/**
+ * Arguments for `cast_vote`.
+ *
+ * Caller must be on the dispute's panel and currently `Active`.
+ * Allowed only during the open voting window
+ * (`evidence_deadline_ns <= now_ns < voting_deadline_ns`). Latest-wins
+ * — calling repeatedly during the window updates the recorded vote.
+ */
+export interface CastVoteArgs {
+	vote: Vote;
+	dispute_id: bigint;
+}
+export type CastVoteResult = { Ok: DisputeView } | { Err: EscrowError };
 /**
  * Reduced view for public claim pages — does not expose payer, claim code,
  * or internal fields.
@@ -76,6 +201,26 @@ export interface ClaimableDealView {
 	 * Whether a recipient principal has already been bound to this deal.
 	 */
 	is_recipient_bound: boolean;
+}
+/**
+ * Global configuration for the Escrow canister.
+ *
+ * New fields use `Option` for backward-compatible deserialisation from
+ * older stable-memory snapshots that lack them.
+ */
+export interface Config {
+	/**
+	 * Admin-tunable dispute parameters. The fallback is whole-struct,
+	 * not per-field — when `dispute_config` is `None` (legacy
+	 * snapshots; fresh deployments before `update_config` is first
+	 * called), `services::disputes::load_dispute_config` returns
+	 * `DisputeConfig::default()`. Once a controller calls
+	 * `update_config` with a `Some(_)` value, every field comes from
+	 * that struct (including any fields the controller wants set to
+	 * the default value — there's no per-field "leave unchanged"
+	 * merge mechanism).
+	 */
+	dispute_config: [] | [DisputeConfig];
 }
 export type Consent = { Rejected: null } | { Accepted: null } | { Pending: null };
 /**
@@ -120,7 +265,33 @@ export interface CreateDealArgs {
 	expires_at_ns: bigint;
 }
 export type DealStatus =
+	| {
+			/**
+			 * A dispute is open on this deal. Funds remain in the escrow
+			 * subaccount until the dispute resolves to `ArbitratedSettled` /
+			 * `ArbitratedRefunded`. The expiry sweep (`services::expiry`)
+			 * skips deals in this state.
+			 */
+			Disputed: null;
+	  }
 	| { Refunded: null }
+	| {
+			/**
+			 * Dispute panel voted majority CC, OR both parties agreed
+			 * out-of-band on a CC outcome — funds released to recipient.
+			 * Distinct from `Settled` so callers can tell arbitrated from
+			 * unilateral settlement. Terminal.
+			 */
+			ArbitratedSettled: null;
+	  }
+	| {
+			/**
+			 * Dispute panel voted majority IC, OR both parties agreed
+			 * out-of-band on an IC outcome, OR the panel reached no quorum.
+			 * Funds refunded to payer. Distinct from `Refunded`. Terminal.
+			 */
+			ArbitratedRefunded: null;
+	  }
 	| { Rejected: null }
 	| { Funded: null }
 	| { Cancelled: null }
@@ -192,6 +363,13 @@ export interface DealView {
 	 */
 	claim_code: [] | [string];
 	/**
+	 * Identifier of the attached dispute, if any. `Some(_)` while a
+	 * dispute is open or after it has resolved (audit-trail link to
+	 * the `Dispute` record); `None` for deals that never went into
+	 * dispute.
+	 */
+	dispute: [] | [bigint];
+	/**
 	 * Timestamp when the deal was settled (funds released), if applicable.
 	 */
 	settled_at_ns: [] | [bigint];
@@ -211,6 +389,152 @@ export interface DealView {
 	 * Nanosecond UTC timestamp after which the deal expires.
 	 */
 	expires_at_ns: bigint;
+}
+/**
+ * Admin-tunable dispute configuration. Lives nested in [`crate::types::state::Config`].
+ *
+ * All windows are nanoseconds (canister convention); fee bps follows the
+ * standard ICRC bps convention (`10_000` = 100%).
+ */
+export interface DisputeConfig {
+	/**
+	 * Number of arbitrators selected per dispute. Must be odd and
+	 * `>= 3` — `validation::validate_dispute_config` enforces both
+	 * invariants when `update_config` is called. Odd-only is
+	 * required by the tally rules (no tie possible without an
+	 * abstention).
+	 */
+	panel_size: number;
+	/**
+	 * Length of the Voting phase, in nanoseconds (default 2 days).
+	 */
+	voting_window_ns: bigint;
+	/**
+	 * Length of the Evidence phase, in nanoseconds (default 3 days).
+	 */
+	evidence_window_ns: bigint;
+	/**
+	 * Optional minimum arbitrator score required to be eligible for
+	 * selection (Sybil filter). `None` = bootstrap mode (every active
+	 * arbitrator is eligible; default).
+	 */
+	min_arbitrator_score: [] | [number];
+	/**
+	 * Minimum arbitration fee in the deal's token. The effective fee
+	 * at `open_dispute` is `max(arbitration_min_fee, amount *
+	 * arbitration_fee_bps / 10_000)`.
+	 */
+	arbitration_min_fee: bigint;
+	/**
+	 * Arbitration fee in basis points of the disputed amount
+	 * (default 500 = 5%). Combined with [`Self::arbitration_min_fee`].
+	 */
+	arbitration_fee_bps: number;
+	/**
+	 * Percentage of the arbitration fee paid to the panel when both
+	 * parties resolve out-of-band via `withdraw_dispute` (default
+	 * 25). `validation::validate_dispute_config` rejects values
+	 * `> 100` at `update_config` time;
+	 * `services::disputes::withdraw_finalize_locked` also clamps
+	 * defensively at the use site so a hypothetical bad config that
+	 * somehow slipped through (e.g. a future migration) can't
+	 * over-pay arbitrators.
+	 */
+	withdraw_fee_pct: number;
+}
+/**
+ * Outcome of a resolved dispute. Set on the `Dispute` record at finalize
+ * time. The mapping to `DealStatus` is:
+ *
+ * | `DisputeOutcome`                                 | Resulting `DealStatus`     |
+ * | ------------------------------------------------ | -------------------------- |
+ * | `Settled { … }`                                  | `ArbitratedSettled`        |
+ * | `Refunded { … }`                                 | `ArbitratedRefunded`       |
+ * | `NoQuorum { … }`                                 | `ArbitratedRefunded` (no-quorum fallback) |
+ * | `Withdrawn { agreed: ConcludedCorrectly }`       | `ArbitratedSettled`        |
+ * | `Withdrawn { agreed: IncorrectlyConcluded }`     | `ArbitratedRefunded`       |
+ */
+export type DisputeOutcome =
+	| {
+			/**
+			 * Majority IC — funds refunded to payer.
+			 */
+			Refunded: DisputeTally;
+	  }
+	| {
+			/**
+			 * Both parties agreed out-of-band on `agreed` via `withdraw_dispute`.
+			 * Arbitrators receive the reduced `withdraw_fee_pct` slice of the fee.
+			 */
+			Withdrawn: { agreed: Vote };
+	  }
+	| {
+			/**
+			 * Voting deadline reached without enough non-abstain votes.
+			 * Falls back to refunding the payer (status quo ante).
+			 */
+			NoQuorum: DisputeTally;
+	  }
+	| {
+			/**
+			 * Majority CC — funds released to recipient.
+			 */
+			Settled: DisputeTally;
+	  };
+/**
+ * Lifecycle phase of a dispute. The phase advances on a strict timeline
+ * driven by `evidence_deadline_ns` / `voting_deadline_ns` (set at
+ * `open_dispute` time using the windows in [`DisputeConfig`]).
+ */
+export type DisputePhase =
+	| {
+			/**
+			 * Evidence submission window. Both parties + arbitrators may post
+			 * evidence; voting is closed.
+			 */
+			Evidence: null;
+	  }
+	| {
+			/**
+			 * Voting window. Evidence is frozen, arbitrators cast their votes.
+			 */
+			Voting: null;
+	  }
+	| {
+			/**
+			 * Tally finalised; outcome propagated to the parent `Deal`. Terminal.
+			 */
+			Resolved: null;
+	  };
+/**
+ * Per-outcome vote counts. Mirrors the shape inside
+ * `DisputeOutcome::Settled` / `Refunded` / `NoQuorum` so the public view
+ * can surface counts independently of the `DisputeOutcome` discriminant.
+ */
+export interface DisputeTally {
+	cc: number;
+	ic: number;
+	abstain: number;
+}
+/**
+ * Full dispute view returned to authorised callers (parties of the
+ * parent deal + arbitrators on the panel). Mirrors the shape of
+ * [`crate::types::dispute::Dispute`] one-to-one for simplicity.
+ */
+export interface DisputeView {
+	id: bigint;
+	recipient_withdraw_proposal: [] | [Vote];
+	opened_by: Principal;
+	voting_deadline_ns: bigint;
+	opened_at_ns: bigint;
+	evidence: Array<Evidence>;
+	arbitration_fee: bigint;
+	panel: Array<PanelMember>;
+	phase: DisputePhase;
+	deal_id: bigint;
+	payer_withdraw_proposal: [] | [Vote];
+	evidence_deadline_ns: bigint;
+	outcome: [] | [DisputeOutcome];
 }
 /**
  * Canonical error type returned by all deal endpoints.
@@ -255,6 +579,12 @@ export type EscrowError =
 	  }
 	| {
 			/**
+			 * The requested dispute does not exist.
+			 */
+			DisputeNotFound: null;
+	  }
+	| {
+			/**
 			 * The payer principal is not set for this deal.
 			 */
 			PayerNotSet: null;
@@ -264,6 +594,19 @@ export type EscrowError =
 			 * The requested deal does not exist.
 			 */
 			NotFound: null;
+	  }
+	| {
+			/**
+			 * The arbitrator is `Suspended` or `Deregistered`.
+			 */
+			ArbitratorNotActive: null;
+	  }
+	| {
+			/**
+			 * `cast_vote` was called by a principal that is not on the
+			 * dispute's selected panel.
+			 */
+			NotAssignedArbitrator: null;
 	  }
 	| {
 			/**
@@ -288,6 +631,18 @@ export type EscrowError =
 			 * A claim code is required for open (unbound-recipient) deals.
 			 */
 			MissingClaimCode: null;
+	  }
+	| {
+			/**
+			 * An evidence submission exceeds the maximum allowed size for
+			 * its field. Returned for both `note` overflow (limit
+			 * `MAX_EVIDENCE_NOTE_LEN`) and `artefact_url` overflow (limit
+			 * `MAX_EVIDENCE_URL_LEN`); the `max` field tells the caller
+			 * WHICH limit was breached. Hash-length violations on
+			 * `artefact_sha256` use `ValidationError` instead — those are
+			 * shape checks ("must be exactly 32 bytes"), not size checks.
+			 */
+			EvidenceTooLarge: { max: number };
 	  }
 	| {
 			/**
@@ -321,9 +676,40 @@ export type EscrowError =
 	  }
 	| {
 			/**
+			 * `open_dispute` was called on a deal whose `recipient` is `None`
+			 * (open-recipient / tip-flow deal). Tip flows cannot be disputed
+			 * because there is no bound counterparty in canister state.
+			 */
+			DisputeRequiresBoundRecipient: null;
+	  }
+	| {
+			/**
+			 * `open_dispute` was called on a deal that already has an open or
+			 * resolved dispute attached.
+			 */
+			DisputeAlreadyExists: null;
+	  }
+	| {
+			/**
 			 * The caller does not match the deal's bound recipient.
 			 */
 			RecipientMismatch: null;
+	  }
+	| {
+			/**
+			 * The action requires the dispute to be in a different phase
+			 * (`Evidence`, `Voting`, or `Resolved`).
+			 */
+			InvalidDisputePhase: {
+				/**
+				 * The phase the dispute is actually in.
+				 */
+				actual: string;
+				/**
+				 * The phase(s) that would have been valid.
+				 */
+				expected: string;
+			};
 	  }
 	| {
 			/**
@@ -336,6 +722,14 @@ export type EscrowError =
 			 * The caller has too many active (non-terminal) deals.
 			 */
 			TooManyActiveDeals: { max: number };
+	  }
+	| {
+			/**
+			 * The eligible arbitrator pool is too small to fill the configured
+			 * `panel_size`. Returned by `open_dispute` — the deal stays
+			 * `Funded` so the caller can retry later or settle out-of-band.
+			 */
+			InsufficientArbitrators: { have: number; need: number };
 	  }
 	| {
 			/**
@@ -363,7 +757,51 @@ export type EscrowError =
 			 * An accept was attempted after the deal's expiry deadline.
 			 */
 			Expired: null;
+	  }
+	| {
+			/**
+			 * `open_dispute` was called on a deal whose `amount` cannot cover
+			 * the configured arbitration fee plus the per-arbitrator ICRC-1
+			 * ledger fees. Tiny deals are not disputable.
+			 */
+			AmountTooSmallForArbitration: { min: bigint };
 	  };
+/**
+ * A piece of evidence attached to a dispute.
+ *
+ * Artefacts are stored **off-canister**: the canister only
+ * records a URL + SHA-256 commitment + an optional short note. Length
+ * limits are enforced at the canister boundary; this struct itself is
+ * purely a data carrier.
+ */
+export interface Evidence {
+	submitted_at_ns: bigint;
+	submitter: Principal;
+	/**
+	 * Free-form note (max 4 KiB at the boundary →
+	 * [`EscrowError::EvidenceTooLarge`]).
+	 */
+	note: [] | [string];
+	/**
+	 * Off-canister artefact URL (max 2 KiB at the boundary).
+	 */
+	artefact_url: [] | [string];
+	/**
+	 * SHA-256 of the off-canister artefact. Always exactly 32 bytes when
+	 * `Some` — the validator rejects other lengths.
+	 */
+	artefact_sha256: [] | [Uint8Array];
+}
+/**
+ * Arguments for `finalize_dispute`.
+ *
+ * Anyone (non-anonymous) can call. Idempotent — calling again after
+ * successful resolution returns the resolved view; calling when not
+ * yet past `voting_deadline_ns` returns `InvalidDisputePhase`.
+ */
+export interface FinalizeDisputeArgs {
+	dispute_id: bigint;
+}
 /**
  * Arguments for funding a created deal via ICRC-2 `transfer_from`.
  */
@@ -377,6 +815,7 @@ export type FundDealResult = { Ok: DealView } | { Err: EscrowError };
 export type GetClaimableDealResult = { Ok: ClaimableDealView } | { Err: EscrowError };
 export type GetDealResult = { Ok: DealView } | { Err: EscrowError };
 export type GetEscrowAccountResult = { Ok: Account } | { Err: EscrowError };
+export type GetPublicDisputeResult = { Ok: PublicDisputeView } | { Err: EscrowError };
 /**
  * ICRC-7 transfer argument for a single token.
  */
@@ -407,6 +846,29 @@ export type Icrc7TransferError =
  */
 export type Icrc7TransferResponse = { Ok: bigint } | { Err: Icrc7TransferError };
 /**
+ * Pagination + filter arguments for `list_arbitrators`.
+ */
+export interface ListArbitratorsArgs {
+	/**
+	 * Filter by status. `None` returns all statuses.
+	 */
+	status: [] | [ArbitratorStatus];
+	/**
+	 * Number of arbitrators to skip (0-based). Defaults to `0`.
+	 */
+	offset: [] | [bigint];
+	/**
+	 * Maximum number of arbitrators to return. Defaults to `50`, capped
+	 * at `100`.
+	 */
+	limit: [] | [bigint];
+	/**
+	 * Filter by minimum reliability score. Arbitrators with `score = None`
+	 * are included only when `min_score` is `None`.
+	 */
+	min_score: [] | [number];
+}
+/**
  * Pagination arguments for listing the caller's deals.
  */
 export interface ListMyDealsArgs {
@@ -419,7 +881,83 @@ export interface ListMyDealsArgs {
 	 */
 	limit: [] | [bigint];
 }
+/**
+ * Pagination + filter arguments for `list_my_disputes`.
+ */
+export interface ListMyDisputesArgs {
+	/**
+	 * Number of disputes to skip (0-based). Defaults to `0`.
+	 */
+	offset: [] | [bigint];
+	/**
+	 * Maximum number of disputes to return. Defaults to `50`, capped
+	 * at `100`.
+	 */
+	limit: [] | [bigint];
+	/**
+	 * Filter by phase. `None` returns disputes in all phases.
+	 */
+	phase: [] | [DisputePhase];
+}
+/**
+ * One member of the dispute panel.
+ *
+ * Mirrors the `Deal.{funded_at_ns, funding_tx, settled_at_ns, payout_tx}`
+ * pattern: `paid_at_ns` + `payout_tx` are populated when the per-arbitrator
+ * fee transfer succeeds at finalize time, making the fan-out payout
+ * replay-safe.
+ */
+export interface PanelMember {
+	principal: Principal;
+	/**
+	 * `None` until the arbitrator calls `cast_vote` during the Voting phase.
+	 */
+	vote: [] | [Vote];
+	/**
+	 * ICRC-1 ledger block index of the per-arbitrator payout transfer.
+	 */
+	payout_tx: [] | [bigint];
+	/**
+	 * `None` until the arbitrator's slice of the arbitration fee has been
+	 * successfully transferred via the ICRC-1 ledger at finalize.
+	 */
+	paid_at_ns: [] | [bigint];
+}
 export type ProcessExpiredDealsResult = { Ok: BigUint64Array } | { Err: EscrowError };
+/**
+ * Reduced public view for status pages.
+ *
+ * No party principals, no panel principals, no evidence URLs — just
+ * the minimum any authenticated caller needs to render a dispute's
+ * progress. Exposing the `deal_id` is intentional (it's already public
+ * via the ICRC-7 token mapping); exposing the cc/ic/abstain counts
+ * after resolution lets external indexers display tally summaries.
+ */
+export interface PublicDisputeView {
+	id: bigint;
+	/**
+	 * Vote counts visible only after the dispute reaches `Resolved`
+	 * (per phase-gated info disclosure). `None` while the dispute is
+	 * still in `Evidence` / `Voting`.
+	 */
+	tally: [] | [DisputeTally];
+	/**
+	 * Number of arbitrators on the panel (no principals).
+	 */
+	panel_size: number;
+	voting_deadline_ns: bigint;
+	/**
+	 * Number of evidence submissions (no URLs).
+	 */
+	evidence_count: number;
+	phase: DisputePhase;
+	deal_id: bigint;
+	evidence_deadline_ns: bigint;
+	/**
+	 * Outcome — set when phase is `Resolved`.
+	 */
+	outcome: [] | [DisputeOutcome];
+}
 /**
  * Public view of a principal's reliability score.
  */
@@ -439,12 +977,44 @@ export interface ReliabilityView {
 	positive: number;
 }
 /**
+ * Arguments for `submit_evidence`.
+ *
+ * At least one of `note` / `(artefact_url + artefact_sha256)`
+ * must be present; URL and hash are paired (one without the other is
+ * rejected); `note` <= 4 KiB; `artefact_url` <= 2 KiB;
+ * `artefact_sha256` exactly 32 bytes when set.
+ */
+export interface SubmitEvidenceArgs {
+	/**
+	 * Free-form note (max 4 KiB).
+	 */
+	note: [] | [string];
+	/**
+	 * Identifier of the dispute receiving the evidence.
+	 */
+	dispute_id: bigint;
+	/**
+	 * Off-canister artefact URL (max 2 KiB).
+	 */
+	artefact_url: [] | [string];
+	/**
+	 * SHA-256 of the off-canister artefact. Always exactly 32 bytes
+	 * when `Some`.
+	 */
+	artefact_sha256: [] | [Uint8Array];
+}
+/**
  * ICRC-10 supported standard descriptor.
  */
 export interface SupportedStandard {
 	url: string;
 	name: string;
 }
+/**
+ * Outcome of `update_config`. `Ok` on successful validation +
+ * persistence; `Err` carries the validation failure.
+ */
+export type UpdateConfigResult = { Ok: null } | { Err: EscrowError };
 /**
  * Generic metadata value following the ICRC-16 specification.
  *
@@ -471,6 +1041,46 @@ export type Vec = Array<
 		)
 	]
 >;
+/**
+ * A single arbitrator's vote on a dispute, or — at the canister boundary —
+ * the outcome a party proposes via `withdraw_dispute`. The validator
+ * at the boundary rejects `Abstain` for out-of-band proposals.
+ */
+export type Vote =
+	| {
+			/**
+			 * "Incorrectly Concluded" — refund payer.
+			 */
+			IncorrectlyConcluded: null;
+	  }
+	| {
+			/**
+			 * Arbitrator abstained. Counts toward `disputes_assigned` but never
+			 * toward `disputes_voted` / `disputes_with_majority` for the
+			 * reliability score.
+			 */
+			Abstain: null;
+	  }
+	| {
+			/**
+			 * "Concluded Correctly" — release funds to recipient.
+			 */
+			ConcludedCorrectly: null;
+	  };
+/**
+ * Arguments for `withdraw_dispute` — out-of-band settlement during
+ * the Evidence phase.
+ *
+ * Caller must be `payer` or `recipient` of the parent deal. Allowed
+ * during the `Evidence` phase only. `proposal: Some(_)` records the
+ * caller's proposed outcome (latest-wins overwrite); `None` retracts.
+ * `Some(Abstain)` is rejected. Resolution fires when both party
+ * fields are `Some` and equal.
+ */
+export interface WithdrawDisputeArgs {
+	dispute_id: bigint;
+	proposal: [] | [Vote];
+}
 export interface _SERVICE {
 	/**
 	 * Accepts (claims) a funded deal, releasing the escrowed tokens to the caller.
@@ -482,6 +1092,31 @@ export interface _SERVICE {
 	 */
 	accept_deal: ActorMethod<[AcceptDealArgs], AcceptDealResult>;
 	/**
+	 * Registers `args.principal` as an arbitrator. Curated registration —
+	 * only canister controllers can add arbitrators to the pool.
+	 *
+	 * Idempotent: re-calling for an already-registered principal returns
+	 * the existing profile (and reactivates it if it was `Suspended` or
+	 * `Deregistered`). Score counters and `registered_at_ns` are
+	 * preserved across reactivation; `registered_by` is updated to the
+	 * calling controller.
+	 */
+	admin_register_arbitrator: ActorMethod<
+		[AdminRegisterArbitratorArgs],
+		AdminRegisterArbitratorResult
+	>;
+	/**
+	 * Sets an arbitrator's status. All transitions are allowed (Active ↔
+	 * Suspended ↔ Deregistered). Self-transitions are no-op success.
+	 *
+	 * Returns `EscrowError::NotFound` if the target principal isn't
+	 * registered as an arbitrator.
+	 */
+	admin_set_arbitrator_status: ActorMethod<
+		[AdminSetArbitratorStatusArgs],
+		AdminRegisterArbitratorResult
+	>;
+	/**
 	 * Cancels a deal that has not yet been funded.
 	 *
 	 * Either party may cancel. The deal transitions from `Created` to
@@ -490,11 +1125,18 @@ export interface _SERVICE {
 	 */
 	cancel_deal: ActorMethod<[CancelDealArgs], AcceptDealResult>;
 	/**
+	 * Casts a vote on a dispute. Caller must be on the panel and
+	 * currently `Active`. Allowed only during the open voting window
+	 * (`evidence_deadline_ns <= now < voting_deadline_ns`). Latest-wins
+	 * semantics — calling repeatedly during the window updates the vote.
+	 */
+	cast_vote: ActorMethod<[CastVoteArgs], CastVoteResult>;
+	/**
 	 * Returns the current global configuration of the Escrow canister.
 	 *
 	 * This method is gated to canister controllers.
 	 */
-	config: ActorMethod<[], {}>;
+	config: ActorMethod<[], Config>;
 	/**
 	 * Explicitly consents to a deal's terms.
 	 *
@@ -516,6 +1158,26 @@ export interface _SERVICE {
 	 */
 	create_deal: ActorMethod<[CreateDealArgs], AcceptDealResult>;
 	/**
+	 * Self-deregisters the caller's arbitrator profile. Opt-out is a
+	 * fundamental right that doesn't require admin intervention. The
+	 * status flips to `Deregistered`; in-flight assignments are honoured
+	 * (a non-vote then counts as `Vote::Abstain` at finalize time).
+	 *
+	 * To re-enter the pool the caller must be re-registered by an admin
+	 * via `admin_register_arbitrator` — the curated registration model
+	 * (admin chooses who's in) does not allow self-resurrection.
+	 */
+	deregister_arbitrator: ActorMethod<[], AdminRegisterArbitratorResult>;
+	/**
+	 * Force-finalises a dispute past its `voting_deadline_ns`. Anyone
+	 * (non-anonymous) can call. Idempotent — replays after a successful
+	 * finalize return the resolved view; partial replays (some
+	 * arbitrator transfers succeeded, others trapped) skip already-paid
+	 * panel members. Triggers tally + outcome propagation + ledger
+	 * transfers + arbitrator score updates.
+	 */
+	finalize_dispute: ActorMethod<[FinalizeDisputeArgs], CastVoteResult>;
+	/**
 	 * Funds a previously created deal by transferring tokens from the payer's
 	 * account into the deal's escrow subaccount via ICRC-2 `transfer_from`.
 	 *
@@ -524,6 +1186,12 @@ export interface _SERVICE {
 	 * recipient must have consented first.
 	 */
 	fund_deal: ActorMethod<[FundDealArgs], FundDealResult>;
+	/**
+	 * Returns the arbitrator profile for `principal`, or `None` if the
+	 * principal hasn't been registered. Public read; any non-anonymous
+	 * caller may query any principal.
+	 */
+	get_arbitrator: ActorMethod<[Principal], [] | [ArbitratorProfile]>;
 	/**
 	 * Reduced public view for claim/share-link pages.
 	 * Returns limited info (no payer, no claim code, no internal fields). Any
@@ -538,9 +1206,19 @@ export interface _SERVICE {
 	 */
 	get_deal: ActorMethod<[bigint], GetDealResult>;
 	/**
+	 * Returns the full dispute view. Caller must be a party of the parent
+	 * deal or an arbitrator on the panel.
+	 */
+	get_dispute: ActorMethod<[bigint], CastVoteResult>;
+	/**
 	 * Returns the escrow `Account` (canister principal + deal subaccount) for a deal.
 	 */
 	get_escrow_account: ActorMethod<[bigint], GetEscrowAccountResult>;
+	/**
+	 * Returns a reduced public view of a dispute (no party / panel
+	 * principals, no evidence URLs). Any non-anonymous caller may query.
+	 */
+	get_public_dispute: ActorMethod<[bigint], GetPublicDisputeResult>;
 	/**
 	 * Returns the reliability score for any principal.
 	 *
@@ -668,10 +1346,28 @@ export interface _SERVICE {
 	 */
 	icrc7_tx_window: ActorMethod<[], [] | [bigint]>;
 	/**
+	 * Lists registered arbitrators with optional `status` and `min_score`
+	 * filters and pagination.
+	 */
+	list_arbitrators: ActorMethod<[ListArbitratorsArgs], Array<ArbitratorProfile>>;
+	/**
 	 * Lists all deals where the caller is either the payer or the recipient,
 	 * ordered by creation time with pagination support.
 	 */
 	list_my_deals: ActorMethod<[ListMyDealsArgs], Array<DealView>>;
+	/**
+	 * Lists disputes the caller is involved with (party of the parent
+	 * deal or arbitrator on the panel), reverse-chronological by
+	 * `opened_at_ns`.
+	 */
+	list_my_disputes: ActorMethod<[ListMyDisputesArgs], Array<DisputeView>>;
+	/**
+	 * Opens a new dispute on a `Funded` deal. Caller must be `payer` or
+	 * `recipient`. Funds remain in the escrow subaccount; the deal
+	 * transitions `Funded → Disputed`. The expiry sweep skips
+	 * `Disputed` deals.
+	 */
+	open_dispute: ActorMethod<[FundDealArgs], CastVoteResult>;
 	/**
 	 * Batch-processes expired deals by refunding escrowed tokens back to their
 	 * payers.
@@ -695,11 +1391,33 @@ export interface _SERVICE {
 	 */
 	reject_deal: ActorMethod<[FundDealArgs], GetDealResult>;
 	/**
+	 * Submits a piece of evidence on a dispute. Caller must be a party
+	 * of the parent deal or an arbitrator on the panel. Allowed during
+	 * the `Evidence` phase only.
+	 */
+	submit_evidence: ActorMethod<[SubmitEvidenceArgs], CastVoteResult>;
+	/**
 	 * Updates the global configuration for the Escrow canister.
+	 *
+	 * Validates `config.dispute_config` (when set) against the
+	 * invariants documented on `DisputeConfig` before persisting.
+	 * Rejects with `EscrowError::ValidationError` on invalid input
+	 * rather than letting bad config poison the dispute machinery at
+	 * runtime (e.g. even `panel_size`, zero windows, fee bps > 100%).
 	 *
 	 * This method is gated to canister controllers.
 	 */
-	update_config: ActorMethod<[{}], undefined>;
+	update_config: ActorMethod<[Config], UpdateConfigResult>;
+	/**
+	 * Out-of-band settlement during the Evidence phase. Caller must be
+	 * `payer` or `recipient`. Records the caller's proposed outcome (or
+	 * retracts on `proposal: None`); when both parties have proposed the
+	 * same outcome, the dispute resolves with
+	 * `DisputeOutcome::Withdrawn { agreed }`, the deal moves to
+	 * `ArbitratedSettled` / `ArbitratedRefunded`, and arbitrators receive
+	 * a reduced fee (`DisputeConfig::withdraw_fee_pct`).
+	 */
+	withdraw_dispute: ActorMethod<[WithdrawDisputeArgs], CastVoteResult>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
