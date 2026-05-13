@@ -1,8 +1,10 @@
 <script lang="ts">
 	import Avatar from '$lib/components/Avatar.svelte';
 	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
+	import { profileDisplayName } from '$lib/derived/profile.derived';
 	import { userPrincipalShort, userPrincipalText } from '$lib/derived/user.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { profileStore } from '$lib/stores/profile.store';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
 	interface Props {
@@ -11,6 +13,14 @@
 	}
 
 	let { size = 'md' }: Props = $props();
+
+	// Mirror the Profile page's avatar source so the header trailing
+	// avatar and the big body avatar always agree (Auth.svelte
+	// bootstraps `profileStore` after sign-in; `ensureProfile` seeds
+	// `avatar_url` with a deterministic DiceBear default, so this is
+	// defined for every signed-in user).
+	let avatarSrc = $derived($profileStore?.data?.avatar_url);
+	let avatarLabel = $derived($profileDisplayName || $userPrincipalShort);
 
 	let copied = $state(false);
 	let resetTimer: ReturnType<typeof setTimeout> | undefined;
@@ -71,5 +81,5 @@
 			{$i18n.core.text.copied}
 		</span>
 	</span>
-	<Avatar fallback={$userPrincipalShort} {size} alt={$userPrincipalShort} />
+	<Avatar src={avatarSrc} fallback={avatarLabel} {size} alt={avatarLabel} />
 </button>

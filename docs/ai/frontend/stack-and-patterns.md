@@ -157,6 +157,16 @@ export const createAndFundDeal = async (
   [`userStore`](../../../src/lib/stores/user.store.ts) and the
   [`userSignedIn` / `userNotSignedIn`](../../../src/lib/derived/user.derived.ts)
   derived stores.
+- `Auth.svelte` also bootstraps
+  [`profileStore`](../../../src/lib/stores/profile.store.ts) by calling
+  [`ensureProfile`](../../../src/lib/services/profile.services.ts) once
+  per signed-in principal (and resetting it on sign-out). This is what
+  lets header trailing widgets like
+  [`UserPrincipalBadge`](../../../src/lib/components/UserPrincipalBadge.svelte)
+  show the user's avatar everywhere — pages don't need to re-issue
+  `ensureProfile` just to render the badge. Pages that own the profile
+  edit UX (Profile / Profile Edit) still call `ensureProfile` themselves
+  for a guaranteed-fresh `version`.
 - `signIn` requires the provider object:
   `signIn({ internet_identity: {} })`.
 - `signOut` accepts `SignOutOptions` — wrap it in an arrow function when
