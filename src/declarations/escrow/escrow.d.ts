@@ -238,6 +238,18 @@ export interface CreateDealArgs {
 	 */
 	title: [] | [string];
 	/**
+	 * Optional per-deal arbitrator panel size. If `Some(n)`, any
+	 * dispute opened on this deal will use `n` arbitrators regardless
+	 * of subsequent `DisputeConfig.panel_size` changes — the deal
+	 * terms are a contract at create time. `None` falls back to
+	 * `DisputeConfig.panel_size` at `open_dispute` time.
+	 *
+	 * Validation at create time: must be odd, must be within
+	 * `[DisputeConfig.min_panel_size, DisputeConfig.max_panel_size]`.
+	 * Out-of-range values return `EscrowError::PanelSizeOutOfRange`.
+	 */
+	panel_size: [] | [number];
+	/**
 	 * Optional note or message attached to the deal.
 	 */
 	note: [] | [string];
@@ -322,6 +334,15 @@ export interface DealView {
 	 */
 	updated_by: [] | [Principal];
 	/**
+	 * Per-deal arbitrator panel size override chosen by the creator
+	 * at `create_deal` time. `Some(n)` locks `n` arbitrators for
+	 * any dispute on this deal; `None` means "use whatever
+	 * `DisputeConfig.panel_size` is current when the dispute opens".
+	 * Surfaced in the public view so a counterparty can see the
+	 * committed dispute terms before consenting.
+	 */
+	panel_size: [] | [number];
+	/**
 	 * Recipient's consent to the deal terms.
 	 */
 	recipient_consent: Consent;
@@ -398,11 +419,18 @@ export interface DealView {
  */
 export interface DisputeConfig {
 	/**
-	 * Number of arbitrators selected per dispute. Must be odd and
-	 * `>= 3` — `validation::validate_dispute_config` enforces both
-	 * invariants when `update_config` is called. Odd-only is
-	 * required by the tally rules (no tie possible without an
-	 * abstention).
+	 * Upper bound on the panel sizes a deal creator may request.
+	 * Must be odd and `>= min_panel_size`. Bounds the cost (each
+	 * extra arbitrator adds an ICRC-1 ledger fee at finalize) and
+	 * the latency to fill the panel from the eligible pool.
+	 */
+	max_panel_size: number;
+	/**
+	 * Default number of arbitrators selected per dispute when the
+	 * deal creator did not pick a per-deal `panel_size`. Must be odd
+	 * and within `[min_panel_size, max_panel_size]`.
+	 * `validation::validate_dispute_config` enforces all invariants
+	 * when `update_config` is called.
 	 */
 	panel_size: number;
 	/**
@@ -425,6 +453,13 @@ export interface DisputeConfig {
 	 * arbitration_fee_bps / 10_000)`.
 	 */
 	arbitration_min_fee: bigint;
+	/**
+	 * Lower bound on the panel sizes a deal creator may request via
+	 * `CreateDealArgs.panel_size`. Must be odd and `>= 3` (odd-only
+	 * is required by the tally rules — no tie possible without an
+	 * abstention; the `>= 3` floor is the smallest meaningful jury).
+	 */
+	min_panel_size: number;
 	/**
 	 * Arbitration fee in basis points of the disputed amount
 	 * (default 500 = 5%). Combined with [`Self::arbitration_min_fee`].
@@ -722,6 +757,18 @@ export type EscrowError =
 			 * The caller has too many active (non-terminal) deals.
 			 */
 			TooManyActiveDeals: { max: number };
+	  }
+	| {
+			/**
+			 * `create_deal` was called with a `panel_size` outside the range
+			 * `[DisputeConfig.min_panel_size, DisputeConfig.max_panel_size]`,
+			 * or a value that is not odd. Surfaces the active range so the
+			 * caller (and the FE / consenting counterparty) can render the
+			 * allowed window without parsing a free-form message. Even
+			 * values fail with `min == max` set to the same allowed range
+			 * — clients should additionally check `n % 2 == 1`.
+			 */
+			PanelSizeOutOfRange: { max: number; min: number };
 	  }
 	| {
 			/**

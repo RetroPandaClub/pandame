@@ -35,6 +35,7 @@ export const idlFactory = ({ IDL }) => {
 		title: IDL.Opt(IDL.Text),
 		funded_at_ns: IDL.Opt(IDL.Nat64),
 		updated_by: IDL.Opt(IDL.Principal),
+		panel_size: IDL.Opt(IDL.Nat32),
 		recipient_consent: Consent,
 		refunded_at_ns: IDL.Opt(IDL.Nat64),
 		note: IDL.Opt(IDL.Text),
@@ -86,6 +87,10 @@ export const idlFactory = ({ IDL }) => {
 		}),
 		TransferFailed: IDL.Text,
 		TooManyActiveDeals: IDL.Record({ max: IDL.Nat32 }),
+		PanelSizeOutOfRange: IDL.Record({
+			max: IDL.Nat32,
+			min: IDL.Nat32
+		}),
 		InsufficientArbitrators: IDL.Record({
 			have: IDL.Nat32,
 			need: IDL.Nat32
@@ -181,17 +186,20 @@ export const idlFactory = ({ IDL }) => {
 		Err: EscrowError
 	});
 	const DisputeConfig = IDL.Record({
+		max_panel_size: IDL.Nat32,
 		panel_size: IDL.Nat32,
 		voting_window_ns: IDL.Nat64,
 		evidence_window_ns: IDL.Nat64,
 		min_arbitrator_score: IDL.Opt(IDL.Nat32),
 		arbitration_min_fee: IDL.Nat,
+		min_panel_size: IDL.Nat32,
 		arbitration_fee_bps: IDL.Nat32,
 		withdraw_fee_pct: IDL.Nat32
 	});
 	const Config = IDL.Record({ dispute_config: IDL.Opt(DisputeConfig) });
 	const CreateDealArgs = IDL.Record({
 		title: IDL.Opt(IDL.Text),
+		panel_size: IDL.Opt(IDL.Nat32),
 		note: IDL.Opt(IDL.Text),
 		recipient: IDL.Opt(IDL.Principal),
 		payer: IDL.Opt(IDL.Principal),
