@@ -188,7 +188,7 @@
 			{#each visibleDeals as deal (deal.id)}
 				<li>
 					{#if tab === 'pending'}
-						<DealCard {deal} href={`/deals/${deal.id}`}>
+						<DealCard {deal} href={`/deals/${deal.id}`} showPanelSize>
 							{#snippet actions()}
 								<button
 									type="button"

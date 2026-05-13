@@ -17,6 +17,14 @@ interface CreateDealRequest {
 	recipient?: Principal;
 	payer?: Principal;
 	token?: Token;
+	/**
+	 * Per-deal arbitrator panel size. `Some(n)` pins `n` arbitrators
+	 * for any dispute on the deal (a contract at create time);
+	 * `undefined` falls back to the canister's
+	 * `DisputeConfig.panel_size`. The canister rejects values outside
+	 * `[min_panel_size, max_panel_size]` with `PanelSizeOutOfRange`.
+	 */
+	panelSize?: number;
 }
 
 const opt = <T>(value: T | undefined): [] | [T] => toNullable(value);
@@ -47,7 +55,8 @@ export const createAndFundDeal = async (
 			note: opt(request.note),
 			recipient: opt(request.recipient),
 			payer: opt(request.payer),
-			token_ledger: createdLedger(request.token)
+			token_ledger: createdLedger(request.token),
+			panel_size: opt(request.panelSize)
 		}
 	});
 

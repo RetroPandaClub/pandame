@@ -74,6 +74,15 @@
 	let claimCode = $derived.by(() =>
 		deal === undefined ? undefined : fromNullable(deal.claim_code)
 	);
+	// `panel_size` is `Option<u32>` on `DealView` (verbatim from
+	// `Deal.panel_size`) — `Some(n)` means the creator pinned `n` at
+	// `create_deal` time; `None` means "use whatever
+	// `DisputeConfig.panel_size` is current at `open_dispute`". We
+	// surface both shapes so the counterparty sees the committed term
+	// before consenting.
+	let panelSize = $derived.by(() =>
+		deal === undefined ? undefined : fromNullable(deal.panel_size)
+	);
 	let createdAt = $derived.by(() =>
 		deal === undefined ? undefined : nsToDate(deal.created_at_ns)
 	);
@@ -207,6 +216,16 @@
 			<div class="flex items-baseline justify-between">
 				<dt class="text-body2 text-muted">{$i18n.deals.row.your_role}</dt>
 				<dd class="text-body2 text-default capitalize">{mySide}</dd>
+			</div>
+			<div class="flex items-baseline justify-between">
+				<dt class="text-body2 text-muted">{$i18n.detail.panel_size}</dt>
+				<dd class="text-body2 text-default">
+					{#if panelSize !== undefined}
+						{$i18n.detail.panel_size_value.replace('{n}', String(panelSize))}
+					{:else}
+						{$i18n.detail.panel_size_default}
+					{/if}
+				</dd>
 			</div>
 		</div>
 

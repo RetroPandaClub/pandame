@@ -194,7 +194,10 @@
 		"consent_recipient": "Recipient consent",
 		"note_label": "Note",
 		"loading": "Loading the deal…",
-		"not_found": "We couldn't find this deal under your principal."
+		"not_found": "We couldn't find this deal under your principal.",
+		"panel_size": "Dispute panel size",
+		"panel_size_value": "{n} arbitrators (locked at create)",
+		"panel_size_default": "Canister default at dispute time"
 	},
 	"profile": {
 		"title": "Profile",
@@ -244,7 +247,10 @@
 			"recipient_open": "open / share-link",
 			"expires": "Time to conclude",
 			"your_role": "Your role",
-			"none": "—"
+			"none": "—",
+			"panel_size": "Dispute panel",
+			"panel_size_value": "{n} arbitrators",
+			"panel_size_default": "Canister default"
 		},
 		"actions": {
 			"consent": "Approve",
@@ -274,7 +280,16 @@
 		"amount_label": "Amount",
 		"expiry_label": "Expiry",
 		"votes_label": "Votes in case of dispute",
-		"votes_panel_hint": "If a dispute is opened, an admin-curated panel of arbitrators reviews the case. The panel size is fixed at the canister level (an odd number ≥ 3) — there's no per-deal jury setting.",
+		"votes_panel_hint": "If a dispute is opened, this many arbitrators will review the case. The choice is locked into the deal terms — your counterparty sees it before consenting.",
+		"panel_fast_title": "Fast",
+		"panel_fast_subtitle": "Little debated",
+		"panel_fair_title": "Fair",
+		"panel_fair_subtitle": "Recommended",
+		"panel_slow_title": "Less fast",
+		"panel_slow_subtitle": "More discussed",
+		"panel_aria_label": "Dispute panel size",
+		"panel_votes_unit": "votes",
+		"error_panel_size_out_of_range": "Panel size {got} is not allowed. Choose an odd value between {min} and {max}.",
 		"summary_label": "Summary",
 		"summary_amount": "Amount",
 		"summary_fee": "Deposit fee",

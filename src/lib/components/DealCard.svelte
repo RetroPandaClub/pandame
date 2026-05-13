@@ -20,9 +20,19 @@
 		 * button on Created).
 		 */
 		actions?: Snippet;
+		/**
+		 * Surface the deal's per-deal panel size (or "default") above the
+		 * `actions` snippet. The Pending consent card on
+		 * `/transactions` uses this so the consenting counterparty sees
+		 * the dispute term before tapping Approve. Off by default to
+		 * keep the History / Created lists tidy.
+		 */
+		showPanelSize?: boolean;
 	}
 
-	let { deal, href, actions }: Props = $props();
+	let { deal, href, actions, showPanelSize = false }: Props = $props();
+
+	let panelSize = $derived(fromNullable(deal.panel_size));
 
 	let principal = $derived(parsePrincipal($userStore?.key));
 	let mySide = $derived(sideOf(deal, principal));
@@ -82,6 +92,21 @@
 		</span>
 		<Countdown expiresAtNs={deal.expires_at_ns} />
 	</div>
+
+	{#if showPanelSize}
+		<div class="flex items-center justify-between px-[18px] pb-[12px]">
+			<span class="text-muted font-sans text-[12px] font-normal">
+				{$i18n.deals.row.panel_size}
+			</span>
+			<span class="text-default font-sans text-[12px] font-medium tabular-nums">
+				{#if panelSize !== undefined}
+					{$i18n.deals.row.panel_size_value.replace('{n}', String(panelSize))}
+				{:else}
+					{$i18n.deals.row.panel_size_default}
+				{/if}
+			</span>
+		</div>
+	{/if}
 
 	{#if actions}
 		<div class="flex items-center gap-[16px] px-[18px] pb-[12px]">

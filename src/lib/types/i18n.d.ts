@@ -208,6 +208,9 @@ interface I18nDetail {
 	note_label: string;
 	loading: string;
 	not_found: string;
+	panel_size: string;
+	panel_size_value: string;
+	panel_size_default: string;
 }
 
 interface I18nProfile {
@@ -261,6 +264,9 @@ interface I18nDeals {
 		expires: string;
 		your_role: string;
 		none: string;
+		panel_size: string;
+		panel_size_value: string;
+		panel_size_default: string;
 	};
 	actions: {
 		consent: string;
@@ -292,6 +298,15 @@ interface I18nCreate {
 	expiry_label: string;
 	votes_label: string;
 	votes_panel_hint: string;
+	panel_fast_title: string;
+	panel_fast_subtitle: string;
+	panel_fair_title: string;
+	panel_fair_subtitle: string;
+	panel_slow_title: string;
+	panel_slow_subtitle: string;
+	panel_aria_label: string;
+	panel_votes_unit: string;
+	error_panel_size_out_of_range: string;
 	summary_label: string;
 	summary_amount: string;
 	summary_fee: string;

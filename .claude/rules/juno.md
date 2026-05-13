@@ -149,10 +149,16 @@ The full dispute lifecycle (RFC-001) is wired:
   `/history` are real — they're backed by `list_my_disputes` and the
   new `Disputed` / `ArbitratedSettled` / `ArbitratedRefunded` deal
   statuses.
-- Per-deal jury size has been removed from `/deals/new`: the canister
-  now treats `panel_size` as a global `DisputeConfig` field
-  (controllers tune it via `update_config`), so the create form just
-  shows an explanatory hint instead of asking the user to pick.
+- Per-deal panel size is wired end-to-end (RFC-001 Q6 revisit): the
+  Figma "Votes in case of dispute" picker on `/deals/new` (component
+  `PanelSizePicker`, options 3 / 7 / 11) sets `CreateDealArgs.panel_size`,
+  which the canister stores on `Deal.panel_size: Option<u32>` and
+  surfaces back through `DealView.panel_size`. The deal detail page
+  and the Pending consent card on `/transactions` both render the
+  committed panel size so the consenting counterparty sees the term
+  before approving. Out-of-range submissions throw
+  `EscrowCanisterError` with a typed `PanelSizeOutOfRange { min, max,
+got }` payload; `/deals/new` maps it to a friendly localised string.
 
 Arbitrator + admin curation:
 

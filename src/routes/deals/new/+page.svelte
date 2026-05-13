@@ -2,6 +2,7 @@
 	import { Principal } from '@icp-sdk/core/principal';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { EscrowCanisterError } from '$lib/canisters/escrow.canister';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Backdrop from '$lib/components/Backdrop.svelte';
@@ -9,6 +10,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import FormField from '$lib/components/FormField.svelte';
 	import InfoLink from '$lib/components/InfoLink.svelte';
+	import PanelSizePicker from '$lib/components/PanelSizePicker.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
 	import Tabs from '$lib/components/Tabs.svelte';
@@ -16,6 +18,7 @@
 	import UploadCTA from '$lib/components/UploadCTA.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import BackIcon from '$lib/components/icons/BackIcon.svelte';
+	import { PANEL_SIZE_DEFAULT } from '$lib/constants/dispute.constants';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { createAndFundDeal } from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
@@ -33,6 +36,10 @@
 	let expiryLocal = $state(defaultExpiry());
 	let titleDeal = $state('');
 	let agreement = $state('');
+	// Pre-selected on the Figma "Fair / Recommended" middle ring; user
+	// can flip to Fast (3) or Less fast (11). The canister default
+	// max_panel_size = 11 accepts the full triplet.
+	let panelSize = $state<number>(PANEL_SIZE_DEFAULT);
 
 	let progress = $state(false);
 	let error: string | undefined = $state(undefined);
@@ -76,17 +83,35 @@
 				payer: payerPrincipal,
 				title: titleDeal.trim() || undefined,
 				note: agreement.trim() || undefined,
+				panelSize,
 				token
 			});
 
 			dealsStore.upsert(funded);
 			createdDeal = funded;
 		} catch (err) {
-			error = err instanceof Error ? err.message : String(err);
+			error = friendlyError(err);
 		} finally {
 			progress = false;
 		}
 	};
+
+	/**
+	 * Map known typed `EscrowError` variants to user-facing strings.
+	 * Falls back to `err.message` so unmapped variants still surface.
+	 */
+	function friendlyError(err: unknown): string {
+		if (err instanceof EscrowCanisterError) {
+			const v = err.variant;
+			if ('PanelSizeOutOfRange' in v) {
+				return $i18n.create.error_panel_size_out_of_range
+					.replace('{got}', String(v.PanelSizeOutOfRange.got))
+					.replace('{min}', String(v.PanelSizeOutOfRange.min))
+					.replace('{max}', String(v.PanelSizeOutOfRange.max));
+			}
+		}
+		return err instanceof Error ? err.message : String(err);
+	}
 
 	const closeShare = async () => {
 		createdDeal = undefined;
@@ -189,10 +214,11 @@
 			<TextInput id="expiry" type="datetime-local" bind:value={expiryLocal} />
 		</FormField>
 
-		<div class="border-border-soft bg-bg-elevated flex flex-col gap-[6px] rounded-md border p-3">
+		<div class="flex flex-col gap-[12px]">
 			<span class="text-default text-label font-sans font-medium tracking-[-0.32px]">
 				{$i18n.create.votes_label}
 			</span>
+			<PanelSizePicker bind:value={panelSize} disabled={progress} />
 			<small class="text-muted text-body2">{$i18n.create.votes_panel_hint}</small>
 		</div>
 

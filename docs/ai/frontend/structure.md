@@ -85,6 +85,7 @@ one fits.
 - `Tabs.svelte` — generic segmented control `<T extends string>` (matches Toggle Pay/Receive).
 - `TextInput.svelte` — themed `<input>` (41 px h, 8 px radius, 1.5 px light-purple border, `variant="default" | "active"`).
 - `UploadCTA.svelte` — purple "Choose files to upload" + "Zip, Jpg or Pdf …" caption pair.
+- `PanelSizePicker.svelte` — three concentric-circle radios for the per-deal arbitrator count (3 / 7 / 11), bound to `CreateDealArgs.panel_size`.
 - `VotePicker.svelte` — stacked CC / IC / Abstain radio cards (cast vote + withdraw proposal).
 - `DisputePhaseBadge.svelte` — 24 px phase pill (Evidence / Voting / Resolved).
 - `EvidenceList.svelte` — list view of `Evidence[]` (submitter + timestamp + note + URL + SHA-256).
