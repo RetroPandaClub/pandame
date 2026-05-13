@@ -88,6 +88,7 @@ export const idlFactory = ({ IDL }) => {
 		TransferFailed: IDL.Text,
 		TooManyActiveDeals: IDL.Record({ max: IDL.Nat32 }),
 		PanelSizeOutOfRange: IDL.Record({
+			got: IDL.Nat32,
 			max: IDL.Nat32,
 			min: IDL.Nat32
 		}),

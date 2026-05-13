@@ -762,13 +762,16 @@ export type EscrowError =
 			/**
 			 * `create_deal` was called with a `panel_size` outside the range
 			 * `[DisputeConfig.min_panel_size, DisputeConfig.max_panel_size]`,
-			 * or a value that is not odd. Surfaces the active range so the
-			 * caller (and the FE / consenting counterparty) can render the
-			 * allowed window without parsing a free-form message. Even
-			 * values fail with `min == max` set to the same allowed range
-			 * — clients should additionally check `n % 2 == 1`.
+			 * or a value that is not odd.
+			 *
+			 * - `min` / `max` surface the active range so the caller can render the allowed window
+			 * without parsing a free-form message.
+			 * - `got` carries the value the caller sent so error logs are self-contained — clients don't
+			 * need to correlate the rejection with the request payload to know which value was wrong,
+			 * and a downstream `got` value of `4` (even, in-range) is distinguishable from `got = 11`
+			 * (out-of-range) without re-checking the inputs.
 			 */
-			PanelSizeOutOfRange: { max: number; min: number };
+			PanelSizeOutOfRange: { got: number; max: number; min: number };
 	  }
 	| {
 			/**
