@@ -40,7 +40,7 @@ If you introduce a new scope, keep it short and lowercase, no spaces.
 ### Breaking changes
 
 If your change breaks the public datastore shape (`UserProfile`, the
-`profiles` collection rules in `juno.dev.config.ts`, or the on-chain
+`profiles` collection rules in `juno.config.ts`, or the on-chain
 escrow `.did` mirror under `$declarations/escrow/**`), mark the title
 with `!`:
 

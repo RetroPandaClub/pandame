@@ -6,7 +6,6 @@
 		"./e2e/",
 		"./eslint.config.js",
 		"./juno.config.ts",
-		"./juno.dev.config.ts",
 		"./playwright.config.ts",
 		"./svelte.config.js",
 		"./vite.config.ts",

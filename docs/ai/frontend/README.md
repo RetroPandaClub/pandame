@@ -47,8 +47,9 @@ it once per session.
   variables on `[data-theme]` so dark mode is a one-file swap. No
   `tailwind.config.ts`.
 - **`@junobuild/core`** for Internet Identity sign-in **and** for
-  the editable `profiles` datastore collection (see
-  [`juno.dev.config.ts`](../../../juno.dev.config.ts) +
+  the editable `profiles` datastore collection (see the
+  `satellite.collections.datastore` block in
+  [`juno.config.ts`](../../../juno.config.ts) +
   [`profile.services.ts`](../../../src/lib/services/profile.services.ts)).
 - **`@dfinity/agent` + `@icp-sdk/canisters`** for talking to the escrow
   canister and the ICP ledger.
@@ -116,7 +117,7 @@ PRs to learn from (from `git log` on `main`):
 - `feat(profile): persist user-editable profile via Juno datastore` —
   one cohesive addition (type + service + store + derived + UI),
   every file fits an existing bucket, datastore collection wired in
-  `juno.dev.config.ts` in the same commit.
+  `juno.config.ts` in the same commit.
 - `feat(ui,routes): turn create-deal into a full-screen /deals/new
 flow` — single concern (UI rewrite), drops the previous modal in
   the same commit.

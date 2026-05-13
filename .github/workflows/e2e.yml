@@ -46,7 +46,6 @@ jobs:
               - 'scripts/**'
               - 'playwright.config.ts'
               - 'juno.config.ts'
-              - 'juno.dev.config.ts'
               - 'svelte.config.js'
               - 'vite.config.ts'
               - 'tsconfig.json'

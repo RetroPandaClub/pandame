@@ -59,17 +59,18 @@ This workflow covers the two flavours of deploy that pandame supports:
    ```
 
 4. **Apply the Juno satellite config** so the datastore collections
-   declared in [`juno.dev.config.ts`](../../juno.dev.config.ts) actually
-   exist on the running satellite. `juno emulator start` boots an empty
-   satellite — without this step every `getDoc` / `setDoc` will trap
-   with `juno.collections.error.not_found (Datastore - profiles)`:
+   declared in [`juno.config.ts`](../../juno.config.ts) (under
+   `satellite.collections.datastore`) actually exist on the running
+   satellite. `juno emulator start` boots an empty satellite — without
+   this step every `getDoc` / `setDoc` will trap with
+   `juno.collections.error.not_found (Datastore - profiles)`:
 
    ```bash
    juno config apply --mode development
    ```
 
-   Re-run this command whenever you change `juno.dev.config.ts` (add a
-   new collection, flip a permission, etc.).
+   Re-run this command whenever you change the `collections` block in
+   `juno.config.ts` (add a new collection, flip a permission, etc.).
 
 5. In a new terminal, start the SvelteKit dev server:
 
@@ -99,16 +100,19 @@ This workflow covers the two flavours of deploy that pandame supports:
    ledger.
 
 7. PandaMe provisions **one Juno datastore collection** locally —
-   `profiles` — for editable user metadata (see
-   [`juno.dev.config.ts`](../../juno.dev.config.ts):
+   `profiles` — for editable user metadata (see the
+   `satellite.collections.datastore` block in
+   [`juno.config.ts`](../../juno.config.ts):
    `memory: 'stable'`, `read: 'public'`, `write: 'private'`). The
-   local satellite ID is pinned in
-   [`juno.config.ts`](../../juno.config.ts) under
+   local satellite ID is pinned in the same file under
    `satellite.ids.development` so the Juno SDK resolves it
-   deterministically. Escrow / ledger state lives in the canisters
-   inside the same emulator (locally) or on mainnet (in production).
-   When you ship a new datastore collection, add the matching rule
-   block in `juno.dev.config.ts`, update
+   deterministically. The same `collections` block is what
+   `juno deploy` pushes to the production satellite, so there is
+   only one source of truth. Escrow / ledger state lives in the
+   canisters inside the same emulator (locally) or on mainnet (in
+   production). When you ship a new datastore collection, add the
+   matching rule block to `satellite.collections.datastore` in
+   `juno.config.ts`, update
    [`Collection`](../../src/lib/constants/collections.constants.ts),
    and re-run `juno config apply --mode development` against the
    running emulator.
@@ -175,8 +179,9 @@ If CI is unavailable:
 
 - **`juno.collections.error.not_found (Datastore - profiles)` /
   profile reads or writes trap.** The local satellite is empty — the
-  collections declared in `juno.dev.config.ts` were never applied.
-  Run `juno config apply --mode development` against the running
+  collections declared in `juno.config.ts` (under
+  `satellite.collections.datastore`) were never applied. Run
+  `juno config apply --mode development` against the running
   emulator and refresh the browser.
 - **Sign-in silently fails locally.** Most often:
   (a) `juno emulator start` is not running, or

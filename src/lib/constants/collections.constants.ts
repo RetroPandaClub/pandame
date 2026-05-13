@@ -1,7 +1,8 @@
 /**
  * Juno datastore collection names. Keep in sync with the
- * `juno.dev.config.ts` definition (local emulator) and the production
- * satellite's collection list (managed via the Juno Console).
+ * `satellite.collections.datastore` block in `juno.config.ts`, which
+ * is applied to both the local emulator (`juno config apply --mode
+ * development`) and the production satellite (`juno deploy`).
  */
 export const Collection = {
 	PROFILES: 'profiles'

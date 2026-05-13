@@ -22,7 +22,8 @@ Pandame uses Juno for two things:
    by principal. See
    [`profile.services.ts`](../../src/lib/services/profile.services.ts),
    [`Collection.PROFILES`](../../src/lib/constants/collections.constants.ts),
-   [`juno.dev.config.ts`](../../juno.dev.config.ts).
+   and the `satellite.collections.datastore` block in
+   [`juno.config.ts`](../../juno.config.ts).
 
 All **escrow** / ledger state lives in the standalone **Escrow** Rust
 canister ([`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow);
@@ -170,13 +171,13 @@ Arbitrator + admin curation:
 `profile.services.ts` reads / writes the `profiles` Juno collection
 through `@junobuild/core`'s `getDoc` / `setDoc`. The collection key
 is `Collection.PROFILES` (string `'profiles'`) and rules in
-[`juno.dev.config.ts`](../../juno.dev.config.ts) are
-`memory: 'stable'`, `read: 'public'`, `write: 'private'`. If you change
-the schema, mirror it in
-[`src/lib/types/profile.ts`](../../src/lib/types/profile.ts) and
-re-run `juno config apply --mode development` to push the new rules
-into the running emulator (the freshly-started emulator boots empty —
-the collection only exists after `apply`). The avatar is stored
-inline on the profile doc as a JPEG data URL produced by
+[`juno.config.ts`](../../juno.config.ts)'s
+`satellite.collections.datastore` block are `memory: 'stable'`,
+`read: 'public'`, `write: 'private'`. If you change the schema,
+mirror it in [`src/lib/types/profile.ts`](../../src/lib/types/profile.ts)
+and re-run `juno config apply --mode development` to push the new
+rules into the running emulator (the freshly-started emulator boots
+empty — the collection only exists after `apply`). The avatar is
+stored inline on the profile doc as a JPEG data URL produced by
 [`fileToAvatarDataUrl`](../../src/lib/utils/image.utils.ts); see
 [`UserProfile.avatar_url`](../../src/lib/types/profile.ts).

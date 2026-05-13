@@ -82,9 +82,10 @@ Claude-specific runtime layer. Anything not contradicted here defers to
     [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow/tree/main/src/escrow)
     (locally `../escrow/src/escrow/`) — go work on the escrow repo
     first, then come back here for `npm run did`.
-  - Modifying `juno.config.ts` / `juno.dev.config.ts`.
-  - Touching anything under `.github/workflows/**` or
-    `.github/actions/**`.
+- Modifying `juno.config.ts` (collection rules + satellite IDs +
+  emulator runner — schema drift breaks data + auth).
+- Touching anything under `.github/workflows/**` or
+  `.github/actions/**`.
 
 ---
 

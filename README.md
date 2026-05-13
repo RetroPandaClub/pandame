@@ -209,7 +209,8 @@ replica.
    the Juno emulator, so the agent in the browser reaches the local
    replica via the same origin as the dev server. The Juno satellite
    hosts the `profiles` datastore for editable user metadata (see
-   [`juno.dev.config.ts`](./juno.dev.config.ts)).
+   the `satellite.collections.datastore` block in
+   [`juno.config.ts`](./juno.config.ts)).
 
 > Don't run `dfx start`. Pandame's `dfx.json` is wired to use the Juno
 > emulator's replica as its `local` network — running a separate
