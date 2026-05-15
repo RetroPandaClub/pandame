@@ -54,6 +54,7 @@ jobs:
               - '.node-version'
               - '.github/workflows/e2e.yml'
               - '.github/actions/prepare/**'
+              - '.github/actions/playwright-install/**'
 
   e2e:
     needs: [check-e2e-changes]
@@ -80,8 +81,8 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Install Playwright
+        uses: ./.github/actions/playwright-install
 
       - name: Run E2E tests
         run: npm run e2e:ci
