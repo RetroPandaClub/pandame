@@ -3,10 +3,14 @@ import * as escrowApi from '$lib/api/escrow.api';
 import * as ledgerApi from '$lib/api/icrc-ledger.api';
 import { ESCROW_CANISTER_ID } from '$lib/constants/canisters.constants';
 import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+import { ConsentStates } from '$lib/enums/deal-status';
 import { safeGetIdentityOnce } from '$lib/services/identity.services';
+import type { Deal } from '$lib/types/deal';
 import type { Token } from '$lib/types/token';
+import { consentState, sideOf } from '$lib/utils/deal.utils';
 import { toNullable } from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 interface CreateDealRequest {
@@ -33,8 +37,13 @@ const opt = <T>(value: T | undefined): [] | [T] => toNullable(value);
  * Create + fund a deal in a single user-facing flow.
  *
  * Order of operations:
- *  1. `create_deal`        → returns a `DealView` with id + claim_code.
- *  2. `icrc2_approve`      → grants the escrow canister `amount + fee`.
+ *  1. `create_deal`        → returns a `DealView` with id + claim_code +
+ *                            the snapshotted `DealFees`.
+ *  2. `icrc2_approve`      → grants the escrow canister
+ *                            `amount + dispute_reserve_per_party + ledger_fee`.
+ *                            The canister's `fund_deal` pulls `amount + DC/2`
+ *                            in a single `transfer_from`; the extra
+ *                            `ledger_fee` covers the ledger's allowance debit.
  *  3. `fund_deal`          → escrow runs `transfer_from(payer → subaccount)`.
  *
  * The intermediate `DealView` is returned to the caller so the UI can
@@ -45,6 +54,7 @@ export const createAndFundDeal = async (
 ): Promise<{ created: EscrowDid.DealView; funded: EscrowDid.DealView }> => {
 	const identity = await safeGetIdentityOnce();
 	const token = request.token ?? ICP_TOKEN;
+	const ledger = createdLedger(token);
 
 	const created = await escrowApi.createDeal({
 		identity,
@@ -55,7 +65,7 @@ export const createAndFundDeal = async (
 			note: opt(request.note),
 			recipient: opt(request.recipient),
 			payer: opt(request.payer),
-			token_ledger: createdLedger(request.token),
+			asset: { Icrc: ledger },
 			panel_size: opt(request.panelSize)
 		}
 	});
@@ -65,12 +75,10 @@ export const createAndFundDeal = async (
 		subaccount: created.escrow_subaccount
 	};
 
-	// Approve `amount + fee` so the canister's `transfer_from` doesn't
-	// fail on the ledger fee deduction.
 	await ledgerApi.approve({
 		identity,
 		ledgerCanisterId: token.ledgerCanisterId,
-		amount: request.amount + token.fee,
+		amount: request.amount + created.fees.dispute_reserve_per_party + token.fee,
 		spender: escrowAccount,
 		expiresAt: request.expires_at_ns
 	});
@@ -99,10 +107,29 @@ export const acceptDeal = async ({
 	return await escrowApi.acceptDeal({ identity, dealId, claimCode });
 };
 
-export const consentDeal = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
+/**
+ * Consent to a deal's terms.
+ *
+ * For a **bound recipient** with `Pending` consent the canister pulls
+ * the receiver's `DC/2` dispute reserve via `icrc2_transfer_from` —
+ * we must therefore approve `DC/2 + ledger_fee` to the escrow canister
+ * before invoking `consent_deal`, or the canister returns
+ * `DisputeReserveRequired`. Payer consent (and a recipient consent
+ * that has already deposited the reserve) is a pure state flip, so we
+ * skip the approve in those cases.
+ */
+export const consentDeal = async ({ deal }: { deal: Deal }): Promise<EscrowDid.DealView> => {
 	const identity = await safeGetIdentityOnce();
+	const callerSide = sideOf(deal, identity.getPrincipal());
 
-	return await escrowApi.consentDeal({ identity, dealId });
+	if (
+		callerSide === 'recipient' &&
+		consentState(deal.recipient_consent) === ConsentStates.Pending
+	) {
+		await approveDisputeReserve({ identity, deal });
+	}
+
+	return await escrowApi.consentDeal({ identity, dealId: deal.id });
 };
 
 export const rejectDeal = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
@@ -163,3 +190,33 @@ export const getReliability = async ({
 
 const createdLedger = (token?: Token): Principal =>
 	Principal.fromText((token ?? ICP_TOKEN).ledgerCanisterId);
+
+/**
+ * Approve `DC/2 + ledger_fee` to the escrow canister so the next
+ * `consent_deal` call can pull the receiver's dispute reserve via
+ * `icrc2_transfer_from`. The ledger principal lives on the deal's
+ * `asset` variant — today always `Icrc`.
+ */
+const approveDisputeReserve = async ({
+	identity,
+	deal
+}: {
+	identity: Identity;
+	deal: Deal;
+}): Promise<void> => {
+	const escrowAccount: IcrcAccount = {
+		owner: ESCROW_CANISTER_ID,
+		subaccount: deal.escrow_subaccount
+	};
+
+	const ledgerCanisterId = deal.asset.Icrc.toText();
+	const ledgerFee = await ledgerApi.transactionFee({ identity, ledgerCanisterId });
+
+	await ledgerApi.approve({
+		identity,
+		ledgerCanisterId,
+		amount: deal.fees.dispute_reserve_per_party + ledgerFee,
+		spender: escrowAccount,
+		expiresAt: deal.expires_at_ns
+	});
+};

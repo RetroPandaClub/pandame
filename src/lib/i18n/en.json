@@ -289,7 +289,6 @@
 		"panel_slow_subtitle": "More discussed",
 		"panel_aria_label": "Dispute panel size",
 		"panel_votes_unit": "votes",
-		"error_panel_size_out_of_range": "Panel size {got} is not allowed. Choose an odd value between {min} and {max}.",
 		"summary_label": "Summary",
 		"summary_amount": "Amount",
 		"summary_fee": "Deposit fee",
@@ -326,5 +325,11 @@
 		"deal_field": "Deal",
 		"status_field": "Status",
 		"submit": "Accept deal"
+	},
+	"errors": {
+		"panel_size_out_of_range": "Panel size {got} is not allowed. Choose an odd value between {min} and {max}.",
+		"amount_below_minimum": "Amount is too small for this deal. Minimum: {min}.",
+		"dispute_reserve_required": "Could not pull your dispute reserve from your wallet. Make sure you have enough balance and try again.",
+		"unsupported_asset": "This settlement asset is not supported yet."
 	}
 }

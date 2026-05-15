@@ -306,7 +306,6 @@ interface I18nCreate {
 	panel_slow_subtitle: string;
 	panel_aria_label: string;
 	panel_votes_unit: string;
-	error_panel_size_out_of_range: string;
 	summary_label: string;
 	summary_amount: string;
 	summary_fee: string;
@@ -347,6 +346,13 @@ interface I18nClaim {
 	submit: string;
 }
 
+interface I18nErrors {
+	panel_size_out_of_range: string;
+	amount_below_minimum: string;
+	dispute_reserve_required: string;
+	unsupported_asset: string;
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -366,4 +372,5 @@ interface I18n {
 	create: I18nCreate;
 	share: I18nShare;
 	claim: I18nClaim;
+	errors: I18nErrors;
 }
