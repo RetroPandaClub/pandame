@@ -39,12 +39,19 @@ const opt = <T>(value: T | undefined): [] | [T] => toNullable(value);
  * Order of operations:
  *  1. `create_deal`        → returns a `DealView` with id + claim_code +
  *                            the snapshotted `DealFees`.
- *  2. `icrc2_approve`      → grants the escrow canister
- *                            `amount + dispute_reserve_per_party + ledger_fee`.
- *                            The canister's `fund_deal` pulls `amount + DC/2`
- *                            in a single `transfer_from`; the extra
- *                            `ledger_fee` covers the ledger's allowance debit.
- *  3. `fund_deal`          → escrow runs `transfer_from(payer → subaccount)`.
+ *  2. `icrc1_fee`          → reads the live ledger fee. We query it
+ *                            instead of using `token.fee` because the
+ *                            canister re-reads the live fee at
+ *                            `transfer_from` time; a stale constant
+ *                            would risk an allowance shortfall if the
+ *                            ledger's fee has drifted.
+ *  3. `icrc2_approve`      → grants the escrow canister
+ *                            `amount + dispute_reserve_per_party + live ledger fee`.
+ *                            The canister's `fund_deal` pulls
+ *                            `amount + DC/2` in a single
+ *                            `transfer_from`; the live fee covers the
+ *                            ledger's allowance debit.
+ *  4. `fund_deal`          → escrow runs `transfer_from(payer → subaccount)`.
  *
  * The intermediate `DealView` is returned to the caller so the UI can
  * display the share link / QR even if funding fails.
@@ -75,10 +82,15 @@ export const createAndFundDeal = async (
 		subaccount: created.escrow_subaccount
 	};
 
+	const ledgerFee = await ledgerApi.transactionFee({
+		identity,
+		ledgerCanisterId: token.ledgerCanisterId
+	});
+
 	await ledgerApi.approve({
 		identity,
 		ledgerCanisterId: token.ledgerCanisterId,
-		amount: request.amount + created.fees.dispute_reserve_per_party + token.fee,
+		amount: request.amount + created.fees.dispute_reserve_per_party + ledgerFee,
 		spender: escrowAccount,
 		expiresAt: request.expires_at_ns
 	});
