@@ -143,6 +143,20 @@ export interface ArbitratorProfile {
  */
 export type ArbitratorStatus = { Deregistered: null } | { Active: null } | { Suspended: null };
 /**
+ * A settlement asset accepted by the escrow canister.
+ *
+ * Always interrogate via the typed accessors (e.g. [`Asset::as_icrc`])
+ * rather than pattern-matching directly — this keeps service code
+ * resilient to future variant additions.
+ */
+export type Asset = {
+	/**
+	 * An ICRC-1 / ICRC-2 token identified by its ledger
+	 * [`Principal`] on the Internet Computer.
+	 */
+	Icrc: Principal;
+};
+/**
  * Arguments for cancelling an unfunded deal.
  */
 export interface CancelDealArgs {
@@ -182,6 +196,11 @@ export interface ClaimableDealView {
 	 */
 	title: [] | [string];
 	/**
+	 * Settlement asset for this deal. Today always
+	 * [`Asset::Icrc`].
+	 */
+	asset: Asset;
+	/**
 	 * Optional note or message.
 	 */
 	note: [] | [string];
@@ -189,10 +208,6 @@ export interface ClaimableDealView {
 	 * Escrowed token amount.
 	 */
 	amount: bigint;
-	/**
-	 * Principal of the ICRC token ledger canister.
-	 */
-	token_ledger: Principal;
 	/**
 	 * Nanosecond UTC timestamp after which the deal expires.
 	 */
@@ -204,23 +219,22 @@ export interface ClaimableDealView {
 }
 /**
  * Global configuration for the Escrow canister.
- *
- * New fields use `Option` for backward-compatible deserialisation from
- * older stable-memory snapshots that lack them.
  */
 export interface Config {
 	/**
-	 * Admin-tunable dispute parameters. The fallback is whole-struct,
-	 * not per-field — when `dispute_config` is `None` (legacy
-	 * snapshots; fresh deployments before `update_config` is first
-	 * called), `services::disputes::load_dispute_config` returns
-	 * `DisputeConfig::default()`. Once a controller calls
-	 * `update_config` with a `Some(_)` value, every field comes from
-	 * that struct (including any fields the controller wants set to
-	 * the default value — there's no per-field "leave unchanged"
-	 * merge mechanism).
+	 * Per-deal escrow service fee, in the deal's token. Charged on
+	 * every terminal state. Defaults to [`DEFAULT_ESCROW_FEE`].
+	 * Snapshotted into each `Deal.fees.escrow_fee` at `create_deal`
+	 * time; subsequent `update_config` changes do not retroactively
+	 * alter in-flight deals.
 	 */
-	dispute_config: [] | [DisputeConfig];
+	escrow_fee: bigint;
+	/**
+	 * Admin-tunable dispute parameters. Fallback is whole-struct
+	 * (`update_config` replaces the entire `DisputeConfig` — there
+	 * is no per-field "leave unchanged" merge mechanism).
+	 */
+	dispute_config: DisputeConfig;
 }
 export type Consent = { Rejected: null } | { Accepted: null } | { Pending: null };
 /**
@@ -237,6 +251,16 @@ export interface CreateDealArgs {
 	 * Optional short title displayed on claim pages.
 	 */
 	title: [] | [string];
+	/**
+	 * Settlement asset for this deal. Today the canister only
+	 * handles ICRC-1 / ICRC-2 ledgers, so clients pass the asset
+	 * as the `Icrc` variant — at the Candid boundary that's
+	 * `asset = variant { Icrc = <ledger principal> }` (and
+	 * `Asset::Icrc(<ledger principal>)` from Rust). The variant
+	 * exists so future settlement domains (EVM, Solana, …) can
+	 * be added without renaming this field.
+	 */
+	asset: Asset;
 	/**
 	 * Optional per-deal arbitrator panel size. If `Some(n)`, any
 	 * dispute opened on this deal will use `n` arbitrators regardless
@@ -264,17 +288,61 @@ export interface CreateDealArgs {
 	 */
 	payer: [] | [Principal];
 	/**
-	 * Token amount to escrow (must be > 0).
+	 * Token amount to escrow (must be > 0). Denominated in the
+	 * base units of the deal's `asset` (e.g. e8s for ICP).
 	 */
 	amount: bigint;
-	/**
-	 * Principal of the ICRC-1/ICRC-2 token ledger canister.
-	 */
-	token_ledger: Principal;
 	/**
 	 * Nanosecond UTC timestamp after which the deal expires and becomes reclaimable.
 	 */
 	expires_at_ns: bigint;
+}
+/**
+ * Per-deal fee snapshot taken at `create_deal` time.
+ *
+ * Every fee the canister will charge against this deal over its
+ * lifetime is locked here so that subsequent `update_config` calls
+ * cannot retroactively alter the agreed economics. Same pattern as
+ * `Deal.panel_size`: the deal terms are a contract at create time.
+ *
+ * `Default` is implemented for test ergonomics — production code
+ * always builds a `DealFees` via `services::deals::compute_deal_fees`.
+ */
+export interface DealFees {
+	/**
+	 * Escrow service fee in the deal's token. Charged on every
+	 * terminal state (`Settled`, `Refunded`, `Cancelled` with a
+	 * committed reserve, `Rejected` with a committed reserve,
+	 * `ArbitratedSettled`, `ArbitratedRefunded`). Snapshot of
+	 * `Config.escrow_fee` at `create_deal` time.
+	 */
+	escrow_fee: bigint;
+	/**
+	 * Reduced-fee percentage the arbitrator panel receives when
+	 * the parties resolve out-of-band via `withdraw_dispute`.
+	 * Snapshot of `DisputeConfig.withdraw_fee_pct` at create time.
+	 */
+	withdraw_fee_pct: number;
+	/**
+	 * Per-party dispute reserve. Each party pre-commits this amount
+	 * before the deal can be `Funded`. Refunded on happy-path
+	 * terminal states (minus one `ledger_fee` per outgoing refund
+	 * transfer); consumed by the arbitrator panel on
+	 * `Disputed → ArbitratedX`. Snapshot of
+	 * `compute_arbitration_fee(amount, DisputeConfig) / 2` at
+	 * create time.
+	 */
+	dispute_reserve_per_party: bigint;
+	/**
+	 * Ledger `icrc1_fee` value at create time, in the deal's
+	 * token. RECORD ONLY — never used for arithmetic. Every
+	 * actual transfer re-queries the live fee via
+	 * `ledger::fee`. Snapshotted so the audit trail can answer
+	 * "what was the user shown at create time?" even if the
+	 * ledger later changes its fee. Operator absorbs any drift
+	 * between create-time and runtime fees out of `escrow_fee`.
+	 */
+	ledger_fee_at_create: bigint;
 }
 export type DealStatus =
 	| {
@@ -334,6 +402,12 @@ export interface DealView {
 	 */
 	updated_by: [] | [Principal];
 	/**
+	 * Settlement asset for this deal. Today always
+	 * [`Asset::Icrc`]; the enum exists so future settlement
+	 * domains can be added without renaming this field.
+	 */
+	asset: Asset;
+	/**
 	 * Per-deal arbitrator panel size override chosen by the creator
 	 * at `create_deal` time. `Some(n)` locks `n` arbitrators for
 	 * any dispute on this deal; `None` means "use whatever
@@ -346,6 +420,15 @@ export interface DealView {
 	 * Recipient's consent to the deal terms.
 	 */
 	recipient_consent: Consent;
+	/**
+	 * Per-deal fee snapshot taken at `create_deal` time —
+	 * `escrow_fee`, per-party dispute reserve, withdraw-fee
+	 * percentage, and create-time ledger fee. Frontends should
+	 * render these for transparent quoting (the recipient's
+	 * expected payout is `amount - fees.escrow_fee - live ledger
+	 * fee`).
+	 */
+	fees: DealFees;
 	/**
 	 * Timestamp when the deal was refunded, if applicable.
 	 */
@@ -402,10 +485,6 @@ export interface DealView {
 	 * Escrowed token amount.
 	 */
 	amount: bigint;
-	/**
-	 * Principal of the ICRC token ledger canister.
-	 */
-	token_ledger: Principal;
 	/**
 	 * Nanosecond UTC timestamp after which the deal expires.
 	 */
@@ -620,6 +699,18 @@ export type EscrowError =
 	  }
 	| {
 			/**
+			 * `create_deal` was called with an `amount` too small to
+			 * cover the escrow fee + per-arbitrator ledger fees + the
+			 * full dispute reserve, leaving zero or negative remainder
+			 * for the recipient. The `min` field carries the **smallest
+			 * acceptable amount** (i.e. one more than the rejected floor)
+			 * so callers can retry with the reported value directly.
+			 * Same convention as `AmountTooSmallForArbitration`.
+			 */
+			AmountBelowMinimum: { min: bigint };
+	  }
+	| {
+			/**
 			 * The payer principal is not set for this deal.
 			 */
 			PayerNotSet: null;
@@ -684,6 +775,18 @@ export type EscrowError =
 			 * An error occurred while communicating with the ICRC ledger canister.
 			 */
 			LedgerError: string;
+	  }
+	| {
+			/**
+			 * The caller has not approved the escrow canister to pull
+			 * their `DC/2` dispute reserve, OR the ledger
+			 * `icrc2_transfer_from` failed (insufficient funds /
+			 * insufficient allowance). Returned by `consent_deal` for a
+			 * bound-receiver deal and by `create_deal` when the receiver
+			 * is the creator (3b). The deal stays `Created` so the caller
+			 * can retry after approving.
+			 */
+			DisputeReserveRequired: null;
 	  }
 	| {
 			/**
@@ -807,6 +910,22 @@ export type EscrowError =
 			 * An accept was attempted after the deal's expiry deadline.
 			 */
 			Expired: null;
+	  }
+	| {
+			/**
+			 * The supplied `Asset` is not handled by the canister. Today
+			 * this is unreachable: `Asset` only carries the `Icrc` variant
+			 * and every code path that consumes an asset expects ICRC. The
+			 * variant exists so future settlement domains (EVM ERC-20,
+			 * native EVM, Solana SPL, …) added to `Asset` can surface a
+			 * typed rejection at the boundary without bypassing the state
+			 * machine — `Asset::as_icrc()` returns this variant for any
+			 * non-ICRC asset, which means an integration that has its own
+			 * `Asset` variant but lands a request against an ICRC-only
+			 * service path gets a structured error instead of a silent
+			 * mis-dispatch.
+			 */
+			UnsupportedAsset: null;
 	  }
 	| {
 			/**
@@ -1170,8 +1289,11 @@ export interface _SERVICE {
 	 * Cancels a deal that has not yet been funded.
 	 *
 	 * Either party may cancel. The deal transitions from `Created` to
-	 * `Cancelled`. Funded deals cannot be cancelled — use [`reclaim_deal`] after
-	 * expiry instead.
+	 * `Cancelled`. Any reserves already deposited (the receiver's
+	 * `DC/2` on a 3a deal where consent already moved money) are
+	 * refunded; the operator retains its `escrow_fee` share when a
+	 * reserve was on hand. Funded deals cannot be cancelled — use
+	 * [`reclaim_deal`] after expiry instead.
 	 */
 	cancel_deal: ActorMethod<[CancelDealArgs], AcceptDealResult>;
 	/**
@@ -1190,9 +1312,13 @@ export interface _SERVICE {
 	/**
 	 * Explicitly consents to a deal's terms.
 	 *
-	 * The caller must be the payer or recipient. Sets their consent to `Accepted`.
-	 * Both parties must consent before the payer can fund a deal with a known
-	 * recipient.
+	 * The caller must be the payer or recipient. For the bound
+	 * receiver of a deal in `Created` state, `consent_deal` performs
+	 * the ICRC-2 deposit of the receiver's `DC/2` dispute reserve
+	 * into the deal subaccount — receivers must therefore approve
+	 * the escrow canister to spend at least `DC/2 + ledger_fee`
+	 * beforehand. Payer consent is a pure state flip (the payer's
+	 * actual commitment is `fund_deal`, which pulls `amount + DC/2`).
 	 */
 	consent_deal: ActorMethod<[CancelDealArgs], AcceptDealResult>;
 	/**
@@ -1362,8 +1488,11 @@ export interface _SERVICE {
 	 * Returns per-token metadata for each requested token ID.
 	 *
 	 * Each deal's metadata includes `icrc7:name`, `escrow:status`,
-	 * `escrow:payer`, `escrow:amount`, `escrow:token_ledger`, and other
-	 * deal-specific fields. Unknown IDs produce `None` in the result vector.
+	 * `escrow:payer`, `escrow:amount`, `escrow:asset_kind`,
+	 * `escrow:asset`, and other deal-specific fields. ICRC deals
+	 * additionally surface the bare ledger principal under the
+	 * legacy `escrow:token_ledger` key for indexer back-compat.
+	 * Unknown IDs produce `None` in the result vector.
 	 */
 	icrc7_token_metadata: ActorMethod<[Array<bigint>], Array<[] | [Array<[string, Value]>]>>;
 	/**
@@ -1436,8 +1565,10 @@ export interface _SERVICE {
 	/**
 	 * Rejects a deal's terms. The deal transitions to `Rejected` (terminal).
 	 *
-	 * The caller must be the payer or recipient. Their consent is set to
-	 * `Rejected` and the deal becomes final.
+	 * The caller must be the payer or recipient. Their consent is set
+	 * to `Rejected` and the deal becomes final. Any reserves already
+	 * deposited are refunded; the operator retains its `escrow_fee`
+	 * share when a reserve was on hand.
 	 */
 	reject_deal: ActorMethod<[FundDealArgs], GetDealResult>;
 	/**
@@ -1449,9 +1580,9 @@ export interface _SERVICE {
 	/**
 	 * Updates the global configuration for the Escrow canister.
 	 *
-	 * Validates `config.dispute_config` (when set) against the
-	 * invariants documented on `DisputeConfig` before persisting.
-	 * Rejects with `EscrowError::ValidationError` on invalid input
+	 * Validates `config.dispute_config` against the invariants documented
+	 * on `DisputeConfig` before persisting. Rejects with
+	 * `EscrowError::ValidationError` on invalid input
 	 * rather than letting bad config poison the dispute machinery at
 	 * runtime (e.g. even `panel_size`, zero windows, fee bps > 100%).
 	 *

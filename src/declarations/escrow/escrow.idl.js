@@ -24,10 +24,17 @@ export const idlFactory = ({ IDL }) => {
 		Created: IDL.Null,
 		Settled: IDL.Null
 	});
+	const Asset = IDL.Variant({ Icrc: IDL.Principal });
 	const Consent = IDL.Variant({
 		Rejected: IDL.Null,
 		Accepted: IDL.Null,
 		Pending: IDL.Null
+	});
+	const DealFees = IDL.Record({
+		escrow_fee: IDL.Nat,
+		withdraw_fee_pct: IDL.Nat32,
+		dispute_reserve_per_party: IDL.Nat,
+		ledger_fee_at_create: IDL.Nat
 	});
 	const DealView = IDL.Record({
 		id: IDL.Nat64,
@@ -35,8 +42,10 @@ export const idlFactory = ({ IDL }) => {
 		title: IDL.Opt(IDL.Text),
 		funded_at_ns: IDL.Opt(IDL.Nat64),
 		updated_by: IDL.Opt(IDL.Principal),
+		asset: Asset,
 		panel_size: IDL.Opt(IDL.Nat32),
 		recipient_consent: Consent,
+		fees: DealFees,
 		refunded_at_ns: IDL.Opt(IDL.Nat64),
 		note: IDL.Opt(IDL.Text),
 		recipient: IDL.Opt(IDL.Principal),
@@ -50,7 +59,6 @@ export const idlFactory = ({ IDL }) => {
 		settled_at_ns: IDL.Opt(IDL.Nat64),
 		payer: IDL.Opt(IDL.Principal),
 		amount: IDL.Nat,
-		token_ledger: IDL.Principal,
 		expires_at_ns: IDL.Nat64
 	});
 	const EscrowError = IDL.Variant({
@@ -61,6 +69,7 @@ export const idlFactory = ({ IDL }) => {
 		AnonymousParty: IDL.Null,
 		InvalidAmount: IDL.Null,
 		DisputeNotFound: IDL.Null,
+		AmountBelowMinimum: IDL.Record({ min: IDL.Nat }),
 		PayerNotSet: IDL.Null,
 		NotFound: IDL.Null,
 		ArbitratorNotActive: IDL.Null,
@@ -71,6 +80,7 @@ export const idlFactory = ({ IDL }) => {
 		MissingClaimCode: IDL.Null,
 		EvidenceTooLarge: IDL.Record({ max: IDL.Nat32 }),
 		LedgerError: IDL.Text,
+		DisputeReserveRequired: IDL.Null,
 		ExpiryTooFar: IDL.Null,
 		ReliabilityTooLow: IDL.Record({
 			threshold: IDL.Nat32,
@@ -99,6 +109,7 @@ export const idlFactory = ({ IDL }) => {
 		NotExpired: IDL.Null,
 		InvalidState: IDL.Record({ actual: IDL.Text, expected: IDL.Text }),
 		Expired: IDL.Null,
+		UnsupportedAsset: IDL.Null,
 		AmountTooSmallForArbitration: IDL.Record({ min: IDL.Nat })
 	});
 	const AcceptDealResult = IDL.Variant({
@@ -197,15 +208,18 @@ export const idlFactory = ({ IDL }) => {
 		arbitration_fee_bps: IDL.Nat32,
 		withdraw_fee_pct: IDL.Nat32
 	});
-	const Config = IDL.Record({ dispute_config: IDL.Opt(DisputeConfig) });
+	const Config = IDL.Record({
+		escrow_fee: IDL.Nat,
+		dispute_config: DisputeConfig
+	});
 	const CreateDealArgs = IDL.Record({
 		title: IDL.Opt(IDL.Text),
+		asset: Asset,
 		panel_size: IDL.Opt(IDL.Nat32),
 		note: IDL.Opt(IDL.Text),
 		recipient: IDL.Opt(IDL.Principal),
 		payer: IDL.Opt(IDL.Principal),
 		amount: IDL.Nat,
-		token_ledger: IDL.Principal,
 		expires_at_ns: IDL.Nat64
 	});
 	const FinalizeDisputeArgs = IDL.Record({ dispute_id: IDL.Nat64 });
@@ -215,9 +229,9 @@ export const idlFactory = ({ IDL }) => {
 		id: IDL.Nat64,
 		status: DealStatus,
 		title: IDL.Opt(IDL.Text),
+		asset: Asset,
 		note: IDL.Opt(IDL.Text),
 		amount: IDL.Nat,
-		token_ledger: IDL.Principal,
 		expires_at_ns: IDL.Nat64,
 		is_recipient_bound: IDL.Bool
 	});
