@@ -2,26 +2,41 @@ name: Install Playwright
 
 description: |
   Install Playwright browsers (and the matching system deps) with a cache
-  keyed on the resolved `@playwright/test` version. On a cache hit we only
-  re-run `playwright install-deps` to bring in any apt packages the
-  browsers need; on a miss we do the full `playwright install --with-deps`.
+  keyed on the resolved Playwright version. On a cache hit we only re-run
+  `playwright install-deps` to bring in any apt packages the browsers need;
+  on a miss we do the full `playwright install --with-deps`.
 
 runs:
   using: composite
   steps:
+    # Both `playwright` and `@playwright/test` are declared as deps and
+    # the upstream project releases them in lockstep — whichever ends up
+    # owning the `playwright` bin shim under `node_modules/.bin/`
+    # (depends on hoisting), it loads `playwright-core` and the browser
+    # revision is fixed by that single version. We assert the two match
+    # so the cache key cannot drift from the binaries actually being
+    # installed; a mismatch means the lockfile is broken.
     - name: Resolve Playwright version
       id: playwright-version
       shell: bash
       run: |
-        version="$(node -e "console.log(require('@playwright/test/package.json').version)")"
-        echo "version=$version" >> "$GITHUB_OUTPUT"
+        pw_version="$(node -e "console.log(require('playwright/package.json').version)")"
+        test_version="$(node -e "console.log(require('@playwright/test/package.json').version)")"
+        if [ "$pw_version" != "$test_version" ]; then
+          echo "::error::playwright ($pw_version) and @playwright/test ($test_version) versions disagree" >&2
+          exit 1
+        fi
+        echo "version=$pw_version" >> "$GITHUB_OUTPUT"
 
     - name: Cache Playwright browsers
       id: cache
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+        # Browser binaries are arch-specific — keep `runner.arch` in the
+        # key so a future move to e.g. `ubuntu-24.04-arm` doesn't restore
+        # an incompatible bundle.
+        key: playwright-browsers-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright-version.outputs.version }}
 
     - name: Install Playwright browsers + system deps
       if: steps.cache.outputs.cache-hit != 'true'

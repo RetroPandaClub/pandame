@@ -54,6 +54,7 @@ jobs:
               - '.node-version'
               - '.github/workflows/e2e.yml'
               - '.github/actions/prepare/**'
+              - '.github/actions/playwright-install/**'
 
   e2e:
     needs: [check-e2e-changes]
