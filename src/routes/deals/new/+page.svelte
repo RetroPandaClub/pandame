@@ -24,6 +24,7 @@
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal } from '$lib/types/deal';
+	import { friendlyEscrowError } from '$lib/utils/escrow-error.utils';
 	import { formatTokenAmount, msToNs, parseTokenAmount } from '$lib/utils/format.utils';
 
 	type Mode = 'pay' | 'receive';
@@ -96,19 +97,9 @@
 		}
 	};
 
-	/**
-	 * Map known typed `EscrowError` variants to user-facing strings.
-	 * Falls back to `err.message` so unmapped variants still surface.
-	 */
 	function friendlyError(err: unknown): string {
 		if (err instanceof EscrowCanisterError) {
-			const v = err.variant;
-			if ('PanelSizeOutOfRange' in v) {
-				return $i18n.create.error_panel_size_out_of_range
-					.replace('{got}', String(v.PanelSizeOutOfRange.got))
-					.replace('{min}', String(v.PanelSizeOutOfRange.min))
-					.replace('{max}', String(v.PanelSizeOutOfRange.max));
-			}
+			return friendlyEscrowError(err, $i18n, token);
 		}
 		return err instanceof Error ? err.message : String(err);
 	}

@@ -2,6 +2,7 @@
 	import { fromNullable } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import { goto } from '$app/navigation';
+	import { EscrowCanisterError } from '$lib/canisters/escrow.canister';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { ConsentStates, DealStatuses } from '$lib/enums/deal-status';
@@ -17,6 +18,7 @@
 	import { userStore } from '$lib/stores/user.store';
 	import type { Deal, DealSide } from '$lib/types/deal';
 	import { consentState, dealStatus, sideOf } from '$lib/utils/deal.utils';
+	import { friendlyEscrowError } from '$lib/utils/escrow-error.utils';
 
 	interface Props {
 		deal: Deal;
@@ -77,14 +79,19 @@
 			const updated = await action();
 			dealsStore.upsert(updated);
 		} catch (err) {
-			error = err instanceof Error ? err.message : String(err);
+			error =
+				err instanceof EscrowCanisterError
+					? friendlyEscrowError(err, $i18n)
+					: err instanceof Error
+						? err.message
+						: String(err);
 			console.error(`${op} failed:`, err);
 		} finally {
 			progress = false;
 		}
 	};
 
-	const onConsent = () => wrap('consentDeal', () => consentDeal({ dealId: deal.id }));
+	const onConsent = () => wrap('consentDeal', () => consentDeal({ deal }));
 	const onReject = () => wrap('rejectDeal', () => rejectDeal({ dealId: deal.id }));
 	const onCancel = () => wrap('cancelDeal', () => cancelDeal({ dealId: deal.id }));
 	const onAccept = () => wrap('acceptDeal', () => acceptDeal({ dealId: deal.id }));
