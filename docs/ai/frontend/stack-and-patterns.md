@@ -192,10 +192,30 @@ export const createAndFundDeal = async (
 - `IcrcLedgerCanister` from `@icp-sdk/canisters/ledger/icrc` is the
   canonical wrapper. Don't redeclare it. The api facade is
   [`api/icrc-ledger.api.ts`](../../../src/lib/api/icrc-ledger.api.ts).
-- The deal funding flow is **always** create → `icrc2_approve(amount + fee)`
-  → `fund_deal`. The fee headroom matters: without it,
-  `transfer_from` will fail on the ledger because the spender (the
-  escrow canister) needs both the `amount` and the `fee` available.
+- Escrow `v0.0.7` folds funding into `create_deal` (tips) and
+  `consent_deal` (two-party). The `fund_deal` endpoint is gone. The
+  client pre-approval contract per-role lives in
+  `preApprovalAmount(call)` in
+  [`services/deal.services.ts`](../../../src/lib/services/deal.services.ts):
+
+  | role                     | allowance                                         |
+  | ------------------------ | ------------------------------------------------- |
+  | `tip-create`             | `0`                                               |
+  | `payer-create` (3a)      | `amount + DC/2 + creation_fee + 2*ledger_fee + 1` |
+  | `recipient-create` (3b)  | `DC/2 + creation_fee + 2*ledger_fee + 1`          |
+  | `recipient-consent` (3a) | `DC/2 + ledger_fee + 1`                           |
+  | `payer-consent` (3b)     | `amount + DC/2 + 2*ledger_fee + 1`                |
+
+  `DC/2` is exact from `Deal.fees.dispute_reserve_per_party` for the
+  consent roles and worst-case (`amount * 250 / 10_000`, default
+  `arbitration_fee_bps`) for the create roles since the snapshot
+  doesn't exist yet. `creation_fee` uses `DEFAULT_CREATION_FEE = 20_000`
+  (canister default; admin `config()` is controller-gated so the
+  client can't read live overrides — over-approving with the default
+  is harmless). The spender is **always** the escrow canister's
+  default subaccount — `spender_subaccount = None` in
+  `src/escrow/src/ledger.rs` upstream.
+
 - Pandame ships a single token today (`ICP_TOKEN`,
   `ryjl3-tyaaa-aaaaa-aaaba-cai`, 8 decimals, fee 10_000 e8s). Add new
   tokens to `$lib/constants/tokens.constants.ts` (and call out the

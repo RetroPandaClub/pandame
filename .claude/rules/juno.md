@@ -60,9 +60,10 @@ push deal state into Juno.
 - Service layer:
   [`services/deal.services.ts`](../../src/lib/services/deal.services.ts) +
   [`services/identity.services.ts`](../../src/lib/services/identity.services.ts).
-- The canonical create-fund flow is **always**
-  `create_deal` → `icrc2_approve(amount + fee)` → `fund_deal`. See
-  `createAndFundDeal`.
+- Escrow `v0.0.7` removed `fund_deal`. The five-role pre-approval
+  contract lives in `preApprovalAmount(call)` in
+  `$lib/services/deal.services.ts`; tip flows skip approval entirely
+  and `create_deal` settles them atomically.
 - Components never touch `@dfinity/agent` / `EscrowCanister.create` /
   `IcrcLedgerCanister.create` directly.
 

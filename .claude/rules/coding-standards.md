@@ -107,9 +107,13 @@ Use **kebab-case** (or single-word) with a functional dot-suffix:
   `getAgent` from a component.
 - Generated `EscrowDid` types come through `$lib/types/deal.ts` —
   don't import from `$declarations` outside of `$lib/{api,canisters}/`.
-- The canonical create-fund flow is **always**
-  `create_deal` → `icrc2_approve(amount + fee)` → `fund_deal` (see
-  `createAndFundDeal` in `$lib/services/deal.services.ts`).
+- Escrow `v0.0.7` removed `fund_deal`; funding is folded into
+  `create_deal` (tips) and `consent_deal` (two-party). Use
+  `preApprovalAmount(call)` in `$lib/services/deal.services.ts` to
+  compute the ICRC-2 allowance per role
+  (`tip-create` / `payer-create` / `recipient-create` /
+  `recipient-consent` / `payer-consent`). The spender is always the
+  escrow canister's default subaccount.
 
 ## Routing
 

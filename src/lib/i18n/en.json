@@ -294,6 +294,7 @@
 		"summary_label": "Summary",
 		"summary_amount": "Amount",
 		"summary_fee": "Deposit fee",
+		"summary_creation_fee": "Anti-spam creation fee",
 		"summary_total": "Total payment",
 		"title_deal_label": "Title Deal",
 		"title_deal_placeholder": "e.g. Coffee for Alice",
@@ -332,6 +333,7 @@
 		"panel_size_out_of_range": "Panel size {got} is not allowed. Choose an odd value between {min} and {max}.",
 		"amount_below_minimum": "Amount is too small for this deal. Minimum: {min}.",
 		"dispute_reserve_required": "Could not pull your dispute reserve from your wallet. Make sure you have enough balance and try again.",
+		"creation_fee_required": "Could not pull the per-deal creation fee from your wallet. Make sure you have enough balance and try again.",
 		"unsupported_asset": "This settlement asset is not supported yet."
 	}
 }

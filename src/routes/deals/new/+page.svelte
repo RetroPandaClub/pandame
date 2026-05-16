@@ -20,7 +20,7 @@
 	import BackIcon from '$lib/components/icons/BackIcon.svelte';
 	import { PANEL_SIZE_DEFAULT } from '$lib/constants/dispute.constants';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
-	import { createAndFundDeal } from '$lib/services/deal.services';
+	import { createAndFundDeal, DEFAULT_CREATION_FEE } from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal } from '$lib/types/deal';
@@ -61,7 +61,12 @@
 			(counterpartyText.trim().length === 0 || counterparty !== undefined)
 	);
 
-	let totalAmount = $derived(amount !== undefined ? amount + token.fee : undefined);
+	// Anti-spam creation fee — pulled at create time by the canister for
+	// every bound deal (recipient or payer pre-bound). Tip flows skip
+	// it. Mirrors `services::deals::create_deal` upstream.
+	let isBound = $derived(counterparty !== undefined);
+	let creationFee = $derived(isBound ? DEFAULT_CREATION_FEE : 0n);
+	let totalAmount = $derived(amount !== undefined ? amount + token.fee + creationFee : undefined);
 
 	const submit = async () => {
 		if (!valid || amount === undefined || expiryNs === undefined) {
@@ -226,6 +231,10 @@
 				</dd>
 				<dt>{$i18n.create.summary_fee}</dt>
 				<dd class="text-right">{formatTokenAmount(token.fee, token)}</dd>
+				{#if creationFee > 0n}
+					<dt>{$i18n.create.summary_creation_fee}</dt>
+					<dd class="text-right">{formatTokenAmount(creationFee, token)}</dd>
+				{/if}
 				<dt class="font-sans font-medium">{$i18n.create.summary_total}</dt>
 				<dd class="text-right font-sans font-semibold">
 					{totalAmount !== undefined ? formatTokenAmount(totalAmount, token) : '—'}

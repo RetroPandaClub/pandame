@@ -311,6 +311,7 @@ interface I18nCreate {
 	summary_label: string;
 	summary_amount: string;
 	summary_fee: string;
+	summary_creation_fee: string;
 	summary_total: string;
 	title_deal_label: string;
 	title_deal_placeholder: string;
@@ -352,6 +353,7 @@ interface I18nErrors {
 	panel_size_out_of_range: string;
 	amount_below_minimum: string;
 	dispute_reserve_required: string;
+	creation_fee_required: string;
 	unsupported_asset: string;
 }
 

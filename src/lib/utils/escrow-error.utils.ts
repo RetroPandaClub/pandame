@@ -42,6 +42,10 @@ export const friendlyEscrowError = (
 		return t.errors.dispute_reserve_required;
 	}
 
+	if ('CreationFeeRequired' in v) {
+		return t.errors.creation_fee_required;
+	}
+
 	if ('UnsupportedAsset' in v) {
 		return t.errors.unsupported_asset;
 	}
