@@ -67,6 +67,43 @@ export interface AdminSetArbitratorStatusArgs {
 	principal: Principal;
 }
 /**
+ * Arguments for `admin_treasury_balance` — the controller-only
+ * query that returns how much of `asset` is currently sitting in
+ * the canister's treasury subaccount (where every deal's
+ * `creation_fee` accumulates). One asset per call so the
+ * controller can iterate ledgers explicitly.
+ */
+export interface AdminTreasuryBalanceArgs {
+	/**
+	 * Settlement asset to query. Today only [`Asset::Icrc`]; the
+	 * query reaches the underlying ledger via
+	 * [`crate::ledger::balance_of`].
+	 */
+	asset: Asset;
+}
+export type AdminTreasuryBalanceResult = { Ok: bigint } | { Err: EscrowError };
+/**
+ * Arguments for `admin_treasury_withdraw` — the controller-only
+ * drain endpoint. Pulls `amount` of `asset` from the treasury
+ * subaccount and `icrc1_transfer`s it to `to`. Caller is
+ * responsible for sizing `amount` against the live treasury
+ * balance (`admin_treasury_balance`); under-funded withdrawals
+ * surface as `EscrowError::TransferFailed` from the ledger.
+ */
+export interface AdminTreasuryWithdrawArgs {
+	/**
+	 * Destination account. Typically a controller's own account
+	 * or a downstream treasury / ops wallet.
+	 */
+	to: Account;
+	asset: Asset;
+	/**
+	 * Amount to transfer in `asset`'s base units. Must be
+	 * `> ledger_fee` (the ledger burns one fee per transfer).
+	 */
+	amount: bigint;
+}
+/**
  * Public profile of a registered arbitrator.
  *
  * Score-related fields follow these rules:
@@ -230,6 +267,18 @@ export interface Config {
 	 */
 	escrow_fee: bigint;
 	/**
+	 * Per-deal anti-spam creation fee. Pulled from the creator at
+	 * `create_deal` time on bound deals (recipient is `Some`) and
+	 * routed to the canister's treasury subaccount. Tips
+	 * (`recipient = None`) skip it entirely — there's no
+	 * counterparty to spam-harass. Defaults to
+	 * [`DEFAULT_CREATION_FEE`]. Snapshotted into each
+	 * `Deal.fees.creation_fee` at create time; subsequent
+	 * `update_config` changes do not retroactively alter
+	 * in-flight deals.
+	 */
+	creation_fee: bigint;
+	/**
 	 * Admin-tunable dispute parameters. Fallback is whole-struct
 	 * (`update_config` replaces the entire `DisputeConfig` — there
 	 * is no per-field "leave unchanged" merge mechanism).
@@ -318,6 +367,18 @@ export interface DealFees {
 	 */
 	escrow_fee: bigint;
 	/**
+	 * Anti-spam creation fee in the deal's token. Pulled from the
+	 * creator at `create_deal` time and routed to the canister's
+	 * controller-controlled treasury subaccount
+	 * (`subaccounts::TREASURY_SUBACCOUNT`). Always forfeited —
+	 * never refunded on any terminal — so a creator who spams
+	 * deals at counterparties they know will reject still pays
+	 * the per-deal stamp. Snapshot of `Config.creation_fee` at
+	 * create time. Set to `0` for tip flows (no bound counterparty
+	 * to spam, so no deterrent needed).
+	 */
+	creation_fee: bigint;
+	/**
 	 * Reduced-fee percentage the arbitrator panel receives when
 	 * the parties resolve out-of-band via `withdraw_dispute`.
 	 * Snapshot of `DisputeConfig.withdraw_fee_pct` at create time.
@@ -376,6 +437,19 @@ export type DealStatus =
 	| { Funded: null }
 	| { Cancelled: null }
 	| { Created: null }
+	| {
+			/**
+			 * Both parties signed `No` on a `Funded` bound deal — mutual
+			 * agreement that the off-chain part of the deal did NOT happen.
+			 * Funds returned to the payer using the same fee math as
+			 * `Refunded` (`escrow_fee` retained, `ledger_fee` burned per
+			 * transfer); the per-party dispute reserves are returned to
+			 * each side. Distinct from `Refunded` (expiry-driven) and
+			 * `ArbitratedRefunded` (dispute-driven) so the audit trail
+			 * records WHY the deal didn't settle. Terminal.
+			 */
+			Aborted: null;
+	  }
 	| { Settled: null };
 /**
  * Full deal view returned to authorised participants (payer or recipient).
@@ -458,6 +532,11 @@ export interface DealView {
 	 */
 	payer_consent: Consent;
 	/**
+	 * Recipient's settlement signature; mirrors
+	 * [`Self::payer_signature`].
+	 */
+	recipient_signature: Signature;
+	/**
 	 * Nanosecond UTC timestamp when the deal was created.
 	 */
 	created_at_ns: bigint;
@@ -466,6 +545,13 @@ export interface DealView {
 	 * participants; never exposed in the public claimable view.
 	 */
 	claim_code: [] | [string];
+	/**
+	 * Payer's settlement signature on a `Funded` bound deal —
+	 * `Empty` until the payer calls `sign_yes` / `sign_no`. Tip
+	 * flows (recipient unbound) always carry `Empty`. See
+	 * [`Signature`] for tally semantics.
+	 */
+	payer_signature: Signature;
 	/**
 	 * Identifier of the attached dispute, if any. `Some(_)` while a
 	 * dispute is open or after it has resolved (audit-trail link to
@@ -714,6 +800,19 @@ export type EscrowError =
 			 * The payer principal is not set for this deal.
 			 */
 			PayerNotSet: null;
+	  }
+	| {
+			/**
+			 * The creator has not approved the escrow canister to pull
+			 * the per-deal `creation_fee`, OR the ledger
+			 * `icrc2_transfer_from` failed at create time. Returned by
+			 * `create_deal` for any bound deal (recipient is `Some`). The
+			 * half-formed deal is rolled forward to `Cancelled` so it
+			 * doesn't sit as a stuck `Created` record. Tip flows
+			 * (`recipient = None`) skip the `creation_fee` entirely and
+			 * never emit this variant.
+			 */
+			CreationFeeRequired: null;
 	  }
 	| {
 			/**
@@ -980,7 +1079,6 @@ export interface FundDealArgs {
 	 */
 	deal_id: bigint;
 }
-export type FundDealResult = { Ok: DealView } | { Err: EscrowError };
 export type GetClaimableDealResult = { Ok: ClaimableDealView } | { Err: EscrowError };
 export type GetDealResult = { Ok: DealView } | { Err: EscrowError };
 export type GetEscrowAccountResult = { Ok: Account } | { Err: EscrowError };
@@ -1146,6 +1244,22 @@ export interface ReliabilityView {
 	positive: number;
 }
 /**
+ * Per-party feedback signature recorded on a `Funded` bound deal.
+ * Drives the settlement tally (see `services::deals::tally_signatures`).
+ *
+ * - `Empty`: no decision yet. Default for both parties when the deal becomes `Funded`. At expiry,
+ * any `Empty` signature is treated as `Yes` for tally purposes (silence = release).
+ * - `Yes`: the party affirms the deal completed correctly off-chain. Both parties on `Yes` →
+ * `Settled` (release to recipient).
+ * - `No`: the party affirms the deal did NOT complete correctly. Both parties on `No` → `Aborted`
+ * (refund to payer). Mixed `Yes`/`No` → auto-`Disputed` (panel arbitration).
+ *
+ * Tip flows (`recipient = None`) never carry signatures: the tip
+ * model has no bound counterparty to sign for, and signing endpoints
+ * reject tip deals with `DisputeRequiresBoundRecipient`.
+ */
+export type Signature = { No: null } | { Yes: null } | { Empty: null };
+/**
  * Arguments for `submit_evidence`.
  *
  * At least one of `note` / `(artefact_url + artefact_sha256)`
@@ -1286,6 +1400,29 @@ export interface _SERVICE {
 		AdminRegisterArbitratorResult
 	>;
 	/**
+	 * Returns the live `icrc1_balance_of` of the canister-owned
+	 * treasury subaccount for the requested asset. Every bound deal's
+	 * `creation_fee` accumulates here and stays until a controller
+	 * drains it via `admin_treasury_withdraw`.
+	 *
+	 * This method is gated to canister controllers — the treasury
+	 * balance is operationally sensitive (it reveals total accumulated
+	 * anti-spam fees across all deals).
+	 */
+	admin_treasury_balance: ActorMethod<[AdminTreasuryBalanceArgs], AdminTreasuryBalanceResult>;
+	/**
+	 * Drains `amount` of `asset` from the treasury subaccount to
+	 * `to` via `icrc1_transfer`. Returns the ledger block index on
+	 * success.
+	 *
+	 * Caller is responsible for sizing `amount` against the live
+	 * treasury balance — under-funded withdrawals surface as
+	 * `EscrowError::TransferFailed` from the ledger.
+	 *
+	 * This method is gated to canister controllers.
+	 */
+	admin_treasury_withdraw: ActorMethod<[AdminTreasuryWithdrawArgs], AdminTreasuryBalanceResult>;
+	/**
 	 * Cancels a deal that has not yet been funded.
 	 *
 	 * Either party may cancel. The deal transitions from `Created` to
@@ -1353,15 +1490,6 @@ export interface _SERVICE {
 	 * transfers + arbitrator score updates.
 	 */
 	finalize_dispute: ActorMethod<[FinalizeDisputeArgs], CastVoteResult>;
-	/**
-	 * Funds a previously created deal by transferring tokens from the payer's
-	 * account into the deal's escrow subaccount via ICRC-2 `transfer_from`.
-	 *
-	 * The deal transitions from `Created` to `Funded`. Funding implicitly sets
-	 * the payer's consent to `Accepted`. For deals with a known recipient, the
-	 * recipient must have consented first.
-	 */
-	fund_deal: ActorMethod<[FundDealArgs], FundDealResult>;
 	/**
 	 * Returns the arbitrator profile for `principal`, or `None` if the
 	 * principal hasn't been registered. Public read; any non-anonymous
@@ -1546,7 +1674,7 @@ export interface _SERVICE {
 	 * transitions `Funded → Disputed`. The expiry sweep skips
 	 * `Disputed` deals.
 	 */
-	open_dispute: ActorMethod<[FundDealArgs], CastVoteResult>;
+	open_dispute: ActorMethod<[CancelDealArgs], CastVoteResult>;
 	/**
 	 * Batch-processes expired deals by refunding escrowed tokens back to their
 	 * payers.
@@ -1561,7 +1689,7 @@ export interface _SERVICE {
 	 * Only callable after the deal's `expires_at_ns` deadline has passed. The deal
 	 * transitions from `Funded` to `Refunded`.
 	 */
-	reclaim_deal: ActorMethod<[FundDealArgs], GetDealResult>;
+	reclaim_deal: ActorMethod<[CancelDealArgs], GetDealResult>;
 	/**
 	 * Rejects a deal's terms. The deal transitions to `Rejected` (terminal).
 	 *
@@ -1570,7 +1698,43 @@ export interface _SERVICE {
 	 * deposited are refunded; the operator retains its `escrow_fee`
 	 * share when a reserve was on hand.
 	 */
-	reject_deal: ActorMethod<[FundDealArgs], GetDealResult>;
+	reject_deal: ActorMethod<[CancelDealArgs], GetDealResult>;
+	/**
+	 * Records the caller's `No` settlement signature on a `Funded`
+	 * bound deal and dispatches the resulting two-party tally:
+	 *
+	 * - other party also `No` → abort (refund to payer; new `Aborted` terminal).
+	 * - other party `Yes` → auto-open a dispute.
+	 * - other party still `Empty` → no-op; deal stays `Funded` with the new signature recorded.
+	 *
+	 * Same caller / tip / re-sign / post-expiry semantics as
+	 * [`sign_yes`].
+	 */
+	sign_no: ActorMethod<[FundDealArgs], GetDealResult>;
+	/**
+	 * Records the caller's `Yes` settlement signature on a `Funded`
+	 * bound deal and dispatches the resulting two-party tally:
+	 *
+	 * - other party also `Yes` → settle (release to recipient).
+	 * - other party `No` → auto-open a dispute.
+	 * - other party still `Empty` → no-op; deal stays `Funded` with the new signature recorded.
+	 *
+	 * Caller must be the bound payer or recipient. Tip flows
+	 * (`recipient = None`) reject with `DisputeRequiresBoundRecipient`
+	 * — use `accept_deal` (with the claim code) to claim a tip.
+	 * While the deal is still `Funded`, re-signing overwrites the
+	 * previous vote (latest-wins). At expiry the auto-YES rule (run by
+	 * the housekeeping sweep) upgrades any unsigned party to `Yes`
+	 * automatically; calling `sign_yes` after expiry returns `Expired`
+	 * to make the transition explicit.
+	 *
+	 * Paired with [`sign_no`] — split into two endpoints (instead of
+	 * a single `sign_deal(vote)`) to match the canister's
+	 * `verb + deal_id` convention used by every other deal-action
+	 * endpoint, and to make "sign with empty vote" unrepresentable
+	 * at the Candid boundary.
+	 */
+	sign_yes: ActorMethod<[FundDealArgs], GetDealResult>;
 	/**
 	 * Submits a piece of evidence on a dispute. Caller must be a party
 	 * of the parent deal or an arbitrator on the panel. Allowed during

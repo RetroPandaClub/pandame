@@ -22,6 +22,7 @@ export const idlFactory = ({ IDL }) => {
 		Funded: IDL.Null,
 		Cancelled: IDL.Null,
 		Created: IDL.Null,
+		Aborted: IDL.Null,
 		Settled: IDL.Null
 	});
 	const Asset = IDL.Variant({ Icrc: IDL.Principal });
@@ -32,9 +33,15 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const DealFees = IDL.Record({
 		escrow_fee: IDL.Nat,
+		creation_fee: IDL.Nat,
 		withdraw_fee_pct: IDL.Nat32,
 		dispute_reserve_per_party: IDL.Nat,
 		ledger_fee_at_create: IDL.Nat
+	});
+	const Signature = IDL.Variant({
+		No: IDL.Null,
+		Yes: IDL.Null,
+		Empty: IDL.Null
 	});
 	const DealView = IDL.Record({
 		id: IDL.Nat64,
@@ -53,8 +60,10 @@ export const idlFactory = ({ IDL }) => {
 		escrow_subaccount: IDL.Vec(IDL.Nat8),
 		created_by: IDL.Principal,
 		payer_consent: Consent,
+		recipient_signature: Signature,
 		created_at_ns: IDL.Nat64,
 		claim_code: IDL.Opt(IDL.Text),
+		payer_signature: Signature,
 		dispute: IDL.Opt(IDL.Nat64),
 		settled_at_ns: IDL.Opt(IDL.Nat64),
 		payer: IDL.Opt(IDL.Principal),
@@ -71,6 +80,7 @@ export const idlFactory = ({ IDL }) => {
 		DisputeNotFound: IDL.Null,
 		AmountBelowMinimum: IDL.Record({ min: IDL.Nat }),
 		PayerNotSet: IDL.Null,
+		CreationFeeRequired: IDL.Null,
 		NotFound: IDL.Null,
 		ArbitratorNotActive: IDL.Null,
 		NotAssignedArbitrator: IDL.Null,
@@ -142,6 +152,20 @@ export const idlFactory = ({ IDL }) => {
 		status: ArbitratorStatus,
 		principal: IDL.Principal
 	});
+	const AdminTreasuryBalanceArgs = IDL.Record({ asset: Asset });
+	const AdminTreasuryBalanceResult = IDL.Variant({
+		Ok: IDL.Nat,
+		Err: EscrowError
+	});
+	const Account = IDL.Record({
+		owner: IDL.Principal,
+		subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
+	const AdminTreasuryWithdrawArgs = IDL.Record({
+		to: Account,
+		asset: Asset,
+		amount: IDL.Nat
+	});
 	const CancelDealArgs = IDL.Record({ deal_id: IDL.Nat64 });
 	const Vote = IDL.Variant({
 		IncorrectlyConcluded: IDL.Null,
@@ -210,6 +234,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		escrow_fee: IDL.Nat,
+		creation_fee: IDL.Nat,
 		dispute_config: DisputeConfig
 	});
 	const CreateDealArgs = IDL.Record({
@@ -223,8 +248,6 @@ export const idlFactory = ({ IDL }) => {
 		expires_at_ns: IDL.Nat64
 	});
 	const FinalizeDisputeArgs = IDL.Record({ dispute_id: IDL.Nat64 });
-	const FundDealArgs = IDL.Record({ deal_id: IDL.Nat64 });
-	const FundDealResult = IDL.Variant({ Ok: DealView, Err: EscrowError });
 	const ClaimableDealView = IDL.Record({
 		id: IDL.Nat64,
 		status: DealStatus,
@@ -240,10 +263,6 @@ export const idlFactory = ({ IDL }) => {
 		Err: EscrowError
 	});
 	const GetDealResult = IDL.Variant({ Ok: DealView, Err: EscrowError });
-	const Account = IDL.Record({
-		owner: IDL.Principal,
-		subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
-	});
 	const GetEscrowAccountResult = IDL.Variant({
 		Ok: Account,
 		Err: EscrowError
@@ -340,6 +359,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(IDL.Nat64),
 		Err: EscrowError
 	});
+	const FundDealArgs = IDL.Record({ deal_id: IDL.Nat64 });
 	const SubmitEvidenceArgs = IDL.Record({
 		note: IDL.Opt(IDL.Text),
 		dispute_id: IDL.Nat64,
@@ -367,6 +387,12 @@ export const idlFactory = ({ IDL }) => {
 			[AdminRegisterArbitratorResult],
 			[]
 		),
+		admin_treasury_balance: IDL.Func([AdminTreasuryBalanceArgs], [AdminTreasuryBalanceResult], []),
+		admin_treasury_withdraw: IDL.Func(
+			[AdminTreasuryWithdrawArgs],
+			[AdminTreasuryBalanceResult],
+			[]
+		),
 		cancel_deal: IDL.Func([CancelDealArgs], [AcceptDealResult], []),
 		cast_vote: IDL.Func([CastVoteArgs], [CastVoteResult], []),
 		config: IDL.Func([], [Config], []),
@@ -374,7 +400,6 @@ export const idlFactory = ({ IDL }) => {
 		create_deal: IDL.Func([CreateDealArgs], [AcceptDealResult], []),
 		deregister_arbitrator: IDL.Func([], [AdminRegisterArbitratorResult], []),
 		finalize_dispute: IDL.Func([FinalizeDisputeArgs], [CastVoteResult], []),
-		fund_deal: IDL.Func([FundDealArgs], [FundDealResult], []),
 		get_arbitrator: IDL.Func([IDL.Principal], [IDL.Opt(ArbitratorProfile)], []),
 		get_claimable_deal: IDL.Func([IDL.Nat64], [GetClaimableDealResult], []),
 		get_deal: IDL.Func([IDL.Nat64], [GetDealResult], []),
@@ -419,10 +444,12 @@ export const idlFactory = ({ IDL }) => {
 		list_arbitrators: IDL.Func([ListArbitratorsArgs], [IDL.Vec(ArbitratorProfile)], []),
 		list_my_deals: IDL.Func([ListMyDealsArgs], [IDL.Vec(DealView)], []),
 		list_my_disputes: IDL.Func([ListMyDisputesArgs], [IDL.Vec(DisputeView)], []),
-		open_dispute: IDL.Func([FundDealArgs], [CastVoteResult], []),
+		open_dispute: IDL.Func([CancelDealArgs], [CastVoteResult], []),
 		process_expired_deals: IDL.Func([IDL.Nat32], [ProcessExpiredDealsResult], []),
-		reclaim_deal: IDL.Func([FundDealArgs], [GetDealResult], []),
-		reject_deal: IDL.Func([FundDealArgs], [GetDealResult], []),
+		reclaim_deal: IDL.Func([CancelDealArgs], [GetDealResult], []),
+		reject_deal: IDL.Func([CancelDealArgs], [GetDealResult], []),
+		sign_no: IDL.Func([FundDealArgs], [GetDealResult], []),
+		sign_yes: IDL.Func([FundDealArgs], [GetDealResult], []),
 		submit_evidence: IDL.Func([SubmitEvidenceArgs], [CastVoteResult], []),
 		update_config: IDL.Func([Config], [UpdateConfigResult], []),
 		withdraw_dispute: IDL.Func([WithdrawDisputeArgs], [CastVoteResult], [])
