@@ -19,19 +19,6 @@ export const createDeal = async ({
 	return await createDeal({ params, ...queryParams });
 };
 
-export const fundDeal = async ({
-	identity,
-	dealId,
-	...queryParams
-}: {
-	identity: Identity;
-	dealId: bigint;
-} & QueryParams): Promise<EscrowDid.DealView> => {
-	const { fundDeal } = await escrowCanister({ identity });
-
-	return await fundDeal({ dealId, ...queryParams });
-};
-
 export const acceptDeal = async ({
 	identity,
 	dealId,

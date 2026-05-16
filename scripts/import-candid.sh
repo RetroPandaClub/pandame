@@ -35,7 +35,9 @@ download_did() {
 cd "$SCRIPT_DIR/.."
 
 : Import escrow canister .did from upstream
+: Pinned to https://github.com/AntonioVentilii/escrow/releases/tag/v0.0.7 — bump
+: the ref when consuming a newer canister contract, then run `npm run did`.
 mkdir -p src/declarations/escrow
-download_did https://raw.githubusercontent.com/AntonioVentilii/escrow/main/src/escrow/escrow.did "escrow.did" "src/declarations/escrow"
+download_did https://raw.githubusercontent.com/AntonioVentilii/escrow/v0.0.7/src/escrow/escrow.did "escrow.did" "src/declarations/escrow"
 
 : Fin

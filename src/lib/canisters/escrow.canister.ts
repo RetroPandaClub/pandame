@@ -60,17 +60,6 @@ export class EscrowCanister extends Canister<EscrowService> {
 		return unwrap(await create_deal(params), 'create deal');
 	};
 
-	fundDeal = async ({
-		dealId,
-		...queryParams
-	}: {
-		dealId: bigint;
-	} & QueryParams): Promise<EscrowDid.DealView> => {
-		const { fund_deal } = this.caller(queryParams);
-
-		return unwrap(await fund_deal({ deal_id: dealId }), 'fund deal');
-	};
-
 	acceptDeal = async ({
 		dealId,
 		claimCode,

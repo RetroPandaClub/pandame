@@ -34,27 +34,31 @@ interface CreateDealRequest {
 const opt = <T>(value: T | undefined): [] | [T] => toNullable(value);
 
 /**
- * Create + fund a deal in a single user-facing flow.
+ * Create a deal.
  *
- * Order of operations:
- *  1. `create_deal`        → returns a `DealView` with id + claim_code +
- *                            the snapshotted `DealFees`.
- *  2. `icrc1_fee`          → reads the live ledger fee. We query it
- *                            instead of using `token.fee` because the
- *                            canister re-reads the live fee at
- *                            `transfer_from` time; a stale constant
- *                            would risk an allowance shortfall if the
- *                            ledger's fee has drifted.
- *  3. `icrc2_approve`      → grants the escrow canister
- *                            `amount + dispute_reserve_per_party + live ledger fee`.
- *                            The canister's `fund_deal` pulls
- *                            `amount + DC/2` in a single
- *                            `transfer_from`; the live fee covers the
- *                            ledger's allowance debit.
- *  4. `fund_deal`          → escrow runs `transfer_from(payer → subaccount)`.
+ * **Transitional shape — escrow `v0.0.7`.** The standalone `fund_deal`
+ * endpoint was removed (PR #41 upstream); funding is now folded into
+ * the lifecycle:
  *
- * The intermediate `DealView` is returned to the caller so the UI can
- * display the share link / QR even if funding fails.
+ *  - **Tip** (no `recipient`): `create_deal` atomically funds. The
+ *    returned `DealView` is already `Funded`.
+ *  - **Two-party** (3a payer-creator / 3b recipient-creator):
+ *    `create_deal` requires pre-approval of `amount? + DC/2 +
+ *    creation_fee + 2*ledger_fee` BEFORE this call; once both sides
+ *    consent the canister atomically flips the deal to `Funded` inside
+ *    `consent_deal`.
+ *
+ * This PR (bindings + types only) wires the API surface to compile
+ * against the new IDL. The pre-approval calculator, `consent_deal`
+ * pre-approval contract, `sign_yes` / `sign_no` settlement actions
+ * and the `CreationFeeRequired` friendly-error mapping land in the
+ * follow-up PRs. Until PR #3 lands, two-party `create_deal` calls
+ * still trap at the canister with `CreationFeeRequired` /
+ * `DisputeReserveRequired` — tip flow is unaffected.
+ *
+ * Return shape kept as `{ created, funded }` (funded === created)
+ * so call sites are untouched; the eventual rename / shape change
+ * is tracked in PR #2.
  */
 export const createAndFundDeal = async (
 	request: CreateDealRequest
@@ -77,30 +81,7 @@ export const createAndFundDeal = async (
 		}
 	});
 
-	const escrowAccount: IcrcAccount = {
-		owner: ESCROW_CANISTER_ID,
-		subaccount: created.escrow_subaccount
-	};
-
-	const ledgerFee = await ledgerApi.transactionFee({
-		identity,
-		ledgerCanisterId: token.ledgerCanisterId
-	});
-
-	await ledgerApi.approve({
-		identity,
-		ledgerCanisterId: token.ledgerCanisterId,
-		amount: request.amount + created.fees.dispute_reserve_per_party + ledgerFee,
-		spender: escrowAccount,
-		expiresAt: request.expires_at_ns
-	});
-
-	const funded = await escrowApi.fundDeal({
-		identity,
-		dealId: created.id
-	});
-
-	return { created, funded };
+	return { created, funded: created };
 };
 
 /**
