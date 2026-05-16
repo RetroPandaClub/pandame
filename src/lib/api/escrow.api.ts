@@ -60,6 +60,36 @@ export const signNo = async ({
 	return await signNo({ dealId, ...queryParams });
 };
 
+export const adminTreasuryBalance = async ({
+	identity,
+	asset,
+	...queryParams
+}: {
+	identity: Identity;
+	asset: EscrowDid.Asset;
+} & QueryParams): Promise<bigint> => {
+	const { adminTreasuryBalance } = await escrowCanister({ identity });
+
+	return await adminTreasuryBalance({ asset, ...queryParams });
+};
+
+export const adminTreasuryWithdraw = async ({
+	identity,
+	asset,
+	amount,
+	to,
+	...queryParams
+}: {
+	identity: Identity;
+	asset: EscrowDid.Asset;
+	amount: bigint;
+	to: EscrowDid.Account;
+} & QueryParams): Promise<bigint> => {
+	const { adminTreasuryWithdraw } = await escrowCanister({ identity });
+
+	return await adminTreasuryWithdraw({ asset, amount, to, ...queryParams });
+};
+
 export const consentDeal = async ({
 	identity,
 	dealId,

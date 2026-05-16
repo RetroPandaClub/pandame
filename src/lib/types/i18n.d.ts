@@ -194,6 +194,16 @@ interface I18nAdmin {
 	list_empty_title: string;
 	list_empty_description: string;
 	invalid_principal: string;
+	treasury_section: string;
+	treasury_description: string;
+	treasury_balance_label: string;
+	treasury_balance_loading: string;
+	treasury_refresh_cta: string;
+	treasury_destination_label: string;
+	treasury_amount_label: string;
+	treasury_withdraw_cta: string;
+	treasury_withdraw_success: string;
+	treasury_invalid_amount: string;
 }
 
 interface I18nDetail {

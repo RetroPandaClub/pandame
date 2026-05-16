@@ -12,22 +12,102 @@
 	import Sheet from '$lib/components/Sheet.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
+	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { ArbitratorStatuses, type ArbitratorStatusName } from '$lib/enums/arbitrator';
 	import {
 		adminRegisterArbitrator,
 		adminSetArbitratorStatus,
 		listArbitrators
 	} from '$lib/services/arbitrator.services';
+	import { treasuryBalance, treasuryWithdraw } from '$lib/services/treasury.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Arbitrator } from '$lib/types/arbitrator';
 	import { arbitratorScore, arbitratorStatus, statusFromName } from '$lib/utils/arbitrator.utils';
-	import { nsToDate, shortPrincipal } from '$lib/utils/format.utils';
+	import {
+		formatTokenAmount,
+		nsToDate,
+		parseTokenAmount,
+		shortPrincipal
+	} from '$lib/utils/format.utils';
 
 	let arbitrators: Arbitrator[] = $state([]);
 	let loading = $state(false);
 	let progress = $state(false);
 	let error: string | undefined = $state(undefined);
 	let registerInput = $state('');
+
+	// Treasury panel — anti-spam `creation_fee` collected on every bound
+	// deal accumulates in the canister-owned treasury subaccount per
+	// settlement ledger. Today only ICP is supported; multi-asset is a
+	// matter of iterating `treasuryBalance({ token })` per `Token`.
+	const treasuryToken = ICP_TOKEN;
+	let treasuryAmount: bigint | undefined = $state(undefined);
+	let treasuryLoading = $state(false);
+	let treasuryNotice: string | undefined = $state(undefined);
+	let treasuryDestText = $state('');
+	let treasuryAmountText = $state('');
+	let treasuryDest = $derived(parsePrincipal(treasuryDestText));
+	let treasuryParsedAmount = $derived(parseTokenAmount(treasuryAmountText, treasuryToken));
+
+	const reloadTreasury = async () => {
+		treasuryLoading = true;
+		treasuryNotice = undefined;
+		error = undefined;
+		try {
+			treasuryAmount = await treasuryBalance({ token: treasuryToken });
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+			console.error('Failed to read treasury balance:', err);
+		} finally {
+			treasuryLoading = false;
+		}
+	};
+
+	const onTreasuryWithdraw = async () => {
+		if (treasuryDest === undefined) {
+			error = $i18n.admin.invalid_principal;
+			return;
+		}
+
+		if (treasuryParsedAmount === undefined || treasuryParsedAmount <= 0n) {
+			error = $i18n.admin.treasury_invalid_amount.replace('{symbol}', treasuryToken.symbol);
+			return;
+		}
+
+		progress = true;
+		error = undefined;
+		treasuryNotice = undefined;
+
+		try {
+			const block = await treasuryWithdraw({
+				to: { owner: treasuryDest, subaccount: undefined },
+				amount: treasuryParsedAmount,
+				token: treasuryToken
+			});
+			treasuryNotice = $i18n.admin.treasury_withdraw_success
+				.replace('{amount}', formatTokenAmount(treasuryParsedAmount, treasuryToken))
+				.replace('{block}', block.toString());
+			treasuryDestText = '';
+			treasuryAmountText = '';
+			await reloadTreasury();
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+			console.error('Failed to withdraw from treasury:', err);
+		} finally {
+			progress = false;
+		}
+	};
+
+	function parsePrincipal(text: string): Principal | undefined {
+		if (text.trim().length === 0) {
+			return undefined;
+		}
+		try {
+			return Principal.fromText(text.trim());
+		} catch {
+			return undefined;
+		}
+	}
 
 	const STATUS_ORDER: readonly ArbitratorStatusName[] = [
 		ArbitratorStatuses.Active,
@@ -51,6 +131,7 @@
 
 	$effect(() => {
 		reload();
+		reloadTreasury();
 	});
 
 	const onRegister = async () => {
@@ -149,6 +230,78 @@
 	>
 		{$i18n.admin.controller_warning}
 	</div>
+
+	<section
+		class="border-border-soft bg-bg-elevated flex flex-col gap-3 rounded-md border p-4"
+		aria-labelledby="treasury-heading"
+	>
+		<header class="flex items-center justify-between gap-2">
+			<h2 id="treasury-heading" class="text-h6 text-default font-bold">
+				{$i18n.admin.treasury_section}
+			</h2>
+			<button
+				type="button"
+				onclick={reloadTreasury}
+				disabled={treasuryLoading}
+				class="text-body2 text-primary-stroke font-medium hover:underline disabled:cursor-wait disabled:opacity-60"
+			>
+				{$i18n.admin.treasury_refresh_cta}
+			</button>
+		</header>
+		<p class="text-body2 text-muted">{$i18n.admin.treasury_description}</p>
+		<div class="flex items-baseline justify-between">
+			<dt class="text-body2 text-muted">
+				{$i18n.admin.treasury_balance_label} ({treasuryToken.symbol})
+			</dt>
+			<dd class="text-body1 text-default font-semibold">
+				{#if treasuryLoading && treasuryAmount === undefined}
+					{$i18n.admin.treasury_balance_loading}
+				{:else if treasuryAmount !== undefined}
+					{formatTokenAmount(treasuryAmount, treasuryToken)}
+				{:else}
+					—
+				{/if}
+			</dd>
+		</div>
+
+		<form
+			class="flex flex-col gap-3"
+			onsubmit={(e) => {
+				e.preventDefault();
+				onTreasuryWithdraw();
+			}}
+		>
+			<FormField label={$i18n.admin.treasury_destination_label} htmlFor="treasury-dest">
+				<TextInput id="treasury-dest" bind:value={treasuryDestText} placeholder="aaaaa-bb…-cc" />
+			</FormField>
+			<FormField label={$i18n.admin.treasury_amount_label} htmlFor="treasury-amount">
+				<TextInput
+					id="treasury-amount"
+					bind:value={treasuryAmountText}
+					inputmode="decimal"
+					placeholder="0.5"
+				/>
+			</FormField>
+			<Button
+				type="submit"
+				disabled={progress ||
+					treasuryDest === undefined ||
+					treasuryParsedAmount === undefined ||
+					treasuryParsedAmount <= 0n}
+			>
+				{$i18n.admin.treasury_withdraw_cta}
+			</Button>
+		</form>
+
+		{#if treasuryNotice !== undefined}
+			<p
+				class="border-success/40 bg-success/10 text-body2 text-default rounded-md border p-2"
+				role="status"
+			>
+				{treasuryNotice}
+			</p>
+		{/if}
+	</section>
 
 	<form
 		class="border-border-soft bg-bg-elevated flex flex-col gap-3 rounded-md border p-4"

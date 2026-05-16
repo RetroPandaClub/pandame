@@ -181,7 +181,17 @@
 		"list_section": "Arbitrator pool",
 		"list_empty_title": "No arbitrators yet",
 		"list_empty_description": "Use the form above to register the first arbitrator.",
-		"invalid_principal": "That doesn't look like a valid principal."
+		"invalid_principal": "That doesn't look like a valid principal.",
+		"treasury_section": "Treasury",
+		"treasury_description": "Anti-spam creation fees collected from bound deals on each settlement ledger. Drain to a destination account to withdraw.",
+		"treasury_balance_label": "Balance",
+		"treasury_balance_loading": "Reading…",
+		"treasury_refresh_cta": "Refresh",
+		"treasury_destination_label": "Destination principal",
+		"treasury_amount_label": "Amount to withdraw",
+		"treasury_withdraw_cta": "Withdraw",
+		"treasury_withdraw_success": "Withdrew {amount} — ledger block index {block}.",
+		"treasury_invalid_amount": "Enter a positive amount in {symbol}."
 	},
 	"detail": {
 		"title": "Deal {id}",

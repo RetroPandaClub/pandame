@@ -101,6 +101,32 @@ export class EscrowCanister extends Canister<EscrowService> {
 		return unwrap(await sign_no({ deal_id: dealId }), 'sign no on deal');
 	};
 
+	adminTreasuryBalance = async ({
+		asset,
+		...queryParams
+	}: {
+		asset: EscrowDid.Asset;
+	} & QueryParams): Promise<bigint> => {
+		const { admin_treasury_balance } = this.caller(queryParams);
+
+		return unwrap(await admin_treasury_balance({ asset }), 'read treasury balance');
+	};
+
+	adminTreasuryWithdraw = async ({
+		asset,
+		amount,
+		to,
+		...queryParams
+	}: {
+		asset: EscrowDid.Asset;
+		amount: bigint;
+		to: EscrowDid.Account;
+	} & QueryParams): Promise<bigint> => {
+		const { admin_treasury_withdraw } = this.caller(queryParams);
+
+		return unwrap(await admin_treasury_withdraw({ asset, amount, to }), 'withdraw from treasury');
+	};
+
 	consentDeal = async ({
 		dealId,
 		...queryParams
