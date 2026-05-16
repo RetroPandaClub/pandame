@@ -257,6 +257,8 @@
 			"reject": "Decline",
 			"cancel": "Cancel",
 			"accept": "Accept",
+			"confirm_completion": "Confirm completion",
+			"reject_completion": "Reject completion",
 			"reclaim": "Reclaim",
 			"dispute": "Dispute",
 			"view_dispute": "View dispute"

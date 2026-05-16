@@ -79,6 +79,28 @@ export class EscrowCanister extends Canister<EscrowService> {
 		);
 	};
 
+	signYes = async ({
+		dealId,
+		...queryParams
+	}: {
+		dealId: bigint;
+	} & QueryParams): Promise<EscrowDid.DealView> => {
+		const { sign_yes } = this.caller(queryParams);
+
+		return unwrap(await sign_yes({ deal_id: dealId }), 'sign yes on deal');
+	};
+
+	signNo = async ({
+		dealId,
+		...queryParams
+	}: {
+		dealId: bigint;
+	} & QueryParams): Promise<EscrowDid.DealView> => {
+		const { sign_no } = this.caller(queryParams);
+
+		return unwrap(await sign_no({ deal_id: dealId }), 'sign no on deal');
+	};
+
 	consentDeal = async ({
 		dealId,
 		...queryParams

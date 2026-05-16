@@ -273,6 +273,8 @@ interface I18nDeals {
 		reject: string;
 		cancel: string;
 		accept: string;
+		confirm_completion: string;
+		reject_completion: string;
 		reclaim: string;
 		dispute: string;
 		view_dispute: string;

@@ -54,3 +54,18 @@ export const ConsentStates = {
 } as const;
 
 export type ConsentState = (typeof ConsentStates)[keyof typeof ConsentStates];
+
+/**
+ * Two-party settlement vote on a `Funded` bound deal. `Empty` is the
+ * pre-sign default; once both parties have a non-empty signature the
+ * canister tallies (`Yes`/`Yes` → `Settled`, `No`/`No` → `Aborted`,
+ * mixed → auto-`Disputed`). Tip flows carry `Empty` forever — the
+ * signing endpoints reject tips with `DisputeRequiresBoundRecipient`.
+ */
+export const SignatureStates = {
+	Empty: 'Empty',
+	Yes: 'Yes',
+	No: 'No'
+} as const;
+
+export type SignatureState = (typeof SignatureStates)[keyof typeof SignatureStates];

@@ -97,7 +97,7 @@ one fits.
 - `AppBottomNav.svelte` — wires `BottomNav` to /transactions · / · /profile.
 - `Auth.svelte` — behaviour-only: subscribes to `onAuthStateChange` and bootstraps `profileStore` via `ensureProfile` after sign-in.
 - `AuthGuard.svelte` — behaviour-only redirect guard for logged-in routes.
-- `DealActions.svelte` — context-aware action bar (Consent / Reject / Cancel / Accept / Reclaim / Dispute).
+- `DealActions.svelte` — context-aware action bar (Consent / Reject / Cancel / Confirm completion / Reject completion / Accept (tip only) / Reclaim / Dispute).
 - `DealCard.svelte` — single-deal preview (purple title bar + status icon + signed amount + countdown + optional inline `actions` snippet).
 - `DealStatusIcon.svelte` — 24 px circular status badge (check / cross / dot / swap / refresh).
 - `DealsTable.svelte` — list wrapper (loading / empty / `<ul>` of `DealCard` links).

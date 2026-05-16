@@ -5,19 +5,21 @@
 	import { EscrowCanisterError } from '$lib/canisters/escrow.canister';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { ConsentStates, DealStatuses } from '$lib/enums/deal-status';
+	import { ConsentStates, DealStatuses, SignatureStates } from '$lib/enums/deal-status';
 	import {
 		acceptDeal,
 		cancelDeal,
 		consentDeal,
 		reclaimDeal,
-		rejectDeal
+		rejectDeal,
+		signNo,
+		signYes
 	} from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userStore } from '$lib/stores/user.store';
 	import type { Deal, DealSide } from '$lib/types/deal';
-	import { consentState, dealStatus, sideOf } from '$lib/utils/deal.utils';
+	import { consentState, dealStatus, sideOf, signatureState } from '$lib/utils/deal.utils';
 	import { friendlyEscrowError } from '$lib/utils/escrow-error.utils';
 
 	interface Props {
@@ -39,6 +41,14 @@
 				? consentState(deal.recipient_consent)
 				: undefined
 	);
+	let mySignature = $derived(
+		mySide === 'payer'
+			? signatureState(deal.payer_signature)
+			: mySide === 'recipient'
+				? signatureState(deal.recipient_signature)
+				: undefined
+	);
+	let isBound = $derived(fromNullable(deal.recipient) !== undefined);
 	let nowNs = $state(BigInt(Date.now()) * 1_000_000n);
 
 	$effect(() => {
@@ -59,7 +69,22 @@
 		mySide !== 'unknown' && status === DealStatuses.Created && myConsent !== ConsentStates.Rejected
 	);
 	const canCancel = $derived(mySide !== 'unknown' && status === DealStatuses.Created);
-	const canAccept = $derived(mySide === 'recipient' && status === DealStatuses.Funded);
+	// Escrow v0.0.7 two-signature tally: on a `Funded` bound deal,
+	// either party signs `Yes` / `No`. Both `Yes` → `Settled`; both
+	// `No` → `Aborted`; mixed → auto-`Disputed`. We hide both buttons
+	// once the caller has already signed (re-signing is allowed by the
+	// canister but latest-wins UX is confusing).
+	const canSign = $derived(
+		isBound &&
+			mySide !== 'unknown' &&
+			status === DealStatuses.Funded &&
+			mySignature === SignatureStates.Empty
+	);
+	// Legacy single-click "Accept" remains for the **tip** branch only —
+	// the unbound recipient claims via the `/claim/[deal_id]` route and
+	// `accept_deal` binds them + settles atomically. Bound recipients
+	// go through `signYes` / `signNo` above.
+	const canAccept = $derived(!isBound && mySide === 'recipient' && status === DealStatuses.Funded);
 	const canReclaim = $derived(mySide === 'payer' && status === DealStatuses.Funded && expired);
 	// Disputes require a bound recipient (canister rejects open-recipient
 	// tip-flow deals via `DisputeRequiresBoundRecipient`). We mirror that
@@ -95,6 +120,8 @@
 	const onReject = () => wrap('rejectDeal', () => rejectDeal({ dealId: deal.id }));
 	const onCancel = () => wrap('cancelDeal', () => cancelDeal({ dealId: deal.id }));
 	const onAccept = () => wrap('acceptDeal', () => acceptDeal({ dealId: deal.id }));
+	const onSignYes = () => wrap('signYes', () => signYes({ dealId: deal.id }));
+	const onSignNo = () => wrap('signNo', () => signNo({ dealId: deal.id }));
 	const onReclaim = () => wrap('reclaimDeal', () => reclaimDeal({ dealId: deal.id }));
 
 	const onOpenDispute = () => goto(`/deals/${deal.id}/dispute`);
@@ -122,6 +149,14 @@
 	{/if}
 	{#if canCancel}
 		<Button onclick={onCancel} disabled={progress}>{$i18n.deals.actions.cancel}</Button>
+	{/if}
+	{#if canSign}
+		<Button onclick={onSignYes} disabled={progress}>
+			{$i18n.deals.actions.confirm_completion}
+		</Button>
+		<Button variant="secondary" onclick={onSignNo} disabled={progress}>
+			{$i18n.deals.actions.reject_completion}
+		</Button>
 	{/if}
 	{#if canAccept}
 		<Button onclick={onAccept} disabled={progress}>{$i18n.deals.actions.accept}</Button>

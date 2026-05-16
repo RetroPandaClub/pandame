@@ -19,6 +19,7 @@ export type DealError = EscrowDid.EscrowError;
  */
 export type DealStatusKey = keyof EscrowDid.DealStatus;
 export type ConsentKey = keyof EscrowDid.Consent;
+export type SignatureKey = keyof EscrowDid.Signature;
 
 /**
  * Side of the deal a given principal is on. `unknown` covers the case

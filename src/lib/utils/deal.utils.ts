@@ -2,9 +2,17 @@ import {
 	ConsentStates,
 	TERMINAL_DEAL_STATUSES,
 	type ConsentState,
-	type DealStatusName
+	type DealStatusName,
+	type SignatureState
 } from '$lib/enums/deal-status';
-import type { ClaimableDeal, ConsentKey, Deal, DealSide, DealStatusKey } from '$lib/types/deal';
+import type {
+	ClaimableDeal,
+	ConsentKey,
+	Deal,
+	DealSide,
+	DealStatusKey,
+	SignatureKey
+} from '$lib/types/deal';
 import { variantKey } from '$lib/utils/variant.utils';
 import { fromNullable } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -15,6 +23,13 @@ export const dealStatus = (
 
 export const consentState = (consent: Deal['payer_consent']): ConsentState =>
 	variantKey<ConsentKey>(consent) as ConsentState;
+
+/**
+ * Narrows a `Signature` variant (`Empty` / `Yes` / `No`) into a typed
+ * key for ergonomic switch/match against [`SignatureStates`].
+ */
+export const signatureState = (signature: Deal['payer_signature']): SignatureState =>
+	variantKey<SignatureKey>(signature) as SignatureState;
 
 export const isTerminal = (status: DealStatusName): boolean =>
 	TERMINAL_DEAL_STATUSES.includes(status);

@@ -34,6 +34,32 @@ export const acceptDeal = async ({
 	return await acceptDeal({ dealId, claimCode, ...queryParams });
 };
 
+export const signYes = async ({
+	identity,
+	dealId,
+	...queryParams
+}: {
+	identity: Identity;
+	dealId: bigint;
+} & QueryParams): Promise<EscrowDid.DealView> => {
+	const { signYes } = await escrowCanister({ identity });
+
+	return await signYes({ dealId, ...queryParams });
+};
+
+export const signNo = async ({
+	identity,
+	dealId,
+	...queryParams
+}: {
+	identity: Identity;
+	dealId: bigint;
+} & QueryParams): Promise<EscrowDid.DealView> => {
+	const { signNo } = await escrowCanister({ identity });
+
+	return await signNo({ dealId, ...queryParams });
+};
+
 export const consentDeal = async ({
 	identity,
 	dealId,

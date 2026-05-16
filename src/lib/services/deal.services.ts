@@ -87,6 +87,15 @@ export const createAndFundDeal = async (
 /**
  * Accept a funded deal — the recipient's claim path. For open (unbound)
  * deals the `claimCode` is required.
+ *
+ * In escrow `v0.0.7` the canister's `accept_deal` for bound recipients
+ * routes through `sign_yes` (so it only flips `recipient_signature`
+ * to `Yes`; settlement happens once the payer also signs `Yes` or the
+ * auto-YES expiry sweep fires). For tip flows (unbound recipient with
+ * `claim_code`), `accept_deal` still binds the recipient and settles
+ * the deal atomically. Bound-deal UIs should prefer `signYes` /
+ * `signNo` directly for clarity — `acceptDeal` stays for the public
+ * `/claim/[deal_id]` tip-claim flow.
  */
 export const acceptDeal = async ({
 	dealId,
@@ -98,6 +107,31 @@ export const acceptDeal = async ({
 	const identity = await safeGetIdentityOnce();
 
 	return await escrowApi.acceptDeal({ identity, dealId, claimCode });
+};
+
+/**
+ * Records the caller's `Yes` settlement signature on a `Funded` bound
+ * deal. Once both parties have signed `Yes` the canister atomically
+ * tallies to `Settled`; a `Yes` vs `No` mix auto-opens a dispute. The
+ * caller must be the payer or recipient — tip flows trap with
+ * `DisputeRequiresBoundRecipient`.
+ */
+export const signYes = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
+	const identity = await safeGetIdentityOnce();
+
+	return await escrowApi.signYes({ identity, dealId });
+};
+
+/**
+ * Records the caller's `No` settlement signature on a `Funded` bound
+ * deal. Both parties on `No` collapses the deal to `Aborted` (refund
+ * to payer); a `Yes` vs `No` mix auto-opens a dispute. Same caller /
+ * tip / re-sign semantics as [`signYes`].
+ */
+export const signNo = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
+	const identity = await safeGetIdentityOnce();
+
+	return await escrowApi.signNo({ identity, dealId });
 };
 
 /**
