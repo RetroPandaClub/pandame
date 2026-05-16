@@ -205,6 +205,13 @@ interface I18nDetail {
 	funded_at: string;
 	consent_payer: string;
 	consent_recipient: string;
+	signature_payer: string;
+	signature_recipient: string;
+	signature_empty: string;
+	signature_yes: string;
+	signature_no: string;
+	waiting_on_payer: string;
+	waiting_on_recipient: string;
 	note_label: string;
 	loading: string;
 	not_found: string;
@@ -281,6 +288,8 @@ interface I18nDeals {
 	};
 	status: {
 		refunded: string;
+		aborted: string;
+		aborted_description: string;
 		disputed: string;
 		arbitrated_settled: string;
 		arbitrated_refunded: string;

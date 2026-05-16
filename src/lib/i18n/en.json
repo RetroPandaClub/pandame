@@ -192,6 +192,13 @@
 		"funded_at": "Funded",
 		"consent_payer": "Payer consent",
 		"consent_recipient": "Recipient consent",
+		"signature_payer": "Payer signature",
+		"signature_recipient": "Recipient signature",
+		"signature_empty": "Not signed",
+		"signature_yes": "Confirmed completion",
+		"signature_no": "Rejected completion",
+		"waiting_on_payer": "Waiting on the payer to sign before the deal can settle.",
+		"waiting_on_recipient": "Waiting on the recipient to sign before the deal can settle.",
 		"note_label": "Note",
 		"loading": "Loading the deal…",
 		"not_found": "We couldn't find this deal under your principal.",
@@ -265,6 +272,8 @@
 		},
 		"status": {
 			"refunded": "Refunded",
+			"aborted": "Aborted",
+			"aborted_description": "Both parties rejected completion — the funds have been refunded to the payer.",
 			"disputed": "Disputed",
 			"arbitrated_settled": "Arbitrated · settled",
 			"arbitrated_refunded": "Arbitrated · refunded"

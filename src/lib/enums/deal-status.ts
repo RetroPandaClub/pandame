@@ -9,6 +9,7 @@ export const DealStatuses = {
 	Refunded: 'Refunded',
 	Cancelled: 'Cancelled',
 	Rejected: 'Rejected',
+	Aborted: 'Aborted',
 	Disputed: 'Disputed',
 	ArbitratedSettled: 'ArbitratedSettled',
 	ArbitratedRefunded: 'ArbitratedRefunded'
@@ -19,13 +20,15 @@ export type DealStatusName = (typeof DealStatuses)[keyof typeof DealStatuses];
 /**
  * Terminal statuses — no further state transitions possible. Includes
  * the two arbitrated terminals introduced by the dispute-resolution
- * lifecycle (RFC-001).
+ * lifecycle (RFC-001) and `Aborted` from the v0.0.7 two-signature
+ * tally (both parties signed `No` → refund to payer).
  */
 export const TERMINAL_DEAL_STATUSES: readonly DealStatusName[] = [
 	DealStatuses.Settled,
 	DealStatuses.Refunded,
 	DealStatuses.Cancelled,
 	DealStatuses.Rejected,
+	DealStatuses.Aborted,
 	DealStatuses.ArbitratedSettled,
 	DealStatuses.ArbitratedRefunded
 ];
@@ -40,10 +43,14 @@ export const SETTLED_DEAL_STATUSES: readonly DealStatusName[] = [
 ];
 
 /**
- * Statuses that count as a "returned to payer" outcome.
+ * Statuses that count as a "returned to payer" outcome. `Aborted`
+ * (mutual two-signature `No`) lives here too — from the user's PoV
+ * "both parties refused completion → refund" is the same bucket as
+ * expiry-refund or arbitrated-refund.
  */
 export const REFUNDED_DEAL_STATUSES: readonly DealStatusName[] = [
 	DealStatuses.Refunded,
+	DealStatuses.Aborted,
 	DealStatuses.ArbitratedRefunded
 ];
 

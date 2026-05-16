@@ -20,6 +20,10 @@
 	//                        terminal flavour as Settled)
 	//   Rejected           = red cross
 	//   Cancelled          = muted cross (less alarming than rejection)
+	//   Aborted            = warning cross (mutual two-signature `No` →
+	//                        refund; distinct from Refunded so users
+	//                        can see "both parties agreed to abort" at
+	//                        a glance)
 	//   Refunded           = warning dot
 	//   ArbitratedRefunded = warning dot (arbitrated IC / no-quorum
 	//                        outcome — funds back to payer)
@@ -31,6 +35,7 @@
 		[DealStatuses.ArbitratedSettled]: { class: 'bg-success', glyph: 'check' },
 		[DealStatuses.Rejected]: { class: 'bg-danger', glyph: 'cross' },
 		[DealStatuses.Cancelled]: { class: 'bg-muted', glyph: 'cross' },
+		[DealStatuses.Aborted]: { class: 'bg-warning', glyph: 'cross' },
 		[DealStatuses.Refunded]: { class: 'bg-warning', glyph: 'dot' },
 		[DealStatuses.ArbitratedRefunded]: { class: 'bg-warning', glyph: 'dot' },
 		[DealStatuses.Funded]: { class: 'bg-bg-elevated', glyph: 'swap' },

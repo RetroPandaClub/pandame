@@ -16,11 +16,12 @@
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { userPrincipalText } from '$lib/derived/user.derived';
+	import { DealStatuses, SignatureStates, type SignatureState } from '$lib/enums/deal-status';
 	import { getDeal } from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal, DealSide } from '$lib/types/deal';
-	import { consentState, dealStatus, sideOf } from '$lib/utils/deal.utils';
+	import { consentState, dealStatus, sideOf, signatureState } from '$lib/utils/deal.utils';
 	import { nsToDate, shortPrincipal } from '$lib/utils/format.utils';
 
 	let dealId = $derived(parseDealId(page.params.deal_id ?? ''));
@@ -95,6 +96,42 @@
 
 		return ns === undefined ? undefined : nsToDate(ns);
 	});
+
+	let payerSignature = $derived.by(() =>
+		deal === undefined ? undefined : signatureState(deal.payer_signature)
+	);
+	let recipientSignature = $derived.by(() =>
+		deal === undefined ? undefined : signatureState(deal.recipient_signature)
+	);
+
+	// "Waiting on …" callout fires only on Funded bound deals where
+	// exactly one side has signed. Tip flows always carry `Empty` and
+	// terminal states have nothing to wait on. Mirrors the upstream
+	// auto-YES tally rule (a single `Yes` doesn't settle on its own —
+	// the counterparty must also sign).
+	let waitingOnPayer = $derived(
+		status === DealStatuses.Funded &&
+			recipientSignature !== undefined &&
+			recipientSignature !== SignatureStates.Empty &&
+			payerSignature === SignatureStates.Empty
+	);
+	let waitingOnRecipient = $derived(
+		status === DealStatuses.Funded &&
+			payerSignature !== undefined &&
+			payerSignature !== SignatureStates.Empty &&
+			recipientSignature === SignatureStates.Empty
+	);
+
+	const signatureLabel = (s: SignatureState): string => {
+		switch (s) {
+			case SignatureStates.Yes:
+				return $i18n.detail.signature_yes;
+			case SignatureStates.No:
+				return $i18n.detail.signature_no;
+			case SignatureStates.Empty:
+				return $i18n.detail.signature_empty;
+		}
+	};
 
 	function parseDealId(text: string): bigint | undefined {
 		try {
@@ -213,6 +250,18 @@
 					{consentState(deal.recipient_consent).toLowerCase()}
 				</dd>
 			</div>
+			{#if payerSignature !== undefined}
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.detail.signature_payer}</dt>
+					<dd class="text-body2 text-default">{signatureLabel(payerSignature)}</dd>
+				</div>
+			{/if}
+			{#if recipientSignature !== undefined}
+				<div class="flex items-baseline justify-between">
+					<dt class="text-body2 text-muted">{$i18n.detail.signature_recipient}</dt>
+					<dd class="text-body2 text-default">{signatureLabel(recipientSignature)}</dd>
+				</div>
+			{/if}
 			<div class="flex items-baseline justify-between">
 				<dt class="text-body2 text-muted">{$i18n.deals.row.your_role}</dt>
 				<dd class="text-body2 text-default capitalize">{mySide}</dd>
@@ -228,6 +277,31 @@
 				</dd>
 			</div>
 		</div>
+
+		{#if waitingOnPayer}
+			<p
+				class="border-border-soft bg-bg-soft text-body2 text-default rounded-xl border px-4 py-3"
+				role="status"
+			>
+				{$i18n.detail.waiting_on_payer}
+			</p>
+		{:else if waitingOnRecipient}
+			<p
+				class="border-border-soft bg-bg-soft text-body2 text-default rounded-xl border px-4 py-3"
+				role="status"
+			>
+				{$i18n.detail.waiting_on_recipient}
+			</p>
+		{/if}
+
+		{#if status === DealStatuses.Aborted}
+			<p
+				class="border-warning bg-warning/10 text-body2 text-default rounded-xl border px-4 py-3"
+				role="status"
+			>
+				{$i18n.deals.status.aborted_description}
+			</p>
+		{/if}
 
 		{#if note !== undefined}
 			<div class="border-border-soft bg-bg-elevated flex flex-col gap-2 rounded-xl border p-4">
