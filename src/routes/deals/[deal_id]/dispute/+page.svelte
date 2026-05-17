@@ -14,7 +14,7 @@
 	import EvidenceForm from '$lib/components/EvidenceForm.svelte';
 	import EvidenceList from '$lib/components/EvidenceList.svelte';
 	import VotePicker from '$lib/components/VotePicker.svelte';
-	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import { userPrincipalText } from '$lib/derived/user.derived';
 	import { DisputePhases, type VoteName } from '$lib/enums/dispute';
 	import { getDeal } from '$lib/services/deal.services';
@@ -362,7 +362,7 @@
 			<div class="flex items-baseline justify-between">
 				<dt class="text-body2 text-muted">{$i18n.dispute.field_arbitration_fee}</dt>
 				<dd class="text-body2 text-default">
-					{formatTokenAmount(dispute.arbitration_fee, ICP_TOKEN)}
+					{formatTokenAmount(dispute.arbitration_fee, SETTLEMENT_TOKEN)}
 				</dd>
 			</div>
 			<div class="flex items-baseline justify-between">

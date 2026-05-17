@@ -56,7 +56,7 @@
 | `IconButton`            | Square / circular icon-only button. Variants `primary` / `secondary` / `ghost` / `floating` (white card with soft shadow). Sizes sm / md / lg.                                                                                                                                                                                                                                                                   |
 | `InfoLink`              | "Do you need help?" — info icon + Poppins Light 15 px purple. Renders as `<a>` if `href` given.                                                                                                                                                                                                                                                                                                                  |
 | `Modal`                 | Generic dialog shell (title + children + footer + Esc to close). Prefer `LogoutConfirmModal` for the Figma-spec sign-out dialog.                                                                                                                                                                                                                                                                                 |
-| `Money`                 | Formatted token amount via `formatTokenAmount`. Props: `signed`, `colorize`, `size`, `token` (defaults to `ICP_TOKEN`).                                                                                                                                                                                                                                                                                          |
+| `Money`                 | Formatted token amount via `formatTokenAmount`. Props: `signed`, `colorize`, `size`, `token` (defaults to `SETTLEMENT_TOKEN`).                                                                                                                                                                                                                                                                                   |
 | `PandaBotAvatar`        | Lavender disc with the panda silhouette (chat-bubble face). Sizes sm 40 / md 60 / lg 76 px. Different chrome from `PandaMark` (full circle vs squircle).                                                                                                                                                                                                                                                         |
 | `PandaMark`             | Brand mark: panda silhouette inside a soft lavender squircle, sourced from `static/brand/panda.png`. Sizes sm / md / lg / xl. The hero variant on the welcome screen is built inline — don't extend `PandaMark`.                                                                                                                                                                                                 |
 | `ProfileFieldRow`       | Label-left / green-value-right inline-editable row. Click to edit, Enter commits, Esc cancels, blur commits. Used by `/profile`.                                                                                                                                                                                                                                                                                 |
@@ -147,13 +147,13 @@ Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 
 ### Constants — `$lib/constants/`
 
-| File                    | Notes                                                                  |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `app.constants`         | `REPLICA_HOST`, `ZERO`, ms / ns time scales, `II_MAX_TIME_TO_LIVE_NS`. |
-| `canisters.constants`   | `ESCROW_CANISTER_ID`, `ICP_LEDGER_CANISTER_ID`.                        |
-| `tokens.constants`      | `ICP_TOKEN`, `SUPPORTED_TOKENS` list.                                  |
-| `routes.constants`      | `CLAIM_ROUTE`, `SHARE_URL` builders for the QR / share-link flow.      |
-| `collections.constants` | `Collection.PROFILES` — Juno datastore collection key registry.        |
+| File                    | Notes                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `app.constants`         | `REPLICA_HOST`, `ZERO`, ms / ns time scales, `II_MAX_TIME_TO_LIVE_NS`.                            |
+| `canisters.constants`   | `ESCROW_CANISTER_ID`, `ICP_LEDGER_CANISTER_ID`, `TESTICP_LEDGER_CANISTER_ID`.                     |
+| `tokens.constants`      | `ICP_TOKEN`, `TESTICP_TOKEN`, `SETTLEMENT_TOKEN` (env-resolved default), `SUPPORTED_TOKENS` list. |
+| `routes.constants`      | `CLAIM_ROUTE`, `SHARE_URL` builders for the QR / share-link flow.                                 |
+| `collections.constants` | `Collection.PROFILES` — Juno datastore collection key registry.                                   |
 
 ### Enums — `$lib/enums/`
 

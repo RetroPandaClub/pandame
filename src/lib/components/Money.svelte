@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import type { Token } from '$lib/types/token';
 	import { formatTokenAmount } from '$lib/utils/format.utils';
 
@@ -14,7 +14,7 @@
 
 	let {
 		amount,
-		token = ICP_TOKEN,
+		token = SETTLEMENT_TOKEN,
 		signed = false,
 		colorize = false,
 		size = 'md',

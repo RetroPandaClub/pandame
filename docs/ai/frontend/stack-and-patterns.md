@@ -125,7 +125,7 @@ export const createAndFundDeal = async (
 	request: CreateDealRequest
 ): Promise<{ created: EscrowDid.DealView; funded: EscrowDid.DealView }> => {
 	const identity = await safeGetIdentityOnce();
-	const token = request.token ?? ICP_TOKEN;
+	const token = request.token ?? SETTLEMENT_TOKEN;
 
 	const created = await escrowApi.createDeal({ identity, params: { …request } });
 
@@ -216,10 +216,17 @@ export const createAndFundDeal = async (
   default subaccount — `spender_subaccount = None` in
   `src/escrow/src/ledger.rs` upstream.
 
-- Pandame ships a single token today (`ICP_TOKEN`,
-  `ryjl3-tyaaa-aaaaa-aaaba-cai`, 8 decimals, fee 10_000 e8s). Add new
-  tokens to `$lib/constants/tokens.constants.ts` (and call out the
-  reason in the PR), don't sprinkle hex literals across the codebase.
+- Pandame ships a single settlement token (`SETTLEMENT_TOKEN`, 8
+  decimals, fee 10_000 e8s) that resolves to real ICP
+  (`ryjl3-tyaaa-aaaaa-aaaba-cai`) under `vite dev` / `vitest` and to
+  TESTICP (`xafvr-biaaa-aaaai-aql5q-cai`, from
+  [`dfinity/ledger-faucet`](https://github.com/dfinity/ledger-faucet))
+  in any built artifact — so deployed satellites can exercise the
+  full escrow flow without moving real ICP. Production code should
+  import `SETTLEMENT_TOKEN`; tests can pin `ICP_TOKEN` directly when
+  they assert ICP-specific math. Add new tokens to
+  `$lib/constants/tokens.constants.ts` (and call out the reason in the
+  PR), don't sprinkle hex literals across the codebase.
 
 ## Tailwind v4 + design tokens
 

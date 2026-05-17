@@ -12,7 +12,7 @@
 	import Sheet from '$lib/components/Sheet.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
-	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import { ArbitratorStatuses, type ArbitratorStatusName } from '$lib/enums/arbitrator';
 	import {
 		adminRegisterArbitrator,
@@ -38,9 +38,10 @@
 
 	// Treasury panel — anti-spam `creation_fee` collected on every bound
 	// deal accumulates in the canister-owned treasury subaccount per
-	// settlement ledger. Today only ICP is supported; multi-asset is a
-	// matter of iterating `treasuryBalance({ token })` per `Token`.
-	const treasuryToken = ICP_TOKEN;
+	// settlement ledger. Today only one settlement token is supported;
+	// multi-asset is a matter of iterating `treasuryBalance({ token })`
+	// per `Token`.
+	const treasuryToken = SETTLEMENT_TOKEN;
 	let treasuryAmount: bigint | undefined = $state(undefined);
 	let treasuryLoading = $state(false);
 	let treasuryNotice: string | undefined = $state(undefined);

@@ -21,3 +21,12 @@ const ICP_LEDGER_CANISTER_ID_DEFAULT = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 
 export const ICP_LEDGER_CANISTER_ID =
 	viteEnvString('VITE_ICP_LEDGER_CANISTER_ID') ?? ICP_LEDGER_CANISTER_ID_DEFAULT;
+
+// Test ICP ledger from https://github.com/dfinity/ledger-faucet — a
+// mainnet-deployed clone of the ICP ledger backed by a faucet so
+// deployed satellites can exercise the full escrow + ICRC-2 flow
+// without moving real ICP.
+const TESTICP_LEDGER_CANISTER_ID_DEFAULT = 'xafvr-biaaa-aaaai-aql5q-cai';
+
+export const TESTICP_LEDGER_CANISTER_ID =
+	viteEnvString('VITE_TESTICP_LEDGER_CANISTER_ID') ?? TESTICP_LEDGER_CANISTER_ID_DEFAULT;

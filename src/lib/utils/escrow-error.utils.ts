@@ -1,5 +1,5 @@
 import { EscrowCanisterError } from '$lib/canisters/escrow.canister';
-import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 import type { Token } from '$lib/types/token';
 import { formatTokenAmount } from '$lib/utils/format.utils';
 
@@ -8,7 +8,7 @@ import { formatTokenAmount } from '$lib/utils/format.utils';
 export const friendlyEscrowError = (
 	error: EscrowCanisterError,
 	t: I18n,
-	token: Token = ICP_TOKEN
+	token: Token = SETTLEMENT_TOKEN
 ): string => {
 	const v = error.variant;
 

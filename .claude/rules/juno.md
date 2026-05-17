@@ -69,13 +69,15 @@ push deal state into Juno.
 
 ## Canister + ledger configuration
 
-| Constant                 | Where                                   | Value                         |
-| ------------------------ | --------------------------------------- | ----------------------------- |
-| `ESCROW_CANISTER_ID`     | `$lib/constants/canisters.constants.ts` | `umxj5-niaaa-aaaae-af2sq-cai` |
-| `ICP_LEDGER_CANISTER_ID` | `$lib/constants/canisters.constants.ts` | `ryjl3-tyaaa-aaaaa-aaaba-cai` |
-| `ICP_TOKEN`              | `$lib/constants/tokens.constants.ts`    | 8 decimals, fee 10_000 e8s    |
-| Juno satellite (hosting) | `juno.config.ts`                        | `wqhtf-fqaaa-aaaal-amssq-cai` |
-| Juno orbiter (analytics) | `juno.config.ts`                        | `gfpjj-5iaaa-aaaal-amr4a-cai` |
+| Constant                      | Where                                   | Value                                                                          |
+| ----------------------------- | --------------------------------------- | ------------------------------------------------------------------------------ |
+| `ESCROW_CANISTER_ID`          | `$lib/constants/canisters.constants.ts` | `umxj5-niaaa-aaaae-af2sq-cai`                                                  |
+| `ICP_LEDGER_CANISTER_ID`      | `$lib/constants/canisters.constants.ts` | `ryjl3-tyaaa-aaaaa-aaaba-cai`                                                  |
+| `TESTICP_LEDGER_CANISTER_ID`  | `$lib/constants/canisters.constants.ts` | `xafvr-biaaa-aaaai-aql5q-cai` (https://github.com/dfinity/ledger-faucet)       |
+| `ICP_TOKEN` / `TESTICP_TOKEN` | `$lib/constants/tokens.constants.ts`    | 8 decimals, fee 10_000 e8s                                                     |
+| `SETTLEMENT_TOKEN`            | `$lib/constants/tokens.constants.ts`    | active default — `ICP_TOKEN` under `vite dev` / `vitest`, else `TESTICP_TOKEN` |
+| Juno satellite (hosting)      | `juno.config.ts`                        | `wqhtf-fqaaa-aaaal-amssq-cai`                                                  |
+| Juno orbiter (analytics)      | `juno.config.ts`                        | `gfpjj-5iaaa-aaaal-amr4a-cai`                                                  |
 
 ## Local development
 
