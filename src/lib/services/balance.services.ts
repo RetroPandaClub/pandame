@@ -1,14 +1,17 @@
 import * as ledgerApi from '$lib/api/icrc-ledger.api';
-import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 import { safeGetIdentityOnce } from '$lib/services/identity.services';
 import type { Token } from '$lib/types/token';
 
 /**
- * Fetch the caller's balance on the given token's ledger (defaults to ICP).
- * Subaccount-less account — Internet Identity always uses the principal's
- * default subaccount in this app.
+ * Fetch the caller's balance on the given token's ledger (defaults to
+ * the active settlement token — see `SETTLEMENT_TOKEN`). Subaccount-less
+ * account: Internet Identity always uses the principal's default
+ * subaccount in this app.
  */
-export const myBalance = async ({ token = ICP_TOKEN }: { token?: Token } = {}): Promise<bigint> => {
+export const myBalance = async ({
+	token = SETTLEMENT_TOKEN
+}: { token?: Token } = {}): Promise<bigint> => {
 	const identity = await safeGetIdentityOnce();
 
 	return await ledgerApi.balance({

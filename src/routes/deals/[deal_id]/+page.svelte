@@ -14,7 +14,7 @@
 	import DealStatusIcon from '$lib/components/DealStatusIcon.svelte';
 	import Money from '$lib/components/Money.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
-	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import { userPrincipalText } from '$lib/derived/user.derived';
 	import { DealStatuses, SignatureStates, type SignatureState } from '$lib/enums/deal-status';
 	import { getDeal } from '$lib/services/deal.services';
@@ -180,7 +180,7 @@
 		<div
 			class="border-border-soft bg-bg-soft flex items-center justify-between rounded-xl border p-4"
 		>
-			<span class="text-body1 text-default font-semibold">{ICP_TOKEN.name}</span>
+			<span class="text-body1 text-default font-semibold">{SETTLEMENT_TOKEN.name}</span>
 			<Money amount={deal.amount} size="lg" />
 		</div>
 

@@ -19,7 +19,7 @@
 	import UploadCTA from '$lib/components/UploadCTA.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import { PANEL_SIZE_DEFAULT } from '$lib/constants/dispute.constants';
-	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import { createAndFundDeal, DEFAULT_CREATION_FEE } from '$lib/services/deal.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -46,7 +46,7 @@
 	let error: string | undefined = $state(undefined);
 	let createdDeal: Deal | undefined = $state(undefined);
 
-	const token = ICP_TOKEN;
+	const token = SETTLEMENT_TOKEN;
 
 	let amount = $derived(parseTokenAmount(amountText, token));
 	let counterparty = $derived(parsePrincipal(counterpartyText));

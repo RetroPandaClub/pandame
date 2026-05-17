@@ -5,7 +5,7 @@
 	import Countdown from '$lib/components/Countdown.svelte';
 	import DealStatusIcon from '$lib/components/DealStatusIcon.svelte';
 	import Money from '$lib/components/Money.svelte';
-	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userStore } from '$lib/stores/user.store';
 	import type { Deal } from '$lib/types/deal';
@@ -66,7 +66,7 @@
 	</header>
 
 	<div class="flex items-baseline justify-between px-[18px] pt-[14px]">
-		<span class="text-default font-sans text-[16px] font-medium">{ICP_TOKEN.name}</span>
+		<span class="text-default font-sans text-[16px] font-medium">{SETTLEMENT_TOKEN.name}</span>
 		<Money amount={signedAmount} colorize signed size="md" />
 	</div>
 

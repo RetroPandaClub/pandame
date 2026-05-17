@@ -2,7 +2,7 @@ import type { EscrowDid } from '$declarations';
 import * as escrowApi from '$lib/api/escrow.api';
 import * as ledgerApi from '$lib/api/icrc-ledger.api';
 import { ESCROW_CANISTER_ID } from '$lib/constants/canisters.constants';
-import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 import { ConsentStates } from '$lib/enums/deal-status';
 import { safeGetIdentityOnce } from '$lib/services/identity.services';
 import type { Deal } from '$lib/types/deal';
@@ -41,7 +41,7 @@ export const createAndFundDeal = async (
 	request: CreateDealRequest
 ): Promise<{ created: EscrowDid.DealView; funded: EscrowDid.DealView }> => {
 	const identity = await safeGetIdentityOnce();
-	const token = request.token ?? ICP_TOKEN;
+	const token = request.token ?? SETTLEMENT_TOKEN;
 	const ledger = createdLedger(token);
 	const role = inferCreateRole(request);
 
@@ -196,7 +196,7 @@ export const getReliability = async ({
 };
 
 const createdLedger = (token?: Token): Principal =>
-	Principal.fromText((token ?? ICP_TOKEN).ledgerCanisterId);
+	Principal.fromText((token ?? SETTLEMENT_TOKEN).ledgerCanisterId);
 
 // Canister calls `icrc2_transfer_from` with no spender subaccount, so
 // allowances must target the default subaccount.

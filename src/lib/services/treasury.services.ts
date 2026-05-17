@@ -1,6 +1,6 @@
 import type { EscrowDid } from '$declarations';
 import * as escrowApi from '$lib/api/escrow.api';
-import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 import { safeGetIdentityOnce } from '$lib/services/identity.services';
 import type { Token } from '$lib/types/token';
 import { toNullable } from '@dfinity/utils';
@@ -18,7 +18,7 @@ const escrowAccount = (account: IcrcAccount): EscrowDid.Account => ({
 
 // Controller-gated; non-controllers trap with `NotAuthorised`.
 export const treasuryBalance = async ({
-	token = ICP_TOKEN
+	token = SETTLEMENT_TOKEN
 }: { token?: Token } = {}): Promise<bigint> => {
 	const identity = await safeGetIdentityOnce();
 
@@ -31,7 +31,7 @@ export const treasuryBalance = async ({
 export const treasuryWithdraw = async ({
 	to,
 	amount,
-	token = ICP_TOKEN
+	token = SETTLEMENT_TOKEN
 }: {
 	to: IcrcAccount;
 	amount: bigint;

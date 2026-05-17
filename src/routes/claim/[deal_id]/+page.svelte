@@ -11,7 +11,7 @@
 	import Login from '$lib/components/Login.svelte';
 	import Money from '$lib/components/Money.svelte';
 	import PandaMark from '$lib/components/PandaMark.svelte';
-	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import { userSignedIn } from '$lib/derived/user.derived';
 	import { acceptDeal, getClaimableDeal } from '$lib/services/deal.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -158,7 +158,7 @@
 			<dl class="border-border-soft flex flex-col gap-2 border-t pt-3">
 				<div class="flex items-baseline justify-between">
 					<dt class="text-body2 text-muted">{$i18n.deals.row.amount}</dt>
-					<dd><Money amount={preview.amount} token={ICP_TOKEN} size="lg" /></dd>
+					<dd><Money amount={preview.amount} token={SETTLEMENT_TOKEN} size="lg" /></dd>
 				</div>
 				<div class="flex items-baseline justify-between">
 					<dt class="text-body2 text-muted">{$i18n.deals.row.expires}</dt>
