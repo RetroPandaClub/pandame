@@ -288,4 +288,14 @@
 			 * once the dark theme is real. */
 		}
 	}
+
+	/* Tailwind v4's preflight dropped the default `cursor: pointer` on
+	 * buttons. Restore it so we don't sprinkle `cursor-pointer` everywhere.
+	 * `:disabled` only matches form elements, so we also exclude
+	 * `[aria-disabled='true']` / `[disabled]` for custom buttons. */
+	button:not(:disabled):not([aria-disabled='true']),
+	[role='button']:not([disabled]):not([aria-disabled='true']),
+	summary:not([aria-disabled='true']) {
+		cursor: pointer;
+	}
 }

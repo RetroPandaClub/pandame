@@ -114,8 +114,8 @@
 			onclick={startEdit}
 			disabled={!editable}
 			class="text-success font-serif-ui inline-flex items-center gap-[8px] text-[16px] leading-none font-medium tracking-[-0.32px] {editable
-				? 'cursor-pointer hover:opacity-80'
-				: 'cursor-default'}"
+				? 'hover:opacity-80'
+				: ''}"
 		>
 			<span class="max-w-[180px] truncate" {id}>{value || placeholder}</span>
 			{#if editable}
