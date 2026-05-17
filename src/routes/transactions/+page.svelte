@@ -27,17 +27,17 @@
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { disputesStore } from '$lib/stores/disputes.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Deal, DealSide } from '$lib/types/deal';
+	import type { Deal } from '$lib/types/deal';
 	import { consentState, dealStatus, sideOf, signatureState } from '$lib/utils/deal.utils';
 
-	type Tab = 'pending' | 'created' | 'disputed';
+	type Tab = 'pending' | 'active' | 'disputed';
 
-	const TABS: readonly Tab[] = ['pending', 'created', 'disputed'];
+	const TABS: readonly Tab[] = ['pending', 'active', 'disputed'];
 
 	const isTab = (value: string | null): value is Tab =>
 		value !== null && (TABS as readonly string[]).includes(value);
 
-	// Unrecognised values fall back to Pending so a stale link never throws.
+	// Stale `?tab=` links (including the legacy `?tab=created`) fall back to the default.
 	const initialTab = (): Tab => {
 		const raw = page.url.searchParams.get('tab');
 		return isTab(raw) ? raw : 'pending';
@@ -57,54 +57,76 @@
 		}
 	});
 
-	// Pending = the deal is waiting on me; Created = waiting on the
-	// other side. Each side acts twice (consent, then sign), so both
-	// gates feed both tabs.
+	// Open-deal buckets, sliced by lifecycle gate:
+	//   Pending  → `Created` (consent gate)
+	//   Active   → `Funded`  (signature gate)
+	// Terminal statuses (Settled / Refunded / Cancelled / …) live on the
+	// History page, not here.
 	const matches = (deal: Deal, t: Tab): boolean => {
-		const status = dealStatus(deal);
-		const side: DealSide = sideOf(deal, principal);
-		if (side === 'unknown') {
+		if (sideOf(deal, principal) === 'unknown') {
 			return false;
 		}
-
-		const myConsent =
-			side === 'payer' ? consentState(deal.payer_consent) : consentState(deal.recipient_consent);
-		const theirConsent =
-			side === 'payer' ? consentState(deal.recipient_consent) : consentState(deal.payer_consent);
-		const mySig =
-			side === 'payer'
-				? signatureState(deal.payer_signature)
-				: signatureState(deal.recipient_signature);
-		const theirSig =
-			side === 'payer'
-				? signatureState(deal.recipient_signature)
-				: signatureState(deal.payer_signature);
-
+		const status = dealStatus(deal);
 		switch (t) {
 			case 'pending':
-				if (status === DealStatuses.Created) {
-					return myConsent === ConsentStates.Pending;
-				}
-				if (status === DealStatuses.Funded) {
-					return mySig === SignatureStates.Empty;
-				}
-				return false;
-			case 'created':
-				if (status === DealStatuses.Created) {
-					return myConsent === ConsentStates.Accepted && theirConsent === ConsentStates.Pending;
-				}
-				if (status === DealStatuses.Funded) {
-					return mySig !== SignatureStates.Empty && theirSig === SignatureStates.Empty;
-				}
-				return false;
+				return status === DealStatuses.Created;
+			case 'active':
+				return status === DealStatuses.Funded;
 			case 'disputed':
-				// Disputes render straight from `disputesStore`, not from this filter.
+				// Disputes render from `disputesStore`, not from this filter.
 				return false;
 		}
 	};
 
-	let visibleDeals = $derived(($dealsStore ?? []).filter((deal) => matches(deal, tab)));
+	// Pending → freshest first (latest creation up top). Active → most
+	// urgent first (closest to expiry up top, so the user reacts before
+	// `expires_at_ns` triggers the auto-refund).
+	const compareBigInt = (a: bigint, b: bigint): number => (a < b ? -1 : a > b ? 1 : 0);
+
+	let visibleDeals = $derived.by(() => {
+		const filtered = ($dealsStore ?? []).filter((deal) => matches(deal, tab));
+		switch (tab) {
+			case 'pending':
+				return filtered.sort((a, b) => compareBigInt(b.created_at_ns, a.created_at_ns));
+			case 'active':
+				return filtered.sort((a, b) => compareBigInt(a.expires_at_ns, b.expires_at_ns));
+			default:
+				return filtered;
+		}
+	});
 	let visibleDisputes = $derived($disputesStore ?? []);
+
+	// `undefined` when the viewer isn't a party (public preview) — the
+	// card just won't expose any inline actions.
+	const myConsentOf = (deal: Deal) => {
+		const side = sideOf(deal, principal);
+		if (side === 'unknown') {
+			return undefined;
+		}
+		return side === 'payer'
+			? consentState(deal.payer_consent)
+			: consentState(deal.recipient_consent);
+	};
+
+	const theirConsentOf = (deal: Deal) => {
+		const side = sideOf(deal, principal);
+		if (side === 'unknown') {
+			return undefined;
+		}
+		return side === 'payer'
+			? consentState(deal.recipient_consent)
+			: consentState(deal.payer_consent);
+	};
+
+	const mySignatureOf = (deal: Deal) => {
+		const side = sideOf(deal, principal);
+		if (side === 'unknown') {
+			return undefined;
+		}
+		return side === 'payer'
+			? signatureState(deal.payer_signature)
+			: signatureState(deal.recipient_signature);
+	};
 
 	const reloadDeals = async () => {
 		try {
@@ -132,38 +154,25 @@
 		reload();
 	});
 
-	// `accept_deal` traps on `Created` (it routes to `sign_yes`, which
-	// needs a funded deal), so we split by lifecycle gate. Kept for the
-	// public claim flow only.
-	const approve = (deal: Deal) => async () => {
-		const status = dealStatus(deal);
+	const onConsent = (deal: Deal) => async () => {
 		try {
-			if (status === DealStatuses.Created) {
-				await consentDeal({ deal });
-			} else if (status === DealStatuses.Funded) {
-				await signYes({ dealId: deal.id });
-			}
+			await consentDeal({ deal });
 			await reloadDeals();
 		} catch (err) {
-			console.error('Failed to approve deal:', err);
+			console.error('Failed to consent deal:', err);
 		}
 	};
 
-	const decline = (deal: Deal) => async () => {
-		const status = dealStatus(deal);
+	const onReject = (deal: Deal) => async () => {
 		try {
-			if (status === DealStatuses.Created) {
-				await rejectDeal({ dealId: deal.id });
-			} else if (status === DealStatuses.Funded) {
-				await signNo({ dealId: deal.id });
-			}
+			await rejectDeal({ dealId: deal.id });
 			await reloadDeals();
 		} catch (err) {
-			console.error('Failed to decline deal:', err);
+			console.error('Failed to reject deal:', err);
 		}
 	};
 
-	const cancel = (deal: Deal) => async () => {
+	const onCancel = (deal: Deal) => async () => {
 		try {
 			await cancelDeal({ dealId: deal.id });
 			await reloadDeals();
@@ -172,15 +181,30 @@
 		}
 	};
 
-	// Cancel is only legal on `Created`; once Funded the equivalent is `sign_no`.
-	const showInlineCancel = (deal: Deal): boolean => dealStatus(deal) === DealStatuses.Created;
+	const onSignYes = (deal: Deal) => async () => {
+		try {
+			await signYes({ dealId: deal.id });
+			await reloadDeals();
+		} catch (err) {
+			console.error('Failed to confirm completion:', err);
+		}
+	};
+
+	const onSignNo = (deal: Deal) => async () => {
+		try {
+			await signNo({ dealId: deal.id });
+			await reloadDeals();
+		} catch (err) {
+			console.error('Failed to reject completion:', err);
+		}
+	};
 
 	let emptyDescription = $derived.by(() => {
 		switch (tab) {
 			case 'pending':
 				return $i18n.transactions.empty_pending;
-			case 'created':
-				return $i18n.transactions.empty_created;
+			case 'active':
+				return $i18n.transactions.empty_active;
 			case 'disputed':
 				return $i18n.transactions.empty_disputed;
 		}
@@ -210,7 +234,7 @@
 		ariaLabel="Transaction status"
 		tabs={[
 			{ id: 'pending', label: $i18n.transactions.tab_pending },
-			{ id: 'created', label: $i18n.transactions.tab_created },
+			{ id: 'active', label: $i18n.transactions.tab_active },
 			{ id: 'disputed', label: $i18n.transactions.tab_disputed }
 		]}
 	/>
@@ -229,49 +253,70 @@
 				</li>
 			{/each}
 		</ul>
-	{:else}
+	{:else if tab === 'pending'}
 		<ul class="flex flex-col gap-[16px]">
 			{#each visibleDeals as deal (deal.id)}
 				<li>
-					{#if tab === 'pending'}
-						<DealCard {deal} href={`/deals/${deal.id}`} showPanelSize>
-							{#snippet actions()}
+					<DealCard {deal} href={`/deals/${deal.id}`} showPanelSize>
+						{#snippet actions()}
+							{#if myConsentOf(deal) === ConsentStates.Pending}
 								<button
 									type="button"
-									onclick={approve(deal)}
+									onclick={onConsent(deal)}
 									class="bg-success text-default-inverse flex h-[24px] w-[58px] items-center justify-center rounded-[5px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
 								>
 									{$i18n.deals.actions.consent}
 								</button>
 								<button
 									type="button"
-									onclick={decline(deal)}
+									onclick={onReject(deal)}
 									class="bg-danger text-default-inverse flex h-[24px] w-[58px] items-center justify-center rounded-[5px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
 								>
 									{$i18n.deals.actions.reject}
 								</button>
-							{/snippet}
-						</DealCard>
-					{:else}
-						<DealCard {deal} href={`/deals/${deal.id}`}>
-							{#snippet actions()}
-								{#if showInlineCancel(deal)}
-									<button
-										type="button"
-										onclick={cancel(deal)}
-										class="bg-danger text-default-inverse flex h-[24px] w-[58px] items-center justify-center rounded-[5px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
-									>
-										{$i18n.deals.actions.cancel}
-									</button>
-								{:else}
-									<UploadCTA
-										label="Choose files to upload"
-										caption="Zip, Jpg or Pdf — Maximum files 10 MB"
-									/>
-								{/if}
-							{/snippet}
-						</DealCard>
-					{/if}
+							{:else if theirConsentOf(deal) === ConsentStates.Pending}
+								<button
+									type="button"
+									onclick={onCancel(deal)}
+									class="bg-danger text-default-inverse flex h-[24px] w-[58px] items-center justify-center rounded-[5px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
+								>
+									{$i18n.deals.actions.cancel}
+								</button>
+							{/if}
+						{/snippet}
+					</DealCard>
+				</li>
+			{/each}
+		</ul>
+	{:else}
+		<ul class="flex flex-col gap-[16px]">
+			{#each visibleDeals as deal (deal.id)}
+				<li>
+					<DealCard {deal} href={`/deals/${deal.id}`}>
+						{#snippet actions()}
+							{#if mySignatureOf(deal) === SignatureStates.Empty}
+								<button
+									type="button"
+									onclick={onSignYes(deal)}
+									class="bg-success text-default-inverse flex h-[24px] flex-1 items-center justify-center rounded-[5px] px-[12px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
+								>
+									{$i18n.deals.actions.confirm_completion}
+								</button>
+								<button
+									type="button"
+									onclick={onSignNo(deal)}
+									class="bg-danger text-default-inverse flex h-[24px] flex-1 items-center justify-center rounded-[5px] px-[12px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
+								>
+									{$i18n.deals.actions.reject_completion}
+								</button>
+							{:else}
+								<UploadCTA
+									label="Choose files to upload"
+									caption="Zip, Jpg or Pdf — Maximum files 10 MB"
+								/>
+							{/if}
+						{/snippet}
+					</DealCard>
 				</li>
 			{/each}
 		</ul>

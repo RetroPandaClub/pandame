@@ -54,7 +54,7 @@ interface I18nHome {
 	choice_guided: string;
 	choice_expert: string;
 	choice_see_pending: string;
-	choice_see_created: string;
+	choice_see_active: string;
 	choice_see_disputed: string;
 	choice_see_history: string;
 	help_label: string;
@@ -73,11 +73,11 @@ interface I18nHistory {
 interface I18nTransactions {
 	title: string;
 	tab_pending: string;
-	tab_created: string;
+	tab_active: string;
 	tab_disputed: string;
 	empty_title: string;
 	empty_pending: string;
-	empty_created: string;
+	empty_active: string;
 	empty_disputed: string;
 }
 
@@ -301,7 +301,6 @@ interface I18nDeals {
 		confirm_completion: string;
 		reject_completion: string;
 		reclaim: string;
-		dispute: string;
 		view_dispute: string;
 	};
 	status: {

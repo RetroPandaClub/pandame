@@ -47,7 +47,7 @@
 		"choice_guided": "Guided",
 		"choice_expert": "Expert",
 		"choice_see_pending": "Pending",
-		"choice_see_created": "Created",
+		"choice_see_active": "Active",
 		"choice_see_disputed": "Disputed",
 		"choice_see_history": "History",
 		"help_label": "Do you need help?"
@@ -64,11 +64,11 @@
 	"transactions": {
 		"title": "Transactions",
 		"tab_pending": "Pending",
-		"tab_created": "Created",
+		"tab_active": "Active",
 		"tab_disputed": "Disputed",
 		"empty_title": "Nothing to show here",
-		"empty_pending": "Deals waiting on your approval will appear here.",
-		"empty_created": "Deals you've funded but the recipient hasn't accepted yet will appear here.",
+		"empty_pending": "Deals awaiting acceptance — yours or the other party's — will appear here.",
+		"empty_active": "Funded deals in progress — awaiting both parties to confirm completion — will appear here.",
 		"empty_disputed": "Open disputes — yours or those you arbitrate — will appear here."
 	},
 	"dispute": {
@@ -284,7 +284,6 @@
 			"confirm_completion": "Confirm completion",
 			"reject_completion": "Reject completion",
 			"reclaim": "Reclaim",
-			"dispute": "Dispute",
 			"view_dispute": "View dispute"
 		},
 		"status": {

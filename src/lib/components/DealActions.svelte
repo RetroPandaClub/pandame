@@ -79,12 +79,6 @@
 	// Tip-only entrypoint; bound recipients use `signYes` / `signNo`.
 	const canAccept = $derived(!isBound && mySide === 'recipient' && status === DealStatuses.Funded);
 	const canReclaim = $derived(mySide === 'payer' && status === DealStatuses.Funded && expired);
-	// Disputes require a bound recipient; canister traps tips with `DisputeRequiresBoundRecipient`.
-	const canOpenDispute = $derived(
-		mySide !== 'unknown' &&
-			status === DealStatuses.Funded &&
-			fromNullable(deal.recipient) !== undefined
-	);
 	const canViewDispute = $derived(disputeId !== undefined);
 
 	const wrap = async (op: string, action: () => Promise<Deal>) => {
@@ -115,7 +109,6 @@
 	const onSignNo = () => wrap('signNo', () => signNo({ dealId: deal.id }));
 	const onReclaim = () => wrap('reclaimDeal', () => reclaimDeal({ dealId: deal.id }));
 
-	const onOpenDispute = () => goto(`/deals/${deal.id}/dispute`);
 	const onViewDispute = () => goto(`/deals/${deal.id}/dispute`);
 
 	function parsePrincipal(text: string | undefined): Principal | undefined {
@@ -158,10 +151,6 @@
 	{#if canViewDispute}
 		<Button variant="secondary" onclick={onViewDispute} disabled={progress}>
 			{$i18n.deals.actions.view_dispute}
-		</Button>
-	{:else if canOpenDispute}
-		<Button variant="secondary" onclick={onOpenDispute} disabled={progress}>
-			{$i18n.deals.actions.dispute}
 		</Button>
 	{/if}
 </div>

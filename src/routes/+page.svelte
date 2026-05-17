@@ -13,7 +13,7 @@
 
 	type Mode = 'pay' | 'receive';
 	type Path = 'guided' | 'expert';
-	type SeeDeal = 'pending' | 'created' | 'disputed' | 'history';
+	type SeeDeal = 'pending' | 'active' | 'disputed' | 'history';
 
 	// The chatbot is a single decision tree with two branches: Create
 	// (multi-step wizard ending in `/deals/new`) and See Deal (one-step
@@ -134,10 +134,10 @@
 						onclick: chooseSeeDeal('pending')
 					},
 					{
-						id: 'see-created',
-						label: $i18n.home.choice_see_created,
-						variant: seeDeal === 'created' ? 'primary' : 'secondary',
-						onclick: chooseSeeDeal('created')
+						id: 'see-active',
+						label: $i18n.home.choice_see_active,
+						variant: seeDeal === 'active' ? 'primary' : 'secondary',
+						onclick: chooseSeeDeal('active')
 					},
 					{
 						id: 'see-disputed',

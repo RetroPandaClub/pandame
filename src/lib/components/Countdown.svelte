@@ -24,6 +24,29 @@
 	let remainingMs = $derived(Math.max(0, target - nowMs));
 	let expired = $derived(remainingMs === 0);
 
+	// Urgency tiers (right-open intervals): >7d default, ≤7d orange,
+	// ≤1d red, ≤1h red + pulse. `motion-safe:` so users with reduced
+	// motion still get the colour cue without the animation.
+	const ONE_HOUR_MS = 3_600_000;
+	const ONE_DAY_MS = 86_400_000;
+	const ONE_WEEK_MS = 7 * ONE_DAY_MS;
+
+	let toneClass = $derived.by(() => {
+		if (expired) {
+			return 'text-danger';
+		}
+		if (remainingMs < ONE_HOUR_MS) {
+			return 'text-danger motion-safe:animate-pulse';
+		}
+		if (remainingMs < ONE_DAY_MS) {
+			return 'text-danger';
+		}
+		if (remainingMs < ONE_WEEK_MS) {
+			return 'text-warning';
+		}
+		return 'text-default';
+	});
+
 	let display = $derived.by(() => {
 		const totalSeconds = Math.floor(remainingMs / 1_000);
 		const days = Math.floor(totalSeconds / 86_400);
@@ -49,10 +72,7 @@
 	});
 </script>
 
-<time
-	datetime={new Date(target).toISOString()}
-	class="font-mono tabular-nums {expired ? 'text-danger' : 'text-default'}"
->
+<time datetime={new Date(target).toISOString()} class="font-mono tabular-nums {toneClass}">
 	{#if expired}
 		{expiredLabel ?? $i18n.deals.status.refunded}
 	{:else}
