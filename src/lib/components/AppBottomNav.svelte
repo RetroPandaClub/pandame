@@ -49,9 +49,11 @@
 			aria-label={$i18n.nav.home}
 			aria-current={isActive('/') ? 'page' : undefined}
 			onclick={() => goto('/')}
-			class="text-default flex h-[20px] w-[20px] items-center justify-center"
+			class="text-default flex h-full w-full items-center justify-center rounded-full"
 		>
-			<HomeIcon />
+			<span class="flex h-[20px] w-[20px] items-center justify-center">
+				<HomeIcon />
+			</span>
 		</button>
 	{/snippet}
 </BottomNav>
