@@ -35,22 +35,31 @@ export default defineConfig({
 			use: { ...devices['Desktop Safari'] }
 		},
 
-		// Mobile
+		// Mobile — explicit screen/viewport so phone-frame layout assertions
+		// stay deterministic across Playwright bumps.
 		{
-			name: 'Apple iPhone SE',
-			use: { ...devices['iPhone SE'] }
+			name: 'Apple iPhone 15 Pro Max',
+			use: {
+				...devices['iPhone 15 Pro Max'],
+				screen: { width: 430, height: 932 },
+				viewport: { width: 430, height: 932 }
+			}
 		},
 		{
-			name: 'Apple iPhone 14 Pro Max',
-			use: { ...devices['iPhone SE'] }
+			name: 'Apple iPhone 13 Mini',
+			use: {
+				...devices['iPhone 13 Mini'],
+				screen: { width: 375, height: 812 },
+				viewport: { width: 375, height: 812 }
+			}
 		},
 		{
-			name: 'Samsung Galaxy S8',
-			use: { ...devices['Galaxy S8'] }
-		},
-		{
-			name: 'Google Pixel 7',
-			use: { ...devices['Pixel 7'] }
+			name: 'Samsung Galaxy S24',
+			use: {
+				...devices['Galaxy S24'],
+				screen: { width: 360, height: 780 },
+				viewport: { width: 360, height: 780 }
+			}
 		},
 
 		// Tablets
