@@ -7,6 +7,7 @@
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
+	import BrandHeaderBackButton from '$lib/components/BrandHeaderBackButton.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FormField from '$lib/components/FormField.svelte';
 	import InfoLink from '$lib/components/InfoLink.svelte';
@@ -17,7 +18,6 @@
 	import TextInput from '$lib/components/TextInput.svelte';
 	import UploadCTA from '$lib/components/UploadCTA.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
-	import BackIcon from '$lib/components/icons/BackIcon.svelte';
 	import { PANEL_SIZE_DEFAULT } from '$lib/constants/dispute.constants';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import { createAndFundDeal, DEFAULT_CREATION_FEE } from '$lib/services/deal.services';
@@ -142,14 +142,7 @@
 
 <BrandHeader title={$i18n.layout.title}>
 	{#snippet leading()}
-		<button
-			type="button"
-			aria-label={$i18n.core.text.back_to_dashboard}
-			onclick={() => goto('/')}
-			class="text-default-inverse flex h-[24px] w-[24px] items-center justify-center"
-		>
-			<BackIcon />
-		</button>
+		<BrandHeaderBackButton onclick={() => goto('/')} />
 	{/snippet}
 
 	{#snippet trailing()}

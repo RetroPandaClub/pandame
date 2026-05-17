@@ -24,24 +24,24 @@
 	let remainingMs = $derived(Math.max(0, target - nowMs));
 	let expired = $derived(remainingMs === 0);
 
-	// Urgency tiers (right-open intervals): >7d default, ≤7d orange,
-	// ≤1d red, ≤1h red + pulse. `motion-safe:` so users with reduced
+	// Urgency tiers (right-open intervals): >1d default, ≤1d orange,
+	// ≤1h red, ≤10m red + pulse. `motion-safe:` so users with reduced
 	// motion still get the colour cue without the animation.
+	const TEN_MINUTES_MS = 600_000;
 	const ONE_HOUR_MS = 3_600_000;
 	const ONE_DAY_MS = 86_400_000;
-	const ONE_WEEK_MS = 7 * ONE_DAY_MS;
 
 	let toneClass = $derived.by(() => {
 		if (expired) {
 			return 'text-danger';
 		}
-		if (remainingMs < ONE_HOUR_MS) {
+		if (remainingMs < TEN_MINUTES_MS) {
 			return 'text-danger motion-safe:animate-pulse';
 		}
-		if (remainingMs < ONE_DAY_MS) {
+		if (remainingMs < ONE_HOUR_MS) {
 			return 'text-danger';
 		}
-		if (remainingMs < ONE_WEEK_MS) {
+		if (remainingMs < ONE_DAY_MS) {
 			return 'text-warning';
 		}
 		return 'text-default';

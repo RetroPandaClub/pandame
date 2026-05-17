@@ -5,10 +5,10 @@
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
+	import BrandHeaderBackButton from '$lib/components/BrandHeaderBackButton.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import DisputeCard from '$lib/components/DisputeCard.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
-	import IconButton from '$lib/components/IconButton.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
 	import { userPrincipalText } from '$lib/derived/user.derived';
@@ -115,19 +115,7 @@
 
 <BrandHeader title={$i18n.arbitrator.title} subtitle={$i18n.arbitrator.subtitle} tone="success">
 	{#snippet leading()}
-		<IconButton ariaLabel={$i18n.core.text.back_to_dashboard} variant="ghost" onclick={back}>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<path d="M15 18l-6-6 6-6" />
-			</svg>
-		</IconButton>
+		<BrandHeaderBackButton onclick={back} />
 	{/snippet}
 
 	{#snippet trailing()}

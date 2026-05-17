@@ -7,11 +7,11 @@
 	import AuthGuard from '$lib/components/AuthGuard.svelte';
 	import Backdrop from '$lib/components/Backdrop.svelte';
 	import BrandHeader from '$lib/components/BrandHeader.svelte';
+	import BrandHeaderBackButton from '$lib/components/BrandHeaderBackButton.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Countdown from '$lib/components/Countdown.svelte';
 	import DealActions from '$lib/components/DealActions.svelte';
 	import DealStatusIcon from '$lib/components/DealStatusIcon.svelte';
-	import IconButton from '$lib/components/IconButton.svelte';
 	import Money from '$lib/components/Money.svelte';
 	import ShareLinkModal from '$lib/components/ShareLinkModal.svelte';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
@@ -158,23 +158,7 @@
 
 <BrandHeader {title}>
 	{#snippet leading()}
-		<IconButton
-			ariaLabel={$i18n.core.text.back_to_dashboard}
-			variant="ghost"
-			onclick={() => goto('/')}
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<path d="M15 18l-6-6 6-6" />
-			</svg>
-		</IconButton>
+		<BrandHeaderBackButton onclick={() => goto('/')} />
 	{/snippet}
 
 	{#snippet trailing()}
