@@ -219,6 +219,7 @@
 	"profile": {
 		"title": "Profile",
 		"section_edit": "Edit Profile",
+		"wallet_action": "Wallet",
 		"username_label": "Username",
 		"name_label": "Name",
 		"surname_label": "Surname",
@@ -249,6 +250,12 @@
 		"username_placeholder": "Pick a public nickname",
 		"name_placeholder": "Your first name",
 		"surname_placeholder": "Your last name"
+	},
+	"wallet": {
+		"title": "Wallet",
+		"subtitle": "Your balances",
+		"loading": "Loading…",
+		"error": "Unavailable"
 	},
 	"logout_confirm": {
 		"title": "Are You Sure?",

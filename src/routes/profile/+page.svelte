@@ -170,6 +170,17 @@
 		<button
 			type="button"
 			onclick={async () => {
+				await goto('/profile/wallet');
+			}}
+			class="text-default flex items-center justify-between border-b border-[var(--color-border-soft)] py-[14px] font-sans text-[18px] font-normal transition-opacity hover:opacity-70"
+		>
+			<span>{$i18n.profile.wallet_action}</span>
+			<span class="text-subtle font-sans text-[20px]" aria-hidden="true">›</span>
+		</button>
+
+		<button
+			type="button"
+			onclick={async () => {
 				await goto('/history');
 			}}
 			class="text-default flex items-center justify-between border-b border-[var(--color-border-soft)] py-[14px] font-sans text-[18px] font-normal transition-opacity hover:opacity-70"

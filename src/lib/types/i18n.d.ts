@@ -233,6 +233,7 @@ interface I18nDetail {
 interface I18nProfile {
 	title: string;
 	section_edit: string;
+	wallet_action: string;
 	username_label: string;
 	name_label: string;
 	surname_label: string;
@@ -263,6 +264,13 @@ interface I18nProfile {
 	username_placeholder: string;
 	name_placeholder: string;
 	surname_placeholder: string;
+}
+
+interface I18nWallet {
+	title: string;
+	subtitle: string;
+	loading: string;
+	error: string;
 }
 
 interface I18nLogout_confirm {
@@ -390,6 +398,7 @@ interface I18n {
 	admin: I18nAdmin;
 	detail: I18nDetail;
 	profile: I18nProfile;
+	wallet: I18nWallet;
 	logout_confirm: I18nLogout_confirm;
 	deals: I18nDeals;
 	create: I18nCreate;
