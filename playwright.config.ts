@@ -35,8 +35,7 @@ export default defineConfig({
 			use: { ...devices['Desktop Safari'] }
 		},
 
-		// Mobile — explicit screen/viewport so phone-frame layout assertions
-		// stay deterministic across Playwright bumps.
+		// Mobile
 		{
 			name: 'Apple iPhone 15 Pro Max',
 			use: {
