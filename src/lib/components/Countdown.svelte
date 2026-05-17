@@ -37,7 +37,15 @@
 			return `${days}d ${pad(h)}h ${pad(m)}m`;
 		}
 
-		return `h${h}:${pad(m)}:${pad(s)}`;
+		if (h > 0) {
+			return `${h}h ${pad(m)}m ${pad(s)}s`;
+		}
+
+		if (m > 0) {
+			return `${m}m ${pad(s)}s`;
+		}
+
+		return `${s}s`;
 	});
 </script>
 
