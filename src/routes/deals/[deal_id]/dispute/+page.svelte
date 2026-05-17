@@ -86,10 +86,8 @@
 		if (dispute === undefined) {
 			return false;
 		}
-		// The canister lazily advances Evidence → Voting on the first
-		// vote past the evidence deadline; mirror that here so the
-		// cast-vote UI shows up as soon as the wall-clock crosses
-		// `evidence_deadline_ns` even if `phase` is still `Evidence`.
+		// Mirror the canister's lazy Evidence → Voting advance so the
+		// vote UI appears as soon as the deadline passes.
 		const phaseOk = phase === DisputePhases.Evidence || phase === DisputePhases.Voting;
 		if (!phaseOk) {
 			return false;
@@ -149,10 +147,7 @@
 			dispute = updated;
 			disputesStore.upsert(updated);
 
-			// `open_dispute` / `withdraw_dispute(complete)` mutate the
-			// parent deal too — pull a fresh `DealView` so the deal store
-			// (and any other open page) sees `Disputed` /
-			// `ArbitratedSettled` / `ArbitratedRefunded`.
+			// Both open and complete-withdraw mutate the parent deal — refresh it.
 			if (dealId !== undefined) {
 				const refreshed = await getDeal({ dealId });
 				deal = refreshed;
@@ -271,10 +266,7 @@
 		}
 	}
 
-	/**
-	 * Decode a hex-encoded 32-byte SHA-256 digest. Returns `undefined`
-	 * for any input that isn't exactly 64 hex chars.
-	 */
+	// Returns `undefined` for anything that isn't exactly 64 hex chars.
 	function parseHashHex(hex: string): Uint8Array | undefined {
 		const normalized = hex.replace(/^0x/i, '').trim();
 		if (normalized.length !== 64 || !/^[0-9a-fA-F]+$/.test(normalized)) {

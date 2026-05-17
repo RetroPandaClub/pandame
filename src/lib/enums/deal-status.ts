@@ -1,7 +1,4 @@
-/**
- * Deal status keys mirrored from the canister's `DealStatus` Candid variant.
- * Keep this in sync with `$declarations/escrow/escrow.d.ts`.
- */
+// Mirror of the canister's `DealStatus` Candid variant.
 export const DealStatuses = {
 	Created: 'Created',
 	Funded: 'Funded',
@@ -17,12 +14,7 @@ export const DealStatuses = {
 
 export type DealStatusName = (typeof DealStatuses)[keyof typeof DealStatuses];
 
-/**
- * Terminal statuses — no further state transitions possible. Includes
- * the two arbitrated terminals introduced by the dispute-resolution
- * lifecycle (RFC-001) and `Aborted` from the v0.0.7 two-signature
- * tally (both parties signed `No` → refund to payer).
- */
+// No further state transitions possible.
 export const TERMINAL_DEAL_STATUSES: readonly DealStatusName[] = [
 	DealStatuses.Settled,
 	DealStatuses.Refunded,
@@ -33,21 +25,14 @@ export const TERMINAL_DEAL_STATUSES: readonly DealStatusName[] = [
 	DealStatuses.ArbitratedRefunded
 ];
 
-/**
- * Statuses that count as a "released to recipient" outcome — used by the
- * UI to colour the deal-card amount + pick the success status icon.
- */
+// "Released to recipient" bucket — drives card colour + success icon.
 export const SETTLED_DEAL_STATUSES: readonly DealStatusName[] = [
 	DealStatuses.Settled,
 	DealStatuses.ArbitratedSettled
 ];
 
-/**
- * Statuses that count as a "returned to payer" outcome. `Aborted`
- * (mutual two-signature `No`) lives here too — from the user's PoV
- * "both parties refused completion → refund" is the same bucket as
- * expiry-refund or arbitrated-refund.
- */
+// "Returned to payer" bucket — `Aborted` (both parties signed `No`)
+// reads the same to the user as expiry- or arbitrated-refund.
 export const REFUNDED_DEAL_STATUSES: readonly DealStatusName[] = [
 	DealStatuses.Refunded,
 	DealStatuses.Aborted,
@@ -62,13 +47,8 @@ export const ConsentStates = {
 
 export type ConsentState = (typeof ConsentStates)[keyof typeof ConsentStates];
 
-/**
- * Two-party settlement vote on a `Funded` bound deal. `Empty` is the
- * pre-sign default; once both parties have a non-empty signature the
- * canister tallies (`Yes`/`Yes` → `Settled`, `No`/`No` → `Aborted`,
- * mixed → auto-`Disputed`). Tip flows carry `Empty` forever — the
- * signing endpoints reject tips with `DisputeRequiresBoundRecipient`.
- */
+// Two-party tally on a `Funded` bound deal: `Yes`/`Yes` → `Settled`,
+// `No`/`No` → `Aborted`, mixed → auto-`Disputed`. Tips stay `Empty`.
 export const SignatureStates = {
 	Empty: 'Empty',
 	Yes: 'Yes',

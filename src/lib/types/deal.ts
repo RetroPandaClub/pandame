@@ -1,38 +1,18 @@
 import type { EscrowDid } from '$declarations';
 
-/**
- * Re-export of the canister's `DealView` to keep app code free of
- * `$declarations` imports outside `$lib/{api,canisters}/`.
- */
+// Re-exports keep app code free of `$declarations` imports outside `$lib/{api,canisters}/`.
 export type Deal = EscrowDid.DealView;
-
-/**
- * Public claim view returned by `get_claimable_deal` — no payer, no
- * claim code, no internal fields.
- */
 export type ClaimableDeal = EscrowDid.ClaimableDealView;
 
 export type DealError = EscrowDid.EscrowError;
 
-/**
- * Lifecycle status keys, narrowed to a string for switch/match ergonomics.
- */
 export type DealStatusKey = keyof EscrowDid.DealStatus;
 export type ConsentKey = keyof EscrowDid.Consent;
 export type SignatureKey = keyof EscrowDid.Signature;
 
-/**
- * Side of the deal a given principal is on. `unknown` covers the case
- * where the caller is neither party (e.g. a public claim preview).
- */
+// `unknown` covers callers who aren't a party (e.g. public claim preview).
 export type DealSide = 'payer' | 'recipient' | 'unknown';
 
-/**
- * Deal-list filter narrowing — used by the History page + DealsTable.
- *
- * `disputed` covers the live `Disputed` lifecycle state (panel still
- * deliberating); `settled` and `refunded` collapse their `Arbitrated…`
- * counterparts so users don't have to think about how the deal got to
- * its terminal state.
- */
+// `settled` / `refunded` collapse their `Arbitrated…` counterparts —
+// the user shouldn't have to know how the deal reached its terminal state.
 export type DealFilter = 'all' | 'active' | 'settled' | 'refunded' | 'cancelled' | 'disputed';

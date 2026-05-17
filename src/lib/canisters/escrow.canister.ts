@@ -8,16 +8,8 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, jsonReplacer, type QueryParams } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 
-/**
- * Typed error thrown by every `EscrowCanister.*` method on an `Err`
- * variant — preserves the original `EscrowError` payload so call sites
- * can branch on the variant tag (`'PanelSizeOutOfRange' in err.variant`,
- * `'InsufficientArbitrators' in err.variant`, …) without regex'ing the
- * JSON-stringified message.
- *
- * The fallback `.message` keeps the previous "Failed to {op}: …" text
- * so existing `console.error` / display sites still work unchanged.
- */
+// Preserves the original `EscrowError` payload so call sites can
+// branch on the variant tag instead of regex'ing the JSON message.
 export class EscrowCanisterError extends Error {
 	readonly variant: EscrowDid.EscrowError;
 	readonly op: string;

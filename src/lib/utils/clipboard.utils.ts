@@ -1,14 +1,5 @@
-/**
- * Write `text` to the system clipboard via `navigator.clipboard`. Returns
- * `true` on success, `false` if the platform refused (denied permission,
- * insecure context, missing API). Browser-only — call from event handlers
- * (which never run on the server).
- *
- * The helper deliberately stops at the I/O boundary: timing the visual
- * "Copied!" feedback is the caller's responsibility, because durations
- * differ per surface (~1.5 s on the principal badge, ~2 s on the share
- * link modal, etc.).
- */
+// Browser-only — must be called from an event handler. Caller owns
+// the "Copied!" timing because durations differ per surface.
 export const copyToClipboard = async (text: string): Promise<boolean> => {
 	if (typeof navigator === 'undefined' || navigator.clipboard === undefined) {
 		console.error('Clipboard API unavailable in this context.');

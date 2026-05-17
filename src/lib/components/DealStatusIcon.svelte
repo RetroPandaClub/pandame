@@ -13,23 +13,6 @@
 		glyph: 'check' | 'cross' | 'dot' | 'swap' | 'refresh' | 'gavel';
 	}
 
-	// 24 px circular status badge that sits on the right of the
-	// DealCard title bar. Glyph + colour per status:
-	//   Settled            = green check
-	//   ArbitratedSettled  = green check (arbitrated CC outcome — same
-	//                        terminal flavour as Settled)
-	//   Rejected           = red cross
-	//   Cancelled          = muted cross (less alarming than rejection)
-	//   Aborted            = warning cross (mutual two-signature `No` →
-	//                        refund; distinct from Refunded so users
-	//                        can see "both parties agreed to abort" at
-	//                        a glance)
-	//   Refunded           = warning dot
-	//   ArbitratedRefunded = warning dot (arbitrated IC / no-quorum
-	//                        outcome — funds back to payer)
-	//   Funded             = white-bg blue swap-arrows ("in progress")
-	//   Created            = warning refresh
-	//   Disputed           = danger gavel ("a panel is reviewing this")
 	const SPEC: Record<DealStatusName, Spec> = {
 		[DealStatuses.Settled]: { class: 'bg-success', glyph: 'check' },
 		[DealStatuses.ArbitratedSettled]: { class: 'bg-success', glyph: 'check' },

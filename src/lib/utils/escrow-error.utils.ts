@@ -3,20 +3,8 @@ import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 import type { Token } from '$lib/types/token';
 import { formatTokenAmount } from '$lib/utils/format.utils';
 
-/**
- * Map known typed `EscrowError` variants to user-facing strings.
- *
- * Falls back to `err.message` so any unmapped variant still surfaces
- * (rather than swallowing the cause). Keep the variant list in sync
- * with the surface documented in `src/declarations/escrow/escrow.did`
- * — adding a new variant in `EscrowDid.EscrowError` will compile here
- * but won't print anything more useful than the raw payload until a
- * mapping is added.
- *
- * `token` is used to render base-unit amounts (`min`) in the deal's
- * settlement asset; defaults to ICP because that is the only
- * settlement token surfaced today.
- */
+// Falls back to `err.message` so a new variant still surfaces — adding
+// one will compile but render the raw payload until a mapping is added.
 export const friendlyEscrowError = (
 	error: EscrowCanisterError,
 	t: I18n,

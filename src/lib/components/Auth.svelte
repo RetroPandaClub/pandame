@@ -9,11 +9,8 @@
 
 	let unsubscribe: (() => void) | undefined = undefined;
 
-	// Skip the real auth subscription when the dev-only bypass is active
-	// (`?dev=1` in `vite dev`). Otherwise Juno's `onAuthStateChange`
-	// fires with `null` shortly after page load and clobbers the mock
-	// user that `DevAuth.svelte` injected, so the auth-guarded routes
-	// would still bounce back to `/`.
+	// Skip the real subscription under `?dev=1` — Juno would otherwise
+	// fire with `null` and clobber the mock user `DevAuth` injected.
 	const isDevBypass = (): boolean => {
 		if (!dev || !browser) {
 			return false;
@@ -32,12 +29,8 @@
 
 	const automaticSignOut = () => console.warn('Automatically signed out because session expired');
 
-	// Centralised profile bootstrap: keep `profileStore` in sync with the
-	// signed-in principal so any component (e.g. `UserPrincipalBadge` in
-	// the BrandHeader trailing slot) can render the user's avatar without
-	// each page having to re-issue `ensureProfile`. Pages that need a
-	// guaranteed-fresh profile (Profile, Profile Edit) still call
-	// `ensureProfile` themselves — those calls are idempotent.
+	// One central `ensureProfile` so badges in shared chrome can render
+	// the avatar without every page re-issuing the call.
 	$effect(() => {
 		const text = $userPrincipalText;
 		if (text === undefined || text.length === 0) {

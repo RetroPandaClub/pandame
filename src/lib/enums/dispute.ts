@@ -1,7 +1,4 @@
-/**
- * Dispute lifecycle phases mirrored from the canister's `DisputePhase`
- * Candid variant. Keep this in sync with `$declarations/escrow/escrow.d.ts`.
- */
+// Mirror of the canister's `DisputePhase` Candid variant.
 export const DisputePhases = {
 	Evidence: 'Evidence',
 	Voting: 'Voting',
@@ -10,12 +7,7 @@ export const DisputePhases = {
 
 export type DisputePhaseName = (typeof DisputePhases)[keyof typeof DisputePhases];
 
-/**
- * The three vote choices an arbitrator (or, for the withdraw flow, a
- * party) can pick. Mirrors the canister's `Vote` variant. `Abstain` is
- * rejected by the canister boundary for `withdraw_dispute` proposals
- * but valid for `cast_vote` from arbitrators.
- */
+// `Abstain` is valid for `cast_vote` but rejected by `withdraw_dispute`.
 export const Votes = {
 	ConcludedCorrectly: 'ConcludedCorrectly',
 	IncorrectlyConcluded: 'IncorrectlyConcluded',
@@ -24,21 +16,14 @@ export const Votes = {
 
 export type VoteName = (typeof Votes)[keyof typeof Votes];
 
-/**
- * Vote choices allowed for the out-of-band `withdraw_dispute` proposal —
- * `Abstain` is intentionally excluded (parties must agree on a verdict,
- * not on "no opinion").
- */
+// `Abstain` excluded: parties must agree on a verdict, not "no opinion".
 export const WITHDRAW_VOTES: readonly VoteName[] = [
 	Votes.ConcludedCorrectly,
 	Votes.IncorrectlyConcluded
 ];
 
-/**
- * Discriminator keys of the canister's `DisputeOutcome` variant, exposed
- * here so the UI can switch on them without unwrapping the variant
- * shape directly.
- */
+// Keys of the canister's `DisputeOutcome` variant, so the UI can switch
+// without unwrapping the variant shape.
 export const DisputeOutcomes = {
 	Settled: 'Settled',
 	Refunded: 'Refunded',

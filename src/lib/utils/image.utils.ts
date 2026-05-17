@@ -1,14 +1,6 @@
-/**
- * Browser-side helpers for the inline avatar pipeline.
- *
- * The Juno `profiles` collection stores the avatar as a data URL inside
- * the profile document (see `$lib/types/profile.ts`). To keep documents
- * small — well under the 2 MB stable-memory limit and under the
- * 1.5 MB-or-so soft ceiling beyond which Juno responses noticeably
- * slow down — we center-crop, downscale, and JPEG-compress the picked
- * file before storing it. `fileToAvatarDataUrl` is the single entry
- * point; callers don't touch canvases directly.
- */
+// Avatars are stored inline in the profile doc; center-crop +
+// downscale + JPEG-compress here keeps the payload well under Juno's
+// 2 MB doc limit so reads stay fast.
 
 const DEFAULT_MAX_SIZE = 512;
 const DEFAULT_QUALITY = 0.85;
@@ -37,13 +29,8 @@ export class AvatarPipelineError extends Error {
 	}
 }
 
-/**
- * Decode the picked file into a square center-cropped JPEG data URL.
- *
- * Throws `AvatarPipelineError` for the three predictable failure modes
- * (wrong mime, browser couldn't decode, produced payload too big) so
- * callers can branch on `err.reason` for a user-friendly message.
- */
+// Throws typed `AvatarPipelineError` so callers can branch on
+// `err.reason` for user-friendly messaging.
 export const fileToAvatarDataUrl = async (
 	file: File,
 	{

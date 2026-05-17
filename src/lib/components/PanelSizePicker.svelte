@@ -72,9 +72,6 @@
   lines underneath the number (Fast / Little debated, Fair /
   Recommended, Less fast / More discussed). Active text is white,
   inactive text is Blu Night.
-
-  Visual spec: Figma node 311:7640 (frame "Vote") on the
-  /deals/new screen.
 -->
 <div
 	role="radiogroup"

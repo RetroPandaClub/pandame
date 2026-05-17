@@ -4,15 +4,8 @@ import { defaultAvatarUrlForPrincipal } from '$lib/utils/avatar.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { getDoc, setDoc, type Doc } from '@junobuild/core';
 
-/**
- * Loads a user profile from the `profiles` datastore. Returns a fresh
- * empty shell (no `version`, no remote write) when the principal has
- * never saved a profile — the caller can render placeholders without
- * an extra null-check.
- *
- * Reads are public so any signed-in user can resolve a principal to
- * a nickname / display name.
- */
+// Returns an empty shell (no `version`, no remote write) for unknown
+// principals so the caller can render placeholders without a null-check.
 export const getProfile = async (principal: string): Promise<Doc<UserProfile>> => {
 	const existing = await getDoc<UserProfile>({
 		collection: Collection.PROFILES,
@@ -29,14 +22,8 @@ export const getProfile = async (principal: string): Promise<Doc<UserProfile>> =
 	};
 };
 
-/**
- * Upserts the caller's profile. Round-trips the latest `version` from
- * the canister so concurrent edits surface as an explicit error rather
- * than silently overwriting each other.
- *
- * The collection is `write: 'private'` — only the principal whose key
- * matches the doc can call this against their own profile.
- */
+// Reads the latest `version` first so concurrent edits surface as an
+// explicit error instead of silently overwriting.
 export const upsertProfile = async (
 	profileDoc: Doc<UserProfile> | { key: string; data: UserProfile }
 ): Promise<Doc<UserProfile>> => {
@@ -72,19 +59,10 @@ export const upsertProfile = async (
 	});
 };
 
-/**
- * Ensures the caller's profile exists in the datastore. Returns the
- * canonical profile document — either the one already on chain or a
- * freshly-created empty shell. Callers that just want to read should
- * use `getProfile` directly; this one is for "first-load on sign-in"
- * paths that want a guaranteed `version` so subsequent edits succeed.
- *
- * Also makes sure `avatar_url` is set: if the principal has no profile
- * yet (or has one but never picked an avatar), the doc is persisted
- * with a deterministic DiceBear URL derived from the principal alone.
- * This guarantees every user has a stable default avatar without ever
- * sending the raw principal to the image host.
- */
+// First-load-on-sign-in path: guarantees a `version` (so later edits
+// don't fail) and a deterministic DiceBear `avatar_url` (so every user
+// has a stable default avatar without leaking the raw principal to the
+// image host).
 export const ensureProfile = async (principal: string): Promise<Doc<UserProfile>> => {
 	const doc = await getProfile(principal);
 

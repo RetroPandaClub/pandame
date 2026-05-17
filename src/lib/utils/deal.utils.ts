@@ -24,10 +24,6 @@ export const dealStatus = (
 export const consentState = (consent: Deal['payer_consent']): ConsentState =>
 	variantKey<ConsentKey>(consent) as ConsentState;
 
-/**
- * Narrows a `Signature` variant (`Empty` / `Yes` / `No`) into a typed
- * key for ergonomic switch/match against [`SignatureStates`].
- */
 export const signatureState = (signature: Deal['payer_signature']): SignatureState =>
 	variantKey<SignatureKey>(signature) as SignatureState;
 
@@ -37,10 +33,7 @@ export const isTerminal = (status: DealStatusName): boolean =>
 export const isExpired = (deal: Pick<Deal, 'expires_at_ns'>, nowNs: bigint): boolean =>
 	deal.expires_at_ns <= nowNs;
 
-/**
- * Which side of the deal is `principal` on? Returns `'unknown'` when the
- * principal matches neither party — used by the public claim preview.
- */
+// `'unknown'` covers the public claim preview, where the viewer isn't a party.
 export const sideOf = (
 	deal: Pick<Deal, 'payer' | 'recipient'>,
 	principal: Principal | undefined
@@ -63,9 +56,6 @@ export const sideOf = (
 	return 'unknown';
 };
 
-/**
- * Whether both parties have explicitly accepted the deal terms.
- */
 export const isFullyConsented = (
 	deal: Pick<Deal, 'payer_consent' | 'recipient_consent'>
 ): boolean =>

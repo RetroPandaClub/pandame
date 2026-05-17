@@ -69,26 +69,17 @@
 		mySide !== 'unknown' && status === DealStatuses.Created && myConsent !== ConsentStates.Rejected
 	);
 	const canCancel = $derived(mySide !== 'unknown' && status === DealStatuses.Created);
-	// Escrow v0.0.7 two-signature tally: on a `Funded` bound deal,
-	// either party signs `Yes` / `No`. Both `Yes` → `Settled`; both
-	// `No` → `Aborted`; mixed → auto-`Disputed`. We hide both buttons
-	// once the caller has already signed (re-signing is allowed by the
-	// canister but latest-wins UX is confusing).
+	// Hidden after signing — re-signing is legal but latest-wins UX is confusing.
 	const canSign = $derived(
 		isBound &&
 			mySide !== 'unknown' &&
 			status === DealStatuses.Funded &&
 			mySignature === SignatureStates.Empty
 	);
-	// Legacy single-click "Accept" remains for the **tip** branch only —
-	// the unbound recipient claims via the `/claim/[deal_id]` route and
-	// `accept_deal` binds them + settles atomically. Bound recipients
-	// go through `signYes` / `signNo` above.
+	// Tip-only entrypoint; bound recipients use `signYes` / `signNo`.
 	const canAccept = $derived(!isBound && mySide === 'recipient' && status === DealStatuses.Funded);
 	const canReclaim = $derived(mySide === 'payer' && status === DealStatuses.Funded && expired);
-	// Disputes require a bound recipient (canister rejects open-recipient
-	// tip-flow deals via `DisputeRequiresBoundRecipient`). We mirror that
-	// gate here so the button doesn't appear for tip flows.
+	// Disputes require a bound recipient; canister traps tips with `DisputeRequiresBoundRecipient`.
 	const canOpenDispute = $derived(
 		mySide !== 'unknown' &&
 			status === DealStatuses.Funded &&

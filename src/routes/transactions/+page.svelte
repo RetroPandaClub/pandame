@@ -14,14 +14,21 @@
 	import { dealsLoaded } from '$lib/derived/deals.derived';
 	import { disputesLoaded } from '$lib/derived/disputes.derived';
 	import { userPrincipalText } from '$lib/derived/user.derived';
-	import { ConsentStates, DealStatuses } from '$lib/enums/deal-status';
-	import { acceptDeal, listMyDeals, rejectDeal } from '$lib/services/deal.services';
+	import { ConsentStates, DealStatuses, SignatureStates } from '$lib/enums/deal-status';
+	import {
+		cancelDeal,
+		consentDeal,
+		listMyDeals,
+		rejectDeal,
+		signNo,
+		signYes
+	} from '$lib/services/deal.services';
 	import { listMyDisputes } from '$lib/services/dispute.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { disputesStore } from '$lib/stores/disputes.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Deal } from '$lib/types/deal';
-	import { consentState, dealStatus, sideOf } from '$lib/utils/deal.utils';
+	import type { Deal, DealSide } from '$lib/types/deal';
+	import { consentState, dealStatus, sideOf, signatureState } from '$lib/utils/deal.utils';
 
 	type Tab = 'pending' | 'created' | 'disputed';
 
@@ -30,9 +37,7 @@
 	const isTab = (value: string | null): value is Tab =>
 		value !== null && (TABS as readonly string[]).includes(value);
 
-	// `?tab=` is the contract used by the home chatbot's "See Deal"
-	// branch (Figma 219:306). Anything we don't recognise falls back
-	// to the default Pending view rather than throwing.
+	// Unrecognised values fall back to Pending so a stale link never throws.
 	const initialTab = (): Tab => {
 		const raw = page.url.searchParams.get('tab');
 		return isTab(raw) ? raw : 'pending';
@@ -52,32 +57,48 @@
 		}
 	});
 
+	// Pending = the deal is waiting on me; Created = waiting on the
+	// other side. Each side acts twice (consent, then sign), so both
+	// gates feed both tabs.
 	const matches = (deal: Deal, t: Tab): boolean => {
 		const status = dealStatus(deal);
+		const side: DealSide = sideOf(deal, principal);
+		if (side === 'unknown') {
+			return false;
+		}
+
+		const myConsent =
+			side === 'payer' ? consentState(deal.payer_consent) : consentState(deal.recipient_consent);
+		const theirConsent =
+			side === 'payer' ? consentState(deal.recipient_consent) : consentState(deal.payer_consent);
+		const mySig =
+			side === 'payer'
+				? signatureState(deal.payer_signature)
+				: signatureState(deal.recipient_signature);
+		const theirSig =
+			side === 'payer'
+				? signatureState(deal.recipient_signature)
+				: signatureState(deal.payer_signature);
+
 		switch (t) {
-			case 'pending': {
-				// "Pending" = funded, waiting on the caller's consent.
-				if (status !== DealStatuses.Funded) {
-					return false;
+			case 'pending':
+				if (status === DealStatuses.Created) {
+					return myConsent === ConsentStates.Pending;
 				}
-				const side = sideOf(deal, principal);
-				if (side === 'unknown') {
-					return false;
+				if (status === DealStatuses.Funded) {
+					return mySig === SignatureStates.Empty;
 				}
-				const myConsent =
-					side === 'payer'
-						? consentState(deal.payer_consent)
-						: consentState(deal.recipient_consent);
-				return myConsent === ConsentStates.Pending;
-			}
+				return false;
 			case 'created':
-				// "Created" = funded but the OTHER side hasn't acted yet —
-				// the caller is waiting on someone else.
-				return status === DealStatuses.Funded || status === DealStatuses.Created;
+				if (status === DealStatuses.Created) {
+					return myConsent === ConsentStates.Accepted && theirConsent === ConsentStates.Pending;
+				}
+				if (status === DealStatuses.Funded) {
+					return mySig !== SignatureStates.Empty && theirSig === SignatureStates.Empty;
+				}
+				return false;
 			case 'disputed':
-				// Live disputes come from `list_my_disputes` (rendered
-				// directly from `disputesStore`); the deal-side filter
-				// below is unused for this tab.
+				// Disputes render straight from `disputesStore`, not from this filter.
 				return false;
 		}
 	};
@@ -111,9 +132,17 @@
 		reload();
 	});
 
+	// `accept_deal` traps on `Created` (it routes to `sign_yes`, which
+	// needs a funded deal), so we split by lifecycle gate. Kept for the
+	// public claim flow only.
 	const approve = (deal: Deal) => async () => {
+		const status = dealStatus(deal);
 		try {
-			await acceptDeal({ dealId: deal.id });
+			if (status === DealStatuses.Created) {
+				await consentDeal({ deal });
+			} else if (status === DealStatuses.Funded) {
+				await signYes({ dealId: deal.id });
+			}
 			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to approve deal:', err);
@@ -121,13 +150,30 @@
 	};
 
 	const decline = (deal: Deal) => async () => {
+		const status = dealStatus(deal);
 		try {
-			await rejectDeal({ dealId: deal.id });
+			if (status === DealStatuses.Created) {
+				await rejectDeal({ dealId: deal.id });
+			} else if (status === DealStatuses.Funded) {
+				await signNo({ dealId: deal.id });
+			}
 			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to decline deal:', err);
 		}
 	};
+
+	const cancel = (deal: Deal) => async () => {
+		try {
+			await cancelDeal({ dealId: deal.id });
+			await reloadDeals();
+		} catch (err) {
+			console.error('Failed to cancel deal:', err);
+		}
+	};
+
+	// Cancel is only legal on `Created`; once Funded the equivalent is `sign_no`.
+	const showInlineCancel = (deal: Deal): boolean => dealStatus(deal) === DealStatuses.Created;
 
 	let emptyDescription = $derived.by(() => {
 		switch (tab) {
@@ -209,10 +255,20 @@
 					{:else}
 						<DealCard {deal} href={`/deals/${deal.id}`}>
 							{#snippet actions()}
-								<UploadCTA
-									label="Choose files to upload"
-									caption="Zip, Jpg or Pdf — Maximum files 10 MB"
-								/>
+								{#if showInlineCancel(deal)}
+									<button
+										type="button"
+										onclick={cancel(deal)}
+										class="bg-danger text-default-inverse flex h-[24px] w-[58px] items-center justify-center rounded-[5px] font-sans text-[10px] font-semibold transition-opacity hover:opacity-90"
+									>
+										{$i18n.deals.actions.cancel}
+									</button>
+								{:else}
+									<UploadCTA
+										label="Choose files to upload"
+										caption="Zip, Jpg or Pdf — Maximum files 10 MB"
+									/>
+								{/if}
 							{/snippet}
 						</DealCard>
 					{/if}

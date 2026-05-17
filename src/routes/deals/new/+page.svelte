@@ -37,8 +37,8 @@
 	let expiryLocal = $state(defaultExpiry());
 	let titleDeal = $state('');
 	let agreement = $state('');
-	// Pre-selected on the Figma "Fair / Recommended" middle ring; user
-	// can flip to Fast (3) or Less fast (11). The canister default
+	// Pre-selected on the "Fair / Recommended" middle ring; user can
+	// flip to Fast (3) or Less fast (11). The canister default
 	// max_panel_size = 11 accepts the full triplet.
 	let panelSize = $state<number>(PANEL_SIZE_DEFAULT);
 

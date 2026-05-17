@@ -116,9 +116,41 @@ These are on top of the [11 commandments](./AGENTS.md#2-the-11-commandments-read
 - **No new top-level folders** under `src/` or `src/lib/`. The taxonomy
   in [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)
   is closed; surface a question instead of inventing a bucket.
-- **Comments are for _why_, not _what_.** No narrating comments
-  ("// fetch the user"). Only write a comment if it captures intent,
-  trade-off, or an invariant the code can't express.
+- **Comments are for _why_, not _what_ — and they're terse.** Prefer
+  one or two lines; reach for a multi-paragraph block only when the
+  trade-off genuinely needs it. Forbidden:
+- **Narrating comments** ("// fetch the user", "// loop over deals").
+- **Restating the code** — type signatures, function names, bullet
+  lists of every variant the code already enumerates.
+- **Step-by-step walkthroughs of every branch** of a flow — name
+  the invariant or the foot-gun, not the lifecycle.
+- **JSDoc on self-evident exports.** Add a JSDoc block only when
+  it captures intent the signature can't (e.g. "returns `undefined`
+  instead of throwing so callers can render placeholders"). A
+  function called `parseTokenAmount` doesn't need "Parses a token
+  amount.".
+  Default to one line above the binding; promote to a `/** … */`
+  block only when the comment carries a real why (foot-gun,
+  trade-off, invariant). If a comment grew past ~3 lines, ask
+  whether it's still pointing at a why or has slid into narration.
+- **No transient external references in source code.** Code (inline
+  comments, JSDoc, top-of-file headers, snippet labels) must stand on
+  its own. Forbidden inside `src/**`:
+- **Figma:** node ids (`311:7640`), frame numbers (`219:306`),
+  phrases like "per Figma" / "matches the Figma frame" /
+  "Visual spec: Figma…".
+- **Version pins in prose:** `v0.0.7`, `escrow v0.0.7`,
+  `Escrow vN`, "as of …", "since version …".
+- **RFC / PR / issue / commit refs:** `RFC-001`, `RFC 001`,
+  `PR #123`, `issue #45`, raw commit hashes.
+  Stable names of canister functions / variants / types
+  (`consent_deal`, `sign_yes`, `DealStatus::Funded`) are fine —
+  they're part of the API surface. Anything that ages (a design
+  frame, a release tag, a doc revision) does not belong in source.
+  Operational version pins — e.g. the `ESCROW_REF` variable in
+  [`scripts/import-candid.sh`](./scripts/import-candid.sh) or the
+  codegen header in `src/declarations/escrow/**` — are exceptions
+  because they're config values, not narrative comments.
 - **No relative parent imports under `src/**`** — use `$lib`, `$routes`,
 `$root` or `$declarations`aliases (eslint enforces`import/no-relative-parent-imports`). The single tolerated exception
 is the side-effect CSS import in `+layout.svelte`.

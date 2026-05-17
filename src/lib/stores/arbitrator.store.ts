@@ -1,14 +1,8 @@
 import type { Arbitrator } from '$lib/types/arbitrator';
 import { writable, type Readable } from 'svelte/store';
 
-/**
- * Tri-state representation of "is the signed-in user a registered
- * arbitrator?":
- *
- * - `undefined` — not yet loaded for the current principal.
- * - `null`      — loaded; principal is not registered as an arbitrator.
- * - `Arbitrator` — loaded; principal is registered (any status).
- */
+// `undefined` = not yet loaded, `null` = loaded + not registered,
+// `Arbitrator` = loaded + registered (any status).
 type ArbitratorState = Arbitrator | null | undefined;
 
 interface ArbitratorStore extends Readable<ArbitratorState> {
@@ -26,8 +20,4 @@ const initArbitrator = (): ArbitratorStore => {
 	};
 };
 
-/**
- * The currently-signed-in user's arbitrator profile, if registered.
- * Populated by `getArbitrator(principal)` calls from the Profile page.
- */
 export const arbitratorStore = initArbitrator();

@@ -27,18 +27,10 @@ export const phaseName = (phase: DisputePhase): DisputePhaseName =>
 export const voteName = (vote: Vote): VoteName =>
 	variantKey<VoteName>(vote as Record<VoteName, unknown>);
 
-/**
- * The discriminator key of a `DisputeOutcome` variant
- * (`Settled` / `Refunded` / `NoQuorum` / `Withdrawn`).
- */
 export const outcomeName = (outcome: DisputeOutcome): DisputeOutcomeName =>
 	variantKey<DisputeOutcomeName>(outcome as Record<DisputeOutcomeName, unknown>);
 
-/**
- * Tally counts visible on a resolved dispute. `Withdrawn` outcomes
- * carry no tally — return `undefined` so callers can short-circuit
- * instead of pretending the panel voted 0/0/0.
- */
+// `Withdrawn` carries no tally; return `undefined` rather than a fake 0/0/0.
 export const tallyOf = (outcome: DisputeOutcome): DisputeTally | undefined => {
 	if ('Settled' in outcome) {
 		return outcome.Settled;
@@ -52,17 +44,9 @@ export const tallyOf = (outcome: DisputeOutcome): DisputeTally | undefined => {
 	return undefined;
 };
 
-/**
- * Vote agreed on by both parties when a dispute is `Withdrawn`,
- * `undefined` for any other outcome shape.
- */
 export const withdrawnVote = (outcome: DisputeOutcome): Vote | undefined =>
 	'Withdrawn' in outcome ? outcome.Withdrawn.agreed : undefined;
 
-/**
- * Whether the given principal is a (currently-active) panel member on
- * this dispute. Used to gate the cast-vote / submit-evidence UI.
- */
 export const isOnPanel = (
 	dispute: Pick<Dispute, 'panel'>,
 	principal: Principal | undefined
@@ -74,11 +58,7 @@ export const isOnPanel = (
 	return dispute.panel.some((member) => member.principal.toText() === text);
 };
 
-/**
- * The vote (if any) the given principal already cast on this dispute.
- * `undefined` covers both "not on the panel" and "on the panel but
- * hasn't voted yet".
- */
+// `undefined` covers both "not on the panel" and "on the panel but hasn't voted yet".
 export const myVote = (
 	dispute: Pick<Dispute, 'panel'>,
 	principal: Principal | undefined
@@ -94,10 +74,6 @@ export const myVote = (
 	return fromNullable(member.vote);
 };
 
-/**
- * Vote helper constants — surfaced as values rather than constructed
- * inline at every call site to keep app code readable.
- */
 export const VOTE_CC: Vote = { ConcludedCorrectly: null };
 export const VOTE_IC: Vote = { IncorrectlyConcluded: null };
 export const VOTE_ABSTAIN: Vote = { Abstain: null };
@@ -110,11 +86,8 @@ const VOTE_BY_NAME: Record<VoteName, Vote> = {
 
 export const voteFromName = (name: VoteName): Vote => VOTE_BY_NAME[name];
 
-/**
- * Whether `outcome` (when set) maps the underlying deal to its
- * "settled" terminal state — `Settled` / `Withdrawn(CC)`. Used by the
- * deal detail / card to colour the amount.
- */
+// True iff the outcome releases funds to the recipient
+// (`Settled`, or `Withdrawn(ConcludedCorrectly)`).
 export const isSettlingOutcome = (outcome: DisputeOutcome): boolean => {
 	const name = outcomeName(outcome);
 	if (name === DisputeOutcomes.Settled) {

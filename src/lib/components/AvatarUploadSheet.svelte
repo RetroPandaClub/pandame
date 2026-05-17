@@ -7,19 +7,9 @@
 	interface Props {
 		open: boolean;
 		onclose: () => void;
-		/**
-		 * Called with the user-picked `File` (either snapped from the live
-		 * webcam preview or chosen from the device library). Parent owns
-		 * compression + persistence so the same sheet can drive any avatar
-		 * host in the future.
-		 */
+		/** Picked `File` (camera snap or library choice); parent owns compression + persistence. */
 		onpicked: (file: File) => void;
-		/**
-		 * Called when the user picks the "use generated avatar" option.
-		 * Parent computes the principal-derived default URL (via
-		 * `defaultAvatarUrlForPrincipal`) and persists it. Optional — when
-		 * omitted, the third button is hidden.
-		 */
+		/** Picked "use generated avatar"; omit to hide the button. */
 		onpickeddefault?: () => void;
 		/** Disables the action buttons while the parent is processing. */
 		busy?: boolean;
@@ -51,16 +41,13 @@
 		cameraError = undefined;
 	};
 
-	// External closes (Esc, X, backdrop, parent setting open=false) all
-	// route through here so the camera stream is always released.
+	// Every close path funnels through here so the camera stream is always released.
 	$effect(() => {
 		if (!open) {
 			untrack(resetState);
 		}
 	});
 
-	// (Re-)attach the live stream to the <video> the first frame after
-	// `mode === 'camera'` swaps the conditional and the element mounts.
 	$effect(() => {
 		if (mode === 'camera' && stream !== undefined && videoEl !== undefined) {
 			videoEl.srcObject = stream;
@@ -114,9 +101,7 @@
 			return;
 		}
 
-		// Snap a center-cropped square JPEG from the current frame. The
-		// downstream `fileToAvatarDataUrl` does the final resize + size
-		// budget so we hand it a generous source resolution.
+		// Hand `fileToAvatarDataUrl` a generous source — it owns the final resize + size budget.
 		const side = Math.min(w, h);
 		const sx = (w - side) / 2;
 		const sy = (h - side) / 2;
@@ -165,7 +150,7 @@
 	const handleLibrary = (event: Event) => {
 		const target = event.currentTarget as HTMLInputElement;
 		const file = target.files?.[0];
-		// Reset the input so the same file can be picked twice in a row.
+		// Reset so the same file can be picked twice in a row.
 		target.value = '';
 		if (file === undefined) {
 			return;

@@ -9,23 +9,14 @@ export const userSignedIn: Readable<boolean> = derived(
 
 export const userNotSignedIn: Readable<boolean> = derived(userSignedIn, (signedIn) => !signedIn);
 
-/**
- * The caller's principal as a stable string, or `undefined` while the
- * Juno auth state hasn't resolved yet (or after sign-out). Use this
- * instead of reading `$userStore?.key` ad-hoc — keeps every component
- * agreeing on the source of truth + makes future principal-shape
- * changes a single-file edit.
- */
+// Read this instead of `$userStore?.key` so every component agrees on
+// the principal source of truth and shape changes stay single-file.
 export const userPrincipalText: Readable<string | undefined> = derived(
 	userStore,
 	(user) => user?.key
 );
 
-/**
- * Display-friendly short principal (`abc123…xyz`) for the caller,
- * empty string while not yet signed in. Components that need the
- * full text should read `userPrincipalText`.
- */
+// Empty string while signed-out; consumers that need the full text use `userPrincipalText`.
 export const userPrincipalShort: Readable<string> = derived(userPrincipalText, (text) =>
 	text === undefined ? '' : shortPrincipal(text)
 );

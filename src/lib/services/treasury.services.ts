@@ -16,13 +16,7 @@ const escrowAccount = (account: IcrcAccount): EscrowDid.Account => ({
 	subaccount: toNullable(account.subaccount)
 });
 
-/**
- * Reads the live `icrc1_balance_of` of the canister-owned treasury
- * subaccount for the deal's settlement token (today only ICP). Every
- * bound deal's `creation_fee` accumulates here at create time and
- * stays until a controller drains it. Controller-gated — non-
- * controllers get `NotAuthorised` from the canister.
- */
+// Controller-gated; non-controllers trap with `NotAuthorised`.
 export const treasuryBalance = async ({
 	token = ICP_TOKEN
 }: { token?: Token } = {}): Promise<bigint> => {
@@ -31,13 +25,9 @@ export const treasuryBalance = async ({
 	return await escrowApi.adminTreasuryBalance({ identity, asset: assetForToken(token) });
 };
 
-/**
- * Drains `amount` (in `token`'s base units) from the canister
- * treasury subaccount to `to` via `icrc1_transfer`. The caller sizes
- * `amount` against the live `treasuryBalance` reading; under-funded
- * withdrawals trap with `TransferFailed`. Returns the ledger block
- * index of the transfer for an audit trail. Controller-gated.
- */
+// Controller-gated. Returns the ledger block index for an audit trail.
+// Caller sizes `amount` against `treasuryBalance`; under-funded
+// withdrawals trap with `TransferFailed`.
 export const treasuryWithdraw = async ({
 	to,
 	amount,

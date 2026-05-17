@@ -3,17 +3,7 @@
 
 	type Variant = 'primary' | 'secondary' | 'ghost';
 
-	/**
-	 * Each size maps to a real CTA archetype in the design:
-	 *   - `xs` (31 × any, `rounded-[9px]`)  — small inline CTA, e.g.
-	 *                                        "Choose files to upload".
-	 *   - `sm` (36 px, `rounded-button`)    — chat reply pills.
-	 *   - `md` (40 px, `rounded-button`)    — canonical CTA on most
-	 *                                        screens, e.g. "Create
-	 *                                        new deals".
-	 *   - `lg` (54 px, `rounded-button`)    — hero CTA on full-bleed
-	 *                                        screens (Welcome "Connect").
-	 */
+	// `xs` inline CTA · `sm` chat-reply pill · `md` canonical CTA · `lg` hero CTA.
 	type Size = 'xs' | 'sm' | 'md' | 'lg';
 
 	interface Props {

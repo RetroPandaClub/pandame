@@ -19,9 +19,9 @@
 		/**
 		 * Wrap pills onto multiple rows instead of keeping them on a
 		 * single line. Used when the row carries more than two choices
-		 * (e.g. the See-Deal filter set in the home chatbot, Figma
-		 * frame 219:306, which lays four pills out 2 × 2). Pills keep
-		 * their natural width — they never truncate.
+		 * (e.g. the See-Deal filter set in the home chatbot, which lays
+		 * four pills out 2 × 2). Pills keep their natural width — they
+		 * never truncate.
 		 */
 		wrap?: boolean;
 	}
@@ -39,9 +39,9 @@
   gap. In the default (single-line) layout, `flex-nowrap` + `min-w-0
   shrink` on each pill keeps the pair on one line even on a 375 px
   frame; labels truncate before they wrap to a second row. In the
-  `wrap` layout (Figma 219:306) pills keep their natural width and
-  flow onto the next line when they don't fit — `gap-y-[12px]` keeps
-  the rows from touching.
+  `wrap` layout pills keep their natural width and flow onto the
+  next line when they don't fit — `gap-y-[12px]` keeps the rows
+  from touching.
 -->
 <div
 	class="flex items-center gap-x-[9px] pr-[12px] pl-[88px] {wrap

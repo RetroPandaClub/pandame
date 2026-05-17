@@ -14,19 +14,9 @@
 	interface Props {
 		deal: Deal;
 		href?: string;
-		/**
-		 * Optional snippet rendered at the bottom of the card body
-		 * (e.g. the Approve / Decline pair on Pending, or the Choose-files
-		 * button on Created).
-		 */
+		/** Optional bottom-of-card snippet (e.g. Approve / Decline). */
 		actions?: Snippet;
-		/**
-		 * Surface the deal's per-deal panel size (or "default") above the
-		 * `actions` snippet. The Pending consent card on
-		 * `/transactions` uses this so the consenting counterparty sees
-		 * the dispute term before tapping Approve. Off by default to
-		 * keep the History / Created lists tidy.
-		 */
+		/** Show the dispute panel size — the consenting party should see it before tapping Approve. */
 		showPanelSize?: boolean;
 	}
 
@@ -40,8 +30,7 @@
 
 	let title = $derived(fromNullable(deal.title) ?? `Deal ${deal.id.toString()}`);
 
-	// Sign from the caller's PoV: positive when funds flow TO them
-	// (recipient), negative when leaving (payer).
+	// Sign from the caller's PoV: + when funds flow in, − when out.
 	let signedAmount = $derived.by(() => {
 		if (mySide === 'recipient') {
 			return deal.amount;
@@ -67,12 +56,7 @@
 	}
 </script>
 
-<!--
-  Title bar is INSET (mx/mt 11 px) rather than edge-to-edge so it
-  reads as a label inside the card. The optional `actions` snippet
-  is used by /transactions for inline Approve / Decline (Pending)
-  and Choose-files (Created) rows.
--->
+<!-- Title bar is inset so it reads as a label inside the card, not an edge-to-edge banner. -->
 {#snippet body()}
 	<header
 		class="bg-primary-stroke text-default-inverse mx-[11px] mt-[11px] flex h-[24px] items-center justify-between rounded-[4px] px-[10px]"

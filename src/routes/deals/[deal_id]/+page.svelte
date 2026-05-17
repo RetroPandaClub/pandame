@@ -104,11 +104,7 @@
 		deal === undefined ? undefined : signatureState(deal.recipient_signature)
 	);
 
-	// "Waiting on …" callout fires only on Funded bound deals where
-	// exactly one side has signed. Tip flows always carry `Empty` and
-	// terminal states have nothing to wait on. Mirrors the upstream
-	// auto-YES tally rule (a single `Yes` doesn't settle on its own —
-	// the counterparty must also sign).
+	// Fires only when exactly one side has signed on a `Funded` bound deal.
 	let waitingOnPayer = $derived(
 		status === DealStatuses.Funded &&
 			recipientSignature !== undefined &&

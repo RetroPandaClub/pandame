@@ -27,10 +27,9 @@
 	let path: Path | undefined = $state(undefined);
 	let seeDeal: SeeDeal | undefined = $state(undefined);
 
-	// Header chip text mirrors the chatbot's current branch — Figma
-	// frames flip "Hello!" → "New Deal" once the user commits to the
-	// create flow, and → "See Deal" once they pick the see-deals
-	// branch (frame 219:306).
+	// Header chip text mirrors the chatbot's current branch:
+	// "Hello!" → "New Deal" once the user commits to the create flow,
+	// → "See Deal" once they pick the see-deals branch.
 	let headerChip = $derived.by(() => {
 		if (intentCreate) {
 			return $i18n.home.chip_new_deal;
@@ -65,11 +64,6 @@
 			mode === 'receive' ? '/deals/new?side=receive&mode=expert' : '/deals/new?mode=expert'
 		);
 	};
-	// Pending / Created / Disputed live on /transactions (one tab
-	// each); History is its own page. Selecting "Disputed" still
-	// lands on the right tab even though the underlying canister
-	// state isn't wired yet — the tab itself surfaces the future
-	// view.
 	const chooseSeeDeal = (next: SeeDeal) => async () => {
 		seeDeal = next;
 		if (next === 'history') {
@@ -127,8 +121,8 @@
 			</ChatBubble>
 
 			<!--
-        Four pills wrap onto two rows on a 375 px frame, matching
-        the 2 × 2 layout in Figma frame 219:306.
+        Four pills wrap onto two rows on a 375 px frame in a 2 × 2
+        layout.
       -->
 			<ChatChoiceRow
 				wrap

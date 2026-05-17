@@ -74,6 +74,22 @@ derived,enums,env,i18n,services,stores,types,utils}`). The taxonomy is
     change. No new abstractions unless they remove duplication that
     already exists. **No new dependencies without explicit user
     approval.**
+12. **No transient external references in source code.** Inside
+    `src/**`, comments / JSDoc / snippet labels must not pin to Figma
+    node ids or frame numbers, escrow version tags (`v0.0.7`), RFC /
+    PR / issue numbers, or upstream commit hashes. Stable API names
+    (`consent_deal`, `sign_yes`, `DealStatus::Funded`) are fine.
+    Operational pins (e.g. `ESCROW_REF` in
+    [`scripts/import-candid.sh`](./scripts/import-candid.sh)) are
+    config values, not narrative comments, and stay.
+13. **Terse comments, why-only.** Comments and JSDoc explain intent,
+    trade-offs, or foot-guns — not what the code does. Default to one
+    line above the binding; promote to a `/** … */` block only when
+    the comment captures something the signature can't. No narrating
+    ("// fetch the user"), no restating type signatures, no
+    step-by-step walkthroughs of every lifecycle branch. If a
+    comment grew past ~3 lines, check that it's still pointing at a
+    why and not narrating.
 
 ---
 
