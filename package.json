@@ -1,6 +1,11 @@
 {
 	"name": "pandame",
-	"version": "0.0.1",
+	"version": "0.0.2",
+	"juno": {
+		"functions": {
+			"version": "0.0.2"
+		}
+	},
 	"private": true,
 	"scripts": {
 		"dev": "vite dev --force",
@@ -13,6 +18,8 @@
 		"format": "prettier --cache --write . && eslint . --cache --fix",
 		"quality": "npm run format && npm run lint",
 		"did": "./scripts/did.sh && npm run format && npm run lint",
+		"juno:functions:build": "juno functions build --lang ts",
+		"juno:functions:upgrade:dev": "juno functions upgrade -m development",
 		"dev:setup": "./scripts/dev-setup.sh",
 		"dev:tokens": "./scripts/send-tokens.sh",
 		"postinstall:copy-auth": "node -e \"require('fs').cpSync('node_modules/@junobuild/core/dist/workers/', './static/workers', {recursive: true});\"",
@@ -26,6 +33,7 @@
 		"e2e:report": "npm run playwright:install && playwright show-report"
 	},
 	"devDependencies": {
+		"@eslint/compat": "^2.1.0",
 		"@icp-sdk/bindgen": "^0.4.0",
 		"@junobuild/config": "^3.0.1",
 		"@junobuild/vite-plugin": "^4.7.1",

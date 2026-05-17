@@ -73,6 +73,7 @@ it once per session.
   | `$lib`          | `src/lib`          |
   | `$declarations` | `src/declarations` |
   | `$routes`       | `src/routes`       |
+  | `$satellite`    | `src/satellite`    |
   | `$root`         | repo root          |
 
 ## Where things go (one-liner)
@@ -90,6 +91,7 @@ src/
 │   ├── send/+page.svelte
 │   └── claim/[deal_id]/+page.svelte    Public QR / share-link claim flow
 ├── declarations/           Generated Candid bindings (DO NOT hand-edit)
+├── satellite/              Juno serverless functions (`defineHook` / `defineQuery` / `defineAssert`)
 └── lib/
     ├── actors/             Shared agent / actor manager
     ├── api/                Identity-passing facades (`*.api.ts`)

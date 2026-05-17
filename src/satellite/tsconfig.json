@@ -9,7 +9,17 @@
 		"esModuleInterop": true,
 		"isolatedModules": true,
 		"moduleResolution": "bundler",
-		"outDir": "../../target/deploy"
+		"resolveJsonModule": true,
+		"outDir": "../../target/deploy",
+		"paths": {
+			"$lib": ["../lib"],
+			"$lib/*": ["../lib/*"],
+			"$satellite": ["."],
+			"$satellite/*": ["./*"],
+			"$root/*": ["../../*"],
+			"$declarations": ["../declarations"],
+			"$declarations/*": ["../declarations/*"]
+		}
 	},
 	"include": ["**/*.ts"]
 }

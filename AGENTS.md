@@ -95,21 +95,22 @@ derived,enums,env,i18n,services,stores,types,utils}`). The taxonomy is
 
 ## 3. Where to look (frontend)
 
-| You're about to…                              | Read first                                                                                                 |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Open any PR                                   | [`docs/ai/pr-and-ci.md`](./docs/ai/pr-and-ci.md)                                                           |
-| Touch any frontend file                       | [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)                                               |
-| Add or move a file                            | [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)                                         |
-| Write Svelte 5 / runes / TS                   | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)                       |
-| Add UI                                        | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                                     |
-| Add a Svelte component                        | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)             |
-| Add a service / api wrapper                   | [`docs/ai/frontend/workflows/new-service.md`](./docs/ai/frontend/workflows/new-service.md)                 |
-| Add a store / derived                         | [`docs/ai/frontend/workflows/new-store.md`](./docs/ai/frontend/workflows/new-store.md)                     |
-| Regenerate Candid bindings                    | [`docs/ai/frontend/workflows/regenerate-bindings.md`](./docs/ai/frontend/workflows/regenerate-bindings.md) |
-| Add or change tests                           | [`docs/ai/frontend/testing.md`](./docs/ai/frontend/testing.md)                                             |
-| Add user-visible text or interactive elements | [`docs/ai/frontend/a11y.md`](./docs/ai/frontend/a11y.md)                                                   |
-| Add or rename an i18n key                     | [`docs/ai/frontend/workflows/i18n.md`](./docs/ai/frontend/workflows/i18n.md)                               |
-| Deploy / restart locally                      | [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md)                                     |
+| You're about to…                                            | Read first                                                                                                 |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Open any PR                                                 | [`docs/ai/pr-and-ci.md`](./docs/ai/pr-and-ci.md)                                                           |
+| Touch any frontend file                                     | [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)                                               |
+| Add or move a file                                          | [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)                                         |
+| Write Svelte 5 / runes / TS                                 | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)                       |
+| Add UI                                                      | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                                     |
+| Add a Svelte component                                      | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)             |
+| Add a service / api wrapper                                 | [`docs/ai/frontend/workflows/new-service.md`](./docs/ai/frontend/workflows/new-service.md)                 |
+| Add a store / derived                                       | [`docs/ai/frontend/workflows/new-store.md`](./docs/ai/frontend/workflows/new-store.md)                     |
+| Regenerate Candid bindings                                  | [`docs/ai/frontend/workflows/regenerate-bindings.md`](./docs/ai/frontend/workflows/regenerate-bindings.md) |
+| Add / edit a Juno serverless function (hook, query, update) | [`docs/ai/frontend/workflows/satellite-functions.md`](./docs/ai/frontend/workflows/satellite-functions.md) |
+| Add or change tests                                         | [`docs/ai/frontend/testing.md`](./docs/ai/frontend/testing.md)                                             |
+| Add user-visible text or interactive elements               | [`docs/ai/frontend/a11y.md`](./docs/ai/frontend/a11y.md)                                                   |
+| Add or rename an i18n key                                   | [`docs/ai/frontend/workflows/i18n.md`](./docs/ai/frontend/workflows/i18n.md)                               |
+| Deploy / restart locally                                    | [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md)                                     |
 
 ---
 
