@@ -7,10 +7,9 @@
 	import FilterChip from '$lib/components/FilterChip.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
 	import UserPrincipalBadge from '$lib/components/UserPrincipalBadge.svelte';
-	import { listMyDeals } from '$lib/services/deal.services';
-	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { DealFilter } from '$lib/types/deal';
+	import { emit } from '$lib/utils/events.utils';
 
 	const FILTER_ORDER: readonly DealFilter[] = [
 		'all',
@@ -45,29 +44,18 @@
 
 	let filterLabel = $derived(`${FILTER_LABELS[filter]} Filter`);
 
-	const reload = async () => {
-		try {
-			const deals = await listMyDeals();
-			dealsStore.set(deals);
-		} catch (err) {
-			console.error('Failed to refresh history:', err);
-		}
-	};
-
 	const cycleFilter = () => {
 		filter = FILTER_ORDER[(FILTER_ORDER.indexOf(filter) + 1) % FILTER_ORDER.length];
 	};
 
 	$effect(() => {
-		reload();
+		emit({ message: 'pandameReloadDeals' });
 	});
 </script>
 
 <svelte:head>
 	<title>{$i18n.history.title} · {$i18n.layout.title}</title>
 </svelte:head>
-
-<svelte:window onjunoExampleReload={reload} />
 
 <AuthGuard />
 

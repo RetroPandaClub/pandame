@@ -1,6 +1,13 @@
 import type { EscrowDid } from '$declarations';
 import * as escrowApi from '$lib/api/escrow.api';
 import { safeGetIdentityOnce } from '$lib/services/identity.services';
+import { disputesStore } from '$lib/stores/disputes.store';
+import { emit } from '$lib/utils/events.utils';
+
+const reflectDispute = (dispute: EscrowDid.DisputeView): void => {
+	disputesStore.upsert(dispute);
+	emit({ message: 'pandameReloadDeals' });
+};
 
 export const openDispute = async ({
 	dealId
@@ -9,7 +16,9 @@ export const openDispute = async ({
 }): Promise<EscrowDid.DisputeView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.openDispute({ identity, dealId });
+	const updated = await escrowApi.openDispute({ identity, dealId });
+	reflectDispute(updated);
+	return updated;
 };
 
 export const getDispute = async ({
@@ -59,7 +68,15 @@ export const submitEvidence = async ({
 }): Promise<EscrowDid.DisputeView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.submitEvidence({ identity, disputeId, note, artefactUrl, artefactSha256 });
+	const updated = await escrowApi.submitEvidence({
+		identity,
+		disputeId,
+		note,
+		artefactUrl,
+		artefactSha256
+	});
+	reflectDispute(updated);
+	return updated;
 };
 
 export const castVote = async ({
@@ -71,7 +88,9 @@ export const castVote = async ({
 }): Promise<EscrowDid.DisputeView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.castVote({ identity, disputeId, vote });
+	const updated = await escrowApi.castVote({ identity, disputeId, vote });
+	reflectDispute(updated);
+	return updated;
 };
 
 export const finalizeDispute = async ({
@@ -81,7 +100,9 @@ export const finalizeDispute = async ({
 }): Promise<EscrowDid.DisputeView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.finalizeDispute({ identity, disputeId });
+	const updated = await escrowApi.finalizeDispute({ identity, disputeId });
+	reflectDispute(updated);
+	return updated;
 };
 
 export const withdrawDispute = async ({
@@ -93,5 +114,7 @@ export const withdrawDispute = async ({
 }): Promise<EscrowDid.DisputeView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.withdrawDispute({ identity, disputeId, proposal });
+	const updated = await escrowApi.withdrawDispute({ identity, disputeId, proposal });
+	reflectDispute(updated);
+	return updated;
 };

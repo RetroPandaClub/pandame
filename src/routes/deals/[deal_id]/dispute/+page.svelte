@@ -138,20 +138,18 @@
 		reload();
 	});
 
+	// Some dispute actions mutate the parent deal (e.g. `open_dispute`
+	// flips `Funded` → `Disputed`); refresh local `deal` so the page
+	// reflects it.
 	const wrap = async (op: string, action: () => Promise<Dispute>) => {
 		progress = true;
 		error = undefined;
 
 		try {
-			const updated = await action();
-			dispute = updated;
-			disputesStore.upsert(updated);
+			dispute = await action();
 
-			// Both open and complete-withdraw mutate the parent deal — refresh it.
 			if (dealId !== undefined) {
-				const refreshed = await getDeal({ dealId });
-				deal = refreshed;
-				dealsStore.upsert(refreshed);
+				deal = await getDeal({ dealId });
 			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : String(err);

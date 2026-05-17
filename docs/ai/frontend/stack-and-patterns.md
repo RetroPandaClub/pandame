@@ -424,16 +424,55 @@ the typed shape is generated into
 
 ## Custom DOM events
 
-Juno emits `junoSignOutAuthTimer` and `junoExampleReload` on `window`.
-Their typings live in
+Two custom events are typed in
 [`src/custom-events.d.ts`](../../../src/custom-events.d.ts) (augmenting
-`svelte/elements`). Listen with
-`<svelte:window onjunoXxx={handler} />` — see
-[`Auth.svelte`](../../../src/lib/components/Auth.svelte) and
-[`+page.svelte`](../../../src/routes/+page.svelte) (`junoExampleReload`
-is reused by `<svelte:window>` for the dashboard refresh hook).
+`svelte/elements`):
 
-If you add a new custom event, declare it in `src/custom-events.d.ts`.
+- **`junoSignOutAuthTimer`** — emitted by Juno's `auth` worker when
+  the Internet Identity session expires. Listen for it (see
+  [`Auth.svelte`](../../../src/lib/components/Auth.svelte)); never
+  emit it.
+- **`pandameReloadDeals`** — project-local refresh signal for
+  `dealsStore` + `disputesStore`. The lone listener lives in
+  [`DealsLoader.svelte`](../../../src/lib/components/DealsLoader.svelte).
+
+Listen with `<svelte:window on{EventName}={handler} />`. To trigger,
+use the [`emit`](../../../src/lib/utils/events.utils.ts) helper:
+
+```ts
+import { emit } from '$lib/utils/events.utils';
+
+emit({ message: 'pandameReloadDeals' });
+```
+
+This is how the codebase wires "refresh after action" — the action
+services in
+[`deal.services.ts`](../../../src/lib/services/deal.services.ts) /
+[`dispute.services.ts`](../../../src/lib/services/dispute.services.ts)
+emit it after every successful canister call, a 30 s `setInterval`
+inside `DealsLoader` (mounted once in `+layout.svelte`) emits it on
+the ambient cadence, and pages emit it on mount when they want a
+fresh fetch immediately. Mirrors the `oisyTriggerWallet` +
+`LoaderTokens` pattern in
+[`oisy-wallet`](https://github.com/dfinity/oisy-wallet) — keep new
+"refresh on a cadence + on actions" concerns as their own
+behaviour-only loader component instead of piling onto
+`Auth.svelte`.
+
+### Naming new custom events
+
+- Project-local events MUST use the `pandame*` prefix
+  (`pandameReloadDeals`, `pandameRefresh<Concept>`, etc.) so they're
+  trivially greppable and never collide with library-emitted events.
+- Library-emitted events keep their original prefix (`juno*` for
+  Juno).
+- Don't ship event names from a library template (the previous
+  `junoExampleReload` was Juno-starter-template residue — it's not
+  a Juno event).
+
+When you add a new event, declare it in `src/custom-events.d.ts`
+and add a row to the catalog in
+[`reusability.md`](./reusability.md#common-utils--libutils).
 
 ## Performance
 

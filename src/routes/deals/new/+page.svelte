@@ -21,7 +21,6 @@
 	import { PANEL_SIZE_DEFAULT } from '$lib/constants/dispute.constants';
 	import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 	import { createAndFundDeal, DEFAULT_CREATION_FEE } from '$lib/services/deal.services';
-	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal } from '$lib/types/deal';
 	import { friendlyEscrowError } from '$lib/utils/escrow-error.utils';
@@ -93,7 +92,6 @@
 				token
 			});
 
-			dealsStore.upsert(funded);
 			createdDeal = funded;
 		} catch (err) {
 			error = friendlyError(err);

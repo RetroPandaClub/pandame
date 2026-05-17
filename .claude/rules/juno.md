@@ -130,11 +130,16 @@ push deal state into Juno.
   the user isn't signed in.
 - **Post-install.** Auth workers are synced via `npm run postinstall`
   to `./static/workers`. Don't hand-edit those files.
-- **Custom DOM events.** `junoSignOutAuthTimer` fires when the auth
-  session expires; `junoExampleReload` is the project's manual refresh
-  signal (the dashboard listens to it for re-fetching deals + balance).
-  Both are typed in
-  [`src/custom-events.d.ts`](../../src/custom-events.d.ts).
+- **Custom DOM events.** `junoSignOutAuthTimer` is the only event Juno
+  itself emits in this app (fired by the `auth` worker when the II
+  session expires). The project's own refresh signal is
+  `pandameReloadDeals` — fired by `DealsLoader` on a 30 s timer, by
+  every action service after a successful canister call, and by
+  pages on mount; the lone listener lives in
+  [`DealsLoader.svelte`](../../src/lib/components/DealsLoader.svelte).
+  Both events are typed in
+  [`src/custom-events.d.ts`](../../src/custom-events.d.ts). New
+  project-local events use the `pandame*` prefix.
 
 ## Dispute UI
 

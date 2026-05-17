@@ -15,7 +15,6 @@
 		signNo,
 		signYes
 	} from '$lib/services/deal.services';
-	import { dealsStore } from '$lib/stores/deals.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userStore } from '$lib/stores/user.store';
 	import type { Deal, DealSide } from '$lib/types/deal';
@@ -86,8 +85,7 @@
 		error = undefined;
 
 		try {
-			const updated = await action();
-			dealsStore.upsert(updated);
+			await action();
 		} catch (err) {
 			error =
 				err instanceof EscrowCanisterError

@@ -2,6 +2,7 @@
 	import { initSatellite } from '@junobuild/core';
 	import type { Snippet } from 'svelte';
 	import Auth from '$lib/components/Auth.svelte';
+	import DealsLoader from '$lib/components/DealsLoader.svelte';
 	import DevAuth from '$lib/components/DevAuth.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	// eslint-disable-next-line import/no-relative-parent-imports
@@ -46,3 +47,4 @@
 
 <Auth />
 <DevAuth />
+<DealsLoader />

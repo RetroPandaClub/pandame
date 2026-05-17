@@ -18,17 +18,16 @@
 	import {
 		cancelDeal,
 		consentDeal,
-		listMyDeals,
 		rejectDeal,
 		signNo,
 		signYes
 	} from '$lib/services/deal.services';
-	import { listMyDisputes } from '$lib/services/dispute.services';
 	import { dealsStore } from '$lib/stores/deals.store';
 	import { disputesStore } from '$lib/stores/disputes.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Deal } from '$lib/types/deal';
 	import { consentState, dealStatus, sideOf, signatureState } from '$lib/utils/deal.utils';
+	import { emit } from '$lib/utils/events.utils';
 
 	type Tab = 'pending' | 'active' | 'disputed';
 
@@ -128,36 +127,13 @@
 			: signatureState(deal.recipient_signature);
 	};
 
-	const reloadDeals = async () => {
-		try {
-			const deals = await listMyDeals();
-			dealsStore.set(deals);
-		} catch (err) {
-			console.error('Failed to refresh deals:', err);
-		}
-	};
-
-	const reloadDisputes = async () => {
-		try {
-			const disputes = await listMyDisputes();
-			disputesStore.set(disputes);
-		} catch (err) {
-			console.error('Failed to refresh disputes:', err);
-		}
-	};
-
-	const reload = async () => {
-		await Promise.all([reloadDeals(), reloadDisputes()]);
-	};
-
 	$effect(() => {
-		reload();
+		emit({ message: 'pandameReloadDeals' });
 	});
 
 	const onConsent = (deal: Deal) => async () => {
 		try {
 			await consentDeal({ deal });
-			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to consent deal:', err);
 		}
@@ -166,7 +142,6 @@
 	const onReject = (deal: Deal) => async () => {
 		try {
 			await rejectDeal({ dealId: deal.id });
-			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to reject deal:', err);
 		}
@@ -175,7 +150,6 @@
 	const onCancel = (deal: Deal) => async () => {
 		try {
 			await cancelDeal({ dealId: deal.id });
-			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to cancel deal:', err);
 		}
@@ -184,7 +158,6 @@
 	const onSignYes = (deal: Deal) => async () => {
 		try {
 			await signYes({ dealId: deal.id });
-			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to confirm completion:', err);
 		}
@@ -193,7 +166,6 @@
 	const onSignNo = (deal: Deal) => async () => {
 		try {
 			await signNo({ dealId: deal.id });
-			await reloadDeals();
 		} catch (err) {
 			console.error('Failed to reject completion:', err);
 		}
@@ -219,8 +191,6 @@
 <svelte:head>
 	<title>{$i18n.transactions.title} · {$i18n.layout.title}</title>
 </svelte:head>
-
-<svelte:window onjunoExampleReload={reload} />
 
 <AuthGuard />
 

@@ -32,6 +32,7 @@ interface I18nNav {
 	aria_label: string;
 	home: string;
 	transactions: string;
+	transactions_attention: string;
 	profile: string;
 }
 

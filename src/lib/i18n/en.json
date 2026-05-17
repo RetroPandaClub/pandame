@@ -26,6 +26,7 @@
 		"aria_label": "Primary navigation",
 		"home": "Home",
 		"transactions": "Transactions",
+		"transactions_attention": "Transactions, {count} need your attention",
 		"profile": "Profile"
 	},
 	"home": {

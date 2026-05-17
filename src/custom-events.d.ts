@@ -3,7 +3,7 @@ declare module 'svelte/elements' {
 
 	export interface HTMLAttributes<T> {
 		onjunoSignOutAuthTimer?: (event: CustomEvent<any>) => void;
-		onjunoExampleReload?: (event: CustomEvent<any>) => void;
+		onpandameReloadDeals?: (event: CustomEvent<any>) => void;
 	}
 
 	/* eslint-enable */

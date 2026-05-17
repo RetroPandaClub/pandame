@@ -5,12 +5,19 @@ import { ESCROW_CANISTER_ID } from '$lib/constants/canisters.constants';
 import { SETTLEMENT_TOKEN } from '$lib/constants/tokens.constants';
 import { ConsentStates } from '$lib/enums/deal-status';
 import { safeGetIdentityOnce } from '$lib/services/identity.services';
+import { dealsStore } from '$lib/stores/deals.store';
 import type { Deal } from '$lib/types/deal';
 import type { Token } from '$lib/types/token';
 import { consentState, sideOf } from '$lib/utils/deal.utils';
+import { emit } from '$lib/utils/events.utils';
 import { toNullable } from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
+
+const reflectDeal = (deal: EscrowDid.DealView): void => {
+	dealsStore.upsert(deal);
+	emit({ message: 'pandameReloadDeals' });
+};
 
 interface CreateDealRequest {
 	amount: bigint;
@@ -74,6 +81,8 @@ export const createAndFundDeal = async (
 		}
 	});
 
+	reflectDeal(created);
+
 	return { created, funded: created };
 };
 
@@ -92,21 +101,27 @@ export const acceptDeal = async ({
 }): Promise<EscrowDid.DealView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.acceptDeal({ identity, dealId, claimCode });
+	const updated = await escrowApi.acceptDeal({ identity, dealId, claimCode });
+	reflectDeal(updated);
+	return updated;
 };
 
 /** Bound-deal only; tips trap with `DisputeRequiresBoundRecipient`. */
 export const signYes = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.signYes({ identity, dealId });
+	const updated = await escrowApi.signYes({ identity, dealId });
+	reflectDeal(updated);
+	return updated;
 };
 
 /** Bound-deal only; tips trap with `DisputeRequiresBoundRecipient`. */
 export const signNo = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.signNo({ identity, dealId });
+	const updated = await escrowApi.signNo({ identity, dealId });
+	reflectDeal(updated);
+	return updated;
 };
 
 /**
@@ -136,25 +151,33 @@ export const consentDeal = async ({ deal }: { deal: Deal }): Promise<EscrowDid.D
 		});
 	}
 
-	return await escrowApi.consentDeal({ identity, dealId: deal.id });
+	const updated = await escrowApi.consentDeal({ identity, dealId: deal.id });
+	reflectDeal(updated);
+	return updated;
 };
 
 export const rejectDeal = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.rejectDeal({ identity, dealId });
+	const updated = await escrowApi.rejectDeal({ identity, dealId });
+	reflectDeal(updated);
+	return updated;
 };
 
 export const cancelDeal = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.cancelDeal({ identity, dealId });
+	const updated = await escrowApi.cancelDeal({ identity, dealId });
+	reflectDeal(updated);
+	return updated;
 };
 
 export const reclaimDeal = async ({ dealId }: { dealId: bigint }): Promise<EscrowDid.DealView> => {
 	const identity = await safeGetIdentityOnce();
 
-	return await escrowApi.reclaimDeal({ identity, dealId });
+	const updated = await escrowApi.reclaimDeal({ identity, dealId });
+	reflectDeal(updated);
+	return updated;
 };
 
 export const listMyDeals = async ({
