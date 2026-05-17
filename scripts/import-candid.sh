@@ -31,13 +31,16 @@ download_did() {
   } >"${out_path}"
 }
 
-: Move to root of the repo
+# Move to root of the repo
 cd "$SCRIPT_DIR/.."
 
-: Import escrow canister .did from upstream
-: Pinned to https://github.com/AntonioVentilii/escrow/releases/tag/v0.0.7 — bump
-: the ref when consuming a newer canister contract, then run `npm run did`.
-mkdir -p src/declarations/escrow
-download_did https://raw.githubusercontent.com/AntonioVentilii/escrow/v0.0.7/src/escrow/escrow.did "escrow.did" "src/declarations/escrow"
+# Pin the upstream escrow canister contract here. Bump ESCROW_REF (tag,
+# branch, or commit on AntonioVentilii/escrow) when consuming a newer
+# canister, then run "npm run did".
+ESCROW_REF="v0.0.7"
 
-: Fin
+mkdir -p src/declarations/escrow
+download_did \
+  "https://raw.githubusercontent.com/AntonioVentilii/escrow/${ESCROW_REF}/src/escrow/escrow.did" \
+  "escrow.did" \
+  "src/declarations/escrow"
