@@ -15,9 +15,14 @@ const SATELLITE_IDS = {
 } as const;
 
 /**
- * E2E runs against the `junobuild/satellite` emulator image, which bakes in a
- * predictable canister ID that is neither of the above. Tests set
- * `VITE_SATELLITE_ID` to point at it — see `docs/ai/frontend/testing.md`.
+ * `development` is the satellite the Skylab emulator (`juno emulator start`)
+ * creates, which is what `npm run dev` and the local scripts target.
+ *
+ * The override exists for the other local setup: the standalone
+ * `junobuild/satellite` image bakes in the fixed ID
+ * `jx5yt-yyaaa-aaaal-abzbq-cai`. Nothing sets `VITE_SATELLITE_ID` today — the
+ * E2E suite only exercises the homepage and never reaches the satellite — so
+ * it is there for whoever runs against that image directly.
  */
 export const SATELLITE_ID: string =
 	import.meta.env.VITE_SATELLITE_ID ??

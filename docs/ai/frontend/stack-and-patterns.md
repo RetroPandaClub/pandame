@@ -151,7 +151,7 @@ export const createAndFundDeal = async (
 - Use `safeGetIdentityOnce` for authenticated actions (throws if the
   user isn't signed in).
 - Auth uses Internet Identity via `@icp-sdk/auth`. The single call to
-  `onAuthStateChange` lives in
+  `initAuth` lives in
   [`Auth.svelte`](../../../src/lib/components/Auth.svelte). Other
   components read from
   [`userStore`](../../../src/lib/stores/user.store.ts) and the

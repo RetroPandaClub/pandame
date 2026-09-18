@@ -109,8 +109,8 @@ export class AuthClientProvider {
 	 * Resolves the current identity, or `undefined` when signed out.
 	 *
 	 * We read and validate the delegation straight from IndexedDB rather than
-	 * calling `AuthClient.isAuthenticated()`, which in v6 is synchronous and
-	 * reads `localStorage` — unavailable in a worker context.
+	 * calling `AuthClient.isAuthenticated()`, which is synchronous and reads
+	 * `localStorage` — unavailable in a worker context.
 	 */
 	loadIdentity = async (): Promise<Identity | undefined> => {
 		if (!(await this.#hasValidDelegation())) {
@@ -123,17 +123,49 @@ export class AuthClientProvider {
 	};
 
 	#hasValidDelegation = async (): Promise<boolean> => {
+		const chain = await this.#delegationChain();
+
+		return nonNullish(chain) && isDelegationValid(chain);
+	};
+
+	#delegationChain = async (): Promise<DelegationChain | undefined> => {
 		const raw = await this.#storage.get(KEY_STORAGE_DELEGATION);
 
 		if (typeof raw !== 'string') {
-			return false;
+			return undefined;
 		}
 
 		try {
-			return isDelegationValid(DelegationChain.fromJSON(raw));
+			return DelegationChain.fromJSON(raw);
 		} catch {
-			return false;
+			return undefined;
 		}
+	};
+
+	/**
+	 * When the current delegation stops being valid, in milliseconds since the
+	 * epoch — or `undefined` when there is no delegation to expire.
+	 *
+	 * The chain is only as good as its earliest-expiring link, so this is the
+	 * minimum across the chain rather than the last entry's expiry.
+	 */
+	delegationExpiration = async (): Promise<number | undefined> => {
+		const chain = await this.#delegationChain();
+
+		if (isNullish(chain)) {
+			return undefined;
+		}
+
+		const expirations = chain.delegations.map(({ delegation: { expiration } }) => expiration);
+
+		if (expirations.length === 0) {
+			return undefined;
+		}
+
+		const earliest = expirations.reduce((min, value) => (value < min ? value : min));
+
+		// Delegation expiries are nanoseconds; `Date.now()` is milliseconds.
+		return Number(earliest / 1_000_000n);
 	};
 
 	get storage(): IdbStorage {

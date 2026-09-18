@@ -10,11 +10,22 @@
  * upload protocol has to be spoken directly. Everything else about the
  * canister is unchanged: same canister ID, same custom domain, same data.
  *
- * Usage:
- *   node scripts/deploy-hosting.mjs --network ic
- *   node scripts/deploy-hosting.mjs --network local
+ * Both the satellite and an identity are required; the examples below pass
+ * them explicitly because neither has a default.
  *
- * Identity: a PEM file via --pem <path> or the DEPLOY_PEM_PATH env var.
+ * Usage:
+ *   node scripts/deploy-hosting.mjs --network ic \
+ *     --satellite wqhtf-fqaaa-aaaal-amssq-cai --pem ./deploy.pem
+ *
+ *   node scripts/deploy-hosting.mjs --network local \
+ *     --satellite auamu-4x777-77775-aaaaa-cai --pem ./deploy.pem
+ *
+ * The satellite may also come from SATELLITE_ID and the identity from
+ * DEPLOY_PEM_PATH. `npm run deploy` passes the satellite for you.
+ *
+ * Assets in the satellite that are absent from `build/` are deleted, so the
+ * hosted site matches the build exactly — this is what `juno hosting deploy`
+ * did. Pass --keep-stale to upload without deleting anything.
  */
 import { Actor, HttpAgent } from '@icp-sdk/core/agent';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
@@ -27,6 +38,9 @@ const CHUNK_SIZE = 1_900_000;
 
 // The collection the satellite serves the app's own frontend from.
 const DAPP_COLLECTION = '#dapp';
+
+// `list_assets` is paginated; this is how many entries we pull per call.
+const LIST_PAGE_SIZE = 100;
 
 const BUILD_DIR = 'build';
 
@@ -78,10 +92,68 @@ const idlFactory = ({ IDL: idl }) => {
 		chunk_ids: idl.Vec(idl.Nat)
 	});
 
+	const AssetKey = idl.Record({
+		token: idl.Opt(idl.Text),
+		collection: idl.Text,
+		owner: idl.Principal,
+		name: idl.Text,
+		description: idl.Opt(idl.Text),
+		full_path: idl.Text
+	});
+	const AssetEncodingNoContent = idl.Record({
+		modified: idl.Nat64,
+		sha256: idl.Vec(idl.Nat8),
+		total_length: idl.Nat
+	});
+	const AssetNoContent = idl.Record({
+		key: AssetKey,
+		updated_at: idl.Nat64,
+		encodings: idl.Vec(idl.Tuple(idl.Text, AssetEncodingNoContent)),
+		headers: idl.Vec(idl.Tuple(idl.Text, idl.Text)),
+		created_at: idl.Nat64,
+		version: idl.Opt(idl.Nat64)
+	});
+	const ListOrderField = idl.Variant({
+		UpdatedAt: idl.Null,
+		Keys: idl.Null,
+		CreatedAt: idl.Null
+	});
+	const ListOrder = idl.Record({ field: ListOrderField, desc: idl.Bool });
+	const TimestampMatcher = idl.Variant({
+		Equal: idl.Nat64,
+		Between: idl.Tuple(idl.Nat64, idl.Nat64),
+		GreaterThan: idl.Nat64,
+		LessThan: idl.Nat64
+	});
+	const ListMatcher = idl.Record({
+		key: idl.Opt(idl.Text),
+		updated_at: idl.Opt(TimestampMatcher),
+		description: idl.Opt(idl.Text),
+		created_at: idl.Opt(TimestampMatcher)
+	});
+	const ListPaginate = idl.Record({
+		start_after: idl.Opt(idl.Text),
+		limit: idl.Opt(idl.Nat64)
+	});
+	const ListParams = idl.Record({
+		order: idl.Opt(ListOrder),
+		owner: idl.Opt(idl.Principal),
+		matcher: idl.Opt(ListMatcher),
+		paginate: idl.Opt(ListPaginate)
+	});
+	const ListResults = idl.Record({
+		matches_pages: idl.Opt(idl.Nat64),
+		matches_length: idl.Nat64,
+		items_page: idl.Opt(idl.Nat64),
+		items: idl.Vec(idl.Tuple(idl.Text, AssetNoContent)),
+		items_length: idl.Nat64
+	});
+
 	return idl.Service({
 		commit_asset_upload: idl.Func([CommitBatch], [], []),
 		del_asset: idl.Func([idl.Text, idl.Text], [], []),
 		init_asset_upload: idl.Func([InitAssetKey], [InitUploadResult], []),
+		list_assets: idl.Func([idl.Text, ListParams], [ListResults], ['query']),
 		upload_asset_chunk: idl.Func([UploadChunk], [UploadChunkResult], [])
 	});
 };
@@ -185,6 +257,66 @@ const uploadEncoding = async ({ actor, asset, encoding }) => {
 	});
 };
 
+/**
+ * Every asset currently stored in the collection.
+ *
+ * `list_assets` is paginated, so this walks the pages with `start_after`
+ * rather than assuming one call returns everything.
+ */
+const listAllAssets = async ({ actor }) => {
+	const fullPaths = [];
+	let startAfter = [];
+
+	for (;;) {
+		const { items } = await actor.list_assets(DAPP_COLLECTION, {
+			order: [],
+			owner: [],
+			matcher: [],
+			paginate: [{ start_after: startAfter, limit: [BigInt(LIST_PAGE_SIZE)] }]
+		});
+
+		if (items.length === 0) {
+			return fullPaths;
+		}
+
+		for (const [, asset] of items) {
+			fullPaths.push(asset.key.full_path);
+		}
+
+		if (items.length < LIST_PAGE_SIZE) {
+			return fullPaths;
+		}
+
+		startAfter = [items[items.length - 1][0]];
+	}
+};
+
+/**
+ * Deletes assets the satellite still serves that this build no longer
+ * contains, so the hosted site matches `build/` exactly.
+ *
+ * Without this, a renamed or deleted file stays publicly served forever — and
+ * because SvelteKit fingerprints its chunks, every deploy would otherwise
+ * leave the whole previous bundle behind. `juno hosting deploy` did this for
+ * us; the replacement has to do it too.
+ */
+const pruneStaleAssets = async ({ actor, assets }) => {
+	const current = new Set(assets.map(({ fullPath }) => fullPath));
+	const stale = (await listAllAssets({ actor })).filter((fullPath) => !current.has(fullPath));
+
+	if (stale.length === 0) {
+		console.log('\nNo stale assets to remove.');
+		return;
+	}
+
+	console.log(`\nRemoving ${stale.length} assets no longer in the build:`);
+
+	for (const fullPath of stale) {
+		await actor.del_asset(DAPP_COLLECTION, fullPath);
+		console.log(`  - ${fullPath}`);
+	}
+};
+
 const main = async () => {
 	const network = arg('network') ?? 'local';
 	const canisterId = process.env.SATELLITE_ID ?? arg('satellite');
@@ -221,6 +353,12 @@ const main = async () => {
 			await uploadEncoding({ actor, asset, encoding });
 		}
 		console.log(`  ${asset.fullPath}`);
+	}
+
+	if (process.argv.includes('--keep-stale')) {
+		console.log('\nSkipping stale asset cleanup (--keep-stale).');
+	} else {
+		await pruneStaleAssets({ actor, assets });
 	}
 
 	console.log(`\nDone. https://${canisterId}.icp0.io/`);

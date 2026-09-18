@@ -26,7 +26,7 @@ jobs:
       # Uploads `build/` to the satellite with the satellite's own asset API.
       # `icp`/`dfx` cannot do this: the satellite does not implement the
       # standard asset canister interface. The identity below must be a
-      # controller of the satellite — see docs/ai/frontend/workflows/deploy.md.
+      # controller of the satellite — see .agents/workflows/deployment.md.
       - name: Write deploy identity
         env:
           DEPLOY_PEM: ${{ secrets.DEPLOY_PEM }}
