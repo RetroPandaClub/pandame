@@ -38,9 +38,11 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
 
-      # The identity needs to be a controller of the profiles canister, and to
-      # hold the frontend asset canister's Commit permission — see
-      # .agents/workflows/deployment.md.
+      # The identity needs controller rights on the profiles canister and the
+      # frontend's Commit permission. That permission only exists once the
+      # frontend canister has been reinstalled as an asset canister by a
+      # controller — see .agents/workflows/deployment.md. This workflow fails
+      # until that has happened.
       - name: Import deploy identity
         env:
           DEPLOY_PEM: ${{ secrets.DEPLOY_PEM }}

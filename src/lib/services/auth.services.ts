@@ -110,16 +110,22 @@ export const signOut = async (): Promise<void> => {
 };
 
 /**
- * Restores the session on load.
+ * Reconciles the store with whatever delegation is actually in storage.
  *
- * Never rejects. Callers invoke this from `onMount`, where a rejection would
- * surface as an unhandled promise rejection and — worse — leave the store in
- * its initial `undefined` ("not known yet") state, which guards wait on
- * forever. Anything that goes wrong reading the delegation (blocked or
- * unavailable IndexedDB, a corrupt entry) means we cannot prove the user is
- * signed in, so the safe answer is `null` ("signed out").
+ * Used both to restore the session on load and to re-check it later. The
+ * delegation lives in IndexedDB, which is shared across tabs: signing out in
+ * one tab removes it, and without a re-check this tab would keep showing a
+ * signed-in user until its own expiry timer fired, while every authenticated
+ * call silently got no identity.
+ *
+ * Never rejects. Callers invoke this from `onMount` and from event handlers,
+ * where a rejection would surface as an unhandled promise rejection and —
+ * worse — leave the store in its initial `undefined` ("not known yet") state,
+ * which guards wait on forever. Anything that goes wrong reading the
+ * delegation (blocked or unavailable IndexedDB, a corrupt entry) means we
+ * cannot prove the user is signed in, so the safe answer is `null`.
  */
-export const initAuth = async (): Promise<void> => {
+export const syncAuth = async (): Promise<void> => {
 	try {
 		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
@@ -133,4 +139,31 @@ export const initAuth = async (): Promise<void> => {
 
 		userStore.set(null);
 	}
+};
+
+/** Restores the session on load. */
+export const initAuth = syncAuth;
+
+/**
+ * Re-checks the delegation whenever this tab becomes visible or focused.
+ *
+ * This is what replaces Juno's auth worker for the cross-tab case: it caught
+ * a sign-out elsewhere, and dropping it left the UI able to disagree with
+ * storage. Returns a teardown function for `onMount`.
+ */
+export const watchAuth = (): (() => void) => {
+	const reconcile = () => {
+		// Only worth re-reading when this tab is actually being looked at.
+		if (document.visibilityState === 'visible') {
+			syncAuth();
+		}
+	};
+
+	document.addEventListener('visibilitychange', reconcile);
+	window.addEventListener('focus', reconcile);
+
+	return () => {
+		document.removeEventListener('visibilitychange', reconcile);
+		window.removeEventListener('focus', reconcile);
+	};
 };

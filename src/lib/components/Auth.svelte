@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser, dev } from '$app/environment';
 	import { userPrincipalText } from '$lib/derived/user.derived';
-	import { initAuth } from '$lib/services/auth.services';
+	import { initAuth, watchAuth } from '$lib/services/auth.services';
 	import { ensureProfile } from '$lib/services/profile.services';
 	import { profileStore } from '$lib/stores/profile.store';
 
@@ -22,6 +22,8 @@
 		}
 
 		initAuth();
+
+		return watchAuth();
 	});
 
 	// One central `ensureProfile` so badges in shared chrome can render

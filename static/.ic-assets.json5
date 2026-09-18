@@ -15,14 +15,15 @@
       // `script-src 'self'` blocks outright — the page renders but never
       // hydrates. Everything else is kept from the standard policy.
       //
-      // connect-src covers the IC API (escrow, ledgers, profiles) and Internet
-      // Identity. img-src allows the DiceBear default avatars and the inline
-      // data: URLs used for uploaded ones.
+      // connect-src covers the hosts this app calls: the IC API, Internet
+      // Identity, and the local gateway, so a build deployed to a local
+      // network can reach it — dfx's own standard policy allows localhost for
+      // the same reason.
       //
       // This is still stricter than what the Juno satellite served, which set
       // no CSP at all. Dropping 'unsafe-inline' would mean emitting a hash for
       // SvelteKit's bootstrap script on every build.
-      "Content-Security-Policy": "default-src 'self';script-src 'self' 'unsafe-inline';connect-src 'self' https://icp-api.io https://icp0.io https://*.icp0.io https://id.ai;img-src 'self' data: https://api.dicebear.com;style-src 'self' 'unsafe-inline';font-src 'self';object-src 'none';base-uri 'self';frame-ancestors 'none';form-action 'self';upgrade-insecure-requests;"
+      "Content-Security-Policy": "default-src 'self';script-src 'self' 'unsafe-inline';connect-src 'self' http://localhost:* https://icp-api.io https://icp0.io https://*.icp0.io https://id.ai;img-src 'self' data: https://api.dicebear.com;style-src 'self' 'unsafe-inline';font-src 'self';object-src 'none';base-uri 'self';frame-ancestors 'none';form-action 'self';upgrade-insecure-requests;"
     },
     // Serve only over the certified domains. On raw.icp0.io the gateway does
     // not verify responses, so a boundary node could tamper with them

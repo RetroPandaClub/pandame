@@ -242,7 +242,7 @@ npm run e2e       # playwright
 | `npm run did`              | Re-pull `escrow.did` from upstream and regenerate TS bindings                               |
 | `npm run i18n`             | Regenerate the typed i18n dictionary                                                        |
 | `npm run deploy`           | Build and deploy the frontend and profiles canisters to mainnet                             |
-| `npm run deploy:local`     | Same, against the local network                                                             |
+| `npm run deploy:local`     | Same, against the local network (production build — see the deploy notes)                   |
 
 ## 🚀 Deploy
 
