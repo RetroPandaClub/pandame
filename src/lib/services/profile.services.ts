@@ -18,7 +18,8 @@ const toUserProfile = (profile: ProfilesDid.Profile): UserProfile => ({
 	username: profile.username,
 	name: profile.name,
 	surname: profile.surname,
-	avatar_url: fromNullable(profile.avatar_url)
+	avatar_url: fromNullable(profile.avatar_url),
+	version: profile.version
 });
 
 // Returns an empty shell (no remote write) for unknown principals so the caller
@@ -36,9 +37,10 @@ export const getProfile = async (principal: string): Promise<UserProfile> => {
 /**
  * Writes the signed-in user's own profile.
  *
- * The optimistic-concurrency dance the Datastore required is gone: the canister
- * keys profiles by caller, so there is no version to read back and no way for
- * one caller's write to clobber another's.
+ * `version` is the optimistic-concurrency token: it must be the version the
+ * profile was last read at, or `undefined` to create it. Keying by caller stops
+ * one *user* clobbering another's profile, but not one of their own tabs
+ * clobbering the other — that is what this guards.
  */
 export const upsertProfile = async (profile: UserProfile): Promise<UserProfile> => {
 	const saved = await setProfile({
@@ -47,7 +49,8 @@ export const upsertProfile = async (profile: UserProfile): Promise<UserProfile> 
 			username: profile.username,
 			name: profile.name,
 			surname: profile.surname,
-			avatar_url: toNullable(profile.avatar_url)
+			avatar_url: toNullable(profile.avatar_url),
+			version: toNullable(profile.version)
 		}
 	});
 

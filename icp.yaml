@@ -10,9 +10,11 @@ canisters:
     recipe:
       type: '@dfinity/asset-canister@v2.3.0'
       configuration:
+        # No `build` here on purpose. The recipe would always run the same
+        # command, and the local deploy needs the `skylab` mode so the app
+        # targets the local gateway instead of mainnet. `npm run deploy` and
+        # `npm run deploy:local` each build first, with the right mode.
         dir: build
-        build:
-          - npm run build
 
   # User profiles, previously the satellite's `profiles` Datastore collection.
   - name: profiles

@@ -10,6 +10,12 @@ export interface UserProfile {
 	name: string;
 	surname: string;
 	avatar_url?: string;
+	/**
+	 * The version this profile was read at, echoed back on write so a stale
+	 * save is rejected rather than silently overwriting a newer one.
+	 * `undefined` when the profile does not exist in the canister yet.
+	 */
+	version?: bigint;
 }
 
 // `avatar_url` is intentionally undefined here; `ensureProfile` is

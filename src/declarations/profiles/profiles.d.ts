@@ -21,6 +21,11 @@ export interface Profile {
 	 * Nanoseconds since the epoch, set by the canister.
 	 */
 	created_at: bigint;
+	/**
+	 * Bumped on every write. Callers echo it back to `set_profile` so a stale
+	 * write is rejected instead of silently overwriting a newer one.
+	 */
+	version: bigint;
 }
 export type Result = { Ok: Profile } | { Err: string };
 /**
@@ -32,6 +37,15 @@ export interface SetProfile {
 	avatar_url: [] | [string];
 	name: string;
 	surname: string;
+	/**
+	 * The `version` last read, or `None` when creating the profile.
+	 *
+	 * Every write submits a whole profile, so without this two tabs — or an
+	 * avatar upload racing a text edit — would each overwrite the other's
+	 * fields with whatever they last saw. This is the optimistic-concurrency
+	 * check the Datastore used to provide.
+	 */
+	version: [] | [bigint];
 }
 export interface _SERVICE {
 	/**

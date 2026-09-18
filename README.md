@@ -184,7 +184,18 @@ replica.
 
    The IC HTTP gateway is exposed on `http://127.0.0.1:5987`.
 
-2. **First run only — deploy the escrow canister into the local
+2. **Deploy this project's canisters into the local network:**
+
+   ```bash
+   npm run deploy:local
+   ```
+
+   Copy the printed `profiles` canister ID into `.env.local` as
+   `VITE_PROFILES_CANISTER_ID` — a fresh network assigns a new one each time,
+   and the app refuses to start without it rather than calling the wrong
+   canister.
+
+3. **First run only — deploy the escrow canister into the local
    network.** Pandame's [`dfx.json`](./dfx.json) points `dfx` at the same
    gateway (`--network local`) so the escrow wasm built from
    `../escrow/` lands inside the same replica the dashboard talks to:
@@ -196,21 +207,20 @@ replica.
    The script prints the assigned local canister ID; copy it into a
    `.env.local` at the repo root as `VITE_ESCROW_CANISTER_ID=<id>`.
 
-3. **Start the dev server** in a new terminal:
+4. **Start the dev server** in a new terminal:
 
    ```bash
    npm run dev
    ```
 
-   The app boots at <http://localhost:5173>. Vite proxies `/api/*` to
-   the emulator, so the agent in the browser reaches the local
-   replica via the same origin as the dev server. The satellite
-   hosts the `profiles` datastore for editable user metadata (see
-   the profiles canister, whose source is in [`src/profiles/`](./src/profiles/)).
+   The app boots at <http://localhost:5173>. Vite proxies `/api/*` to the
+   local gateway, so the agent in the browser reaches the replica via the same
+   origin as the dev server. User profiles come from the profiles canister,
+   whose source is in [`src/profiles/`](./src/profiles/).
 
-> Don't run `dfx start`. Pandame's `dfx.json` is wired to use the
-> emulator's replica as its `local` network — running a separate
-> replica on port 4943 will collide and confuse you.
+> Don't run `dfx start`. Pandame's `dfx.json` targets the same port 5987 as
+> the icp local network — running a separate replica on port 4943 will collide
+> and confuse you.
 
 ### Quality gates
 

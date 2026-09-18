@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 #
-# Mints local ICP (or any other ICRC-1 token) into one or more principals
-# by calling the Juno emulator's admin endpoint at
-# `http://localhost:5999/ledger/transfer/`. The endpoint runs the transfer
-# from the anonymous identity, which holds minter rights on PocketIC, so
-# it works as a faucet for fresh `juno emulator start` runs.
+# Sends local ICP (or any other ICRC-1 token) to one or more principals via
+# `icp token transfer`.
 #
-# Endpoint contract:
-#   GET /ledger/transfer/?to=<principal>&amount=<e8s>&ledgerId=<canister-id>
-# Documented at https://github.com/junobuild/juno-docker#endpoints.
+# `icp network start` seeds the managed identities with ICP and cycles, so the
+# current identity can act as the faucet. This replaced the Juno emulator's
+# admin endpoint at `http://localhost:5999/ledger/transfer/`, which no longer
+# exists now that the local network is a plain icp-cli replica.
 #
 # Usage (from repo root):
 #   ./scripts/send-tokens.sh                                # prompts for principal, sends 10 ICP
@@ -33,7 +31,6 @@ fi
 DEFAULT_LEDGER_ID="ryjl3-tyaaa-aaaaa-aaaba-cai"
 DEFAULT_AMOUNT_ICP="10"
 ICP_DECIMALS=8
-ADMIN_PORT="${JUNO_ADMIN_PORT:-5999}"
 
 LEDGER_ID="$DEFAULT_LEDGER_ID"
 AMOUNT_ICP=""
@@ -53,14 +50,6 @@ while [[ $# -gt 0 ]]; do
 			AMOUNT_ICP="${2:-}"
 			if [[ -z "$AMOUNT_ICP" ]]; then
 				echo "error: --amount requires an argument" >&2
-				exit 1
-			fi
-			shift 2
-			;;
-		--admin-port)
-			ADMIN_PORT="${2:-}"
-			if [[ -z "$ADMIN_PORT" ]]; then
-				echo "error: --admin-port requires an argument" >&2
 				exit 1
 			fi
 			shift 2
@@ -108,11 +97,9 @@ if [[ -z "$AMOUNT_E8S" || "$AMOUNT_E8S" == "0" ]]; then
 	exit 1
 fi
 
-ENDPOINT="http://localhost:${ADMIN_PORT}/ledger/transfer/"
-
-if ! curl -fsS -o /dev/null --max-time 2 "http://localhost:${ADMIN_PORT}/health"; then
-	echo "error: Juno emulator admin server is not responding at http://localhost:${ADMIN_PORT}." >&2
-	echo "       Run \`juno emulator start\` first." >&2
+if ! npx icp network status -n local >/dev/null 2>&1; then
+	echo "error: the local network is not responding." >&2
+	echo "       Run \`npx icp network start -d\` first." >&2
 	exit 1
 fi
 
@@ -120,13 +107,9 @@ echo "Sending $AMOUNT_ICP token(s) ($AMOUNT_E8S base units) from ledger $LEDGER_
 
 for PRINCIPAL in "${PRINCIPALS[@]}"; do
 	echo "  -> $PRINCIPAL"
-	if ! curl -fsS --max-time 10 \
-		--get \
-		--data-urlencode "to=$PRINCIPAL" \
-		--data-urlencode "amount=$AMOUNT_E8S" \
-		--data-urlencode "ledgerId=$LEDGER_ID" \
-		"$ENDPOINT" \
-		>/dev/null; then
+	# The amount is passed in base units; `icp token transfer` takes whole
+	# tokens, so hand it the value the caller asked for rather than the e8s.
+	if ! npx icp token "$LEDGER_ID" transfer "$AMOUNT_ICP" "$PRINCIPAL" -n local --quiet; then
 		echo "error: transfer to $PRINCIPAL failed" >&2
 		exit 1
 	fi

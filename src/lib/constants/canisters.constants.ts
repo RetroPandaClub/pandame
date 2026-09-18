@@ -1,3 +1,4 @@
+import { isNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 const viteEnvString = (key: string): string | undefined => {
@@ -15,14 +16,26 @@ export const ESCROW_CANISTER_ID = Principal.fromText(
 	viteEnvString('VITE_ESCROW_CANISTER_ID') ?? ESCROW_CANISTER_ID_DEFAULT
 );
 
-// Profiles canister — what used to be the satellite's `profiles` Datastore
-// collection. `npm run dev:setup` overrides this via `.env.local` for a local
-// replica, where the canister ID differs on every fresh network.
-const PROFILES_CANISTER_ID_DEFAULT = 'aaaaa-aa';
+/**
+ * Profiles canister — what used to be the satellite's `profiles` Datastore
+ * collection.
+ *
+ * There is deliberately no fallback. `vite.config.ts` injects this at build
+ * time from `.icp/data/mappings/<env>.ids.json`, so a production build carries
+ * the real ID; locally, `.env.local` overrides it because a fresh network
+ * assigns a new one each time. A wrong-but-plausible default (the management
+ * canister, say) would send every profile call somewhere harmless-looking and
+ * fail at the wire boundary instead of here.
+ */
+const profilesCanisterId = viteEnvString('VITE_PROFILES_CANISTER_ID');
 
-export const PROFILES_CANISTER_ID = Principal.fromText(
-	viteEnvString('VITE_PROFILES_CANISTER_ID') ?? PROFILES_CANISTER_ID_DEFAULT
-);
+if (isNullish(profilesCanisterId) || profilesCanisterId.length === 0) {
+	throw new Error(
+		'VITE_PROFILES_CANISTER_ID is not set. Deploy the profiles canister and commit its mapping, or set it in .env.local for local development.'
+	);
+}
+
+export const PROFILES_CANISTER_ID = Principal.fromText(profilesCanisterId);
 
 // Mainnet ICP ledger. The Juno emulator pre-installs the same ID, so
 // no override is needed for local dev.

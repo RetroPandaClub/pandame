@@ -93,7 +93,7 @@ export class AuthClientProvider {
 	/**
 	 * Builds a client bound to one sign-in attempt.
 	 *
-	 * In `@icp-sdk/auth` v6 `identityProvider`, `derivationOrigin`,
+	 * `identityProvider`, `derivationOrigin`,
 	 * `windowOpenerFeatures` and `openIdProvider` are constructor-bound rather
 	 * than arguments to `login()`, so each sign-in needs its own client.
 	 * Construction stays synchronous so this can be called straight from a

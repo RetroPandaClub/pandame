@@ -46,6 +46,9 @@ pub struct Profile {
     /// Nanoseconds since the epoch, set by the canister.
     pub created_at: u64,
     pub updated_at: u64,
+    /// Bumped on every write. Callers echo it back to `set_profile` so a stale
+    /// write is rejected instead of silently overwriting a newer one.
+    pub version: u64,
 }
 
 /// What a caller may set. The owner and the timestamps are not in here: they
@@ -56,6 +59,13 @@ pub struct SetProfile {
     pub name: String,
     pub surname: String,
     pub avatar_url: Option<String>,
+    /// The `version` last read, or `None` when creating the profile.
+    ///
+    /// Every write submits a whole profile, so without this two tabs — or an
+    /// avatar upload racing a text edit — would each overwrite the other's
+    /// fields with whatever they last saw. This is the optimistic-concurrency
+    /// check the Datastore used to provide.
+    pub version: Option<u64>,
 }
 
 impl Storable for Profile {
@@ -152,9 +162,35 @@ fn set_profile(update: SetProfile) -> Result<Profile, String> {
     let key = PrincipalKey(owner);
     let now = ic_cdk::api::time();
 
-    let created_at = PROFILES
-        .with(|p| p.borrow().get(&key))
+    let existing = PROFILES.with(|p| p.borrow().get(&key));
+
+    // Reject a write based on a version other than the one stored, rather than
+    // letting the last writer win.
+    match (&existing, update.version) {
+        (Some(existing), Some(expected)) if existing.version != expected => {
+            return Err(format!(
+                "profile has version {}, write expected {expected}",
+                existing.version
+            ));
+        }
+        (Some(existing), None) => {
+            return Err(format!(
+                "profile already exists at version {}; pass it to update",
+                existing.version
+            ));
+        }
+        (None, Some(expected)) => {
+            return Err(format!(
+                "no profile to update; write expected version {expected}"
+            ));
+        }
+        _ => {}
+    }
+
+    let created_at = existing
+        .as_ref()
         .map_or(now, |existing| existing.created_at);
+    let version = existing.as_ref().map_or(1, |existing| existing.version + 1);
 
     let profile = Profile {
         owner,
@@ -164,6 +200,7 @@ fn set_profile(update: SetProfile) -> Result<Profile, String> {
         avatar_url: update.avatar_url,
         created_at,
         updated_at: now,
+        version,
     };
 
     PROFILES.with(|p| p.borrow_mut().insert(key, profile.clone()));

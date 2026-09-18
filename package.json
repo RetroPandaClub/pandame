@@ -27,8 +27,9 @@
 		"e2e:ci": "npm run playwright:install && playwright test --reporter=html",
 		"e2e:snapshots": "npm run playwright:install && playwright test --update-snapshots --reporter=list",
 		"e2e:report": "npm run playwright:install && playwright show-report",
-		"deploy": "icp deploy -e ic",
-		"deploy:local": "icp deploy"
+		"deploy": "npm run build && icp deploy -e ic",
+		"deploy:local": "npm run build:skylab && icp deploy",
+		"build:skylab": "tsc --noEmit && vite build --mode skylab"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.1.0",

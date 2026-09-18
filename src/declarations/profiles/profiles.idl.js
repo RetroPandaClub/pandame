@@ -14,13 +14,15 @@ export const idlFactory = ({ IDL }) => {
 		avatar_url: IDL.Opt(IDL.Text),
 		name: IDL.Text,
 		surname: IDL.Text,
-		created_at: IDL.Nat64
+		created_at: IDL.Nat64,
+		version: IDL.Nat64
 	});
 	const SetProfile = IDL.Record({
 		username: IDL.Text,
 		avatar_url: IDL.Opt(IDL.Text),
 		name: IDL.Text,
-		surname: IDL.Text
+		surname: IDL.Text,
+		version: IDL.Opt(IDL.Nat64)
 	});
 	const Result = IDL.Variant({ Ok: Profile, Err: IDL.Text });
 
