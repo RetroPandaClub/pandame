@@ -27,9 +27,9 @@
 		"e2e:ci": "npm run playwright:install && playwright test --reporter=html",
 		"e2e:snapshots": "npm run playwright:install && playwright test --update-snapshots --reporter=list",
 		"e2e:report": "npm run playwright:install && playwright show-report",
-		"deploy": "npm run build && SATELLITE_ID=wqhtf-fqaaa-aaaal-amssq-cai node scripts/deploy-hosting.mjs --network ic",
-		"deploy:dev": "npm run build && SATELLITE_ID=auamu-4x777-77775-aaaaa-cai node scripts/deploy-hosting.mjs --network local",
-		"dev:collections": "SATELLITE_ID=auamu-4x777-77775-aaaaa-cai node scripts/setup-collections.mjs --network local"
+		"deploy": "npm run build && node scripts/deploy-hosting.mjs --network ic --satellite wqhtf-fqaaa-aaaal-amssq-cai",
+		"deploy:dev": "npm run build && node scripts/deploy-hosting.mjs --network local --satellite auamu-4x777-77775-aaaaa-cai",
+		"dev:collections": "node scripts/setup-collections.mjs --network local --satellite auamu-4x777-77775-aaaaa-cai"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.1.0",

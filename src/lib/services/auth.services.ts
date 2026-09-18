@@ -65,11 +65,23 @@ export const signOut = async (): Promise<void> => {
 };
 
 /**
- * Restores the session on load. Sets the store to `null` (signed out) rather
- * than leaving it `undefined` (unknown), so guards can act on the result.
+ * Restores the session on load.
+ *
+ * Never rejects. Callers invoke this from `onMount`, where a rejection would
+ * surface as an unhandled promise rejection and — worse — leave the store in
+ * its initial `undefined` ("not known yet") state, which guards wait on
+ * forever. Anything that goes wrong reading the delegation (blocked or
+ * unavailable IndexedDB, a corrupt entry) means we cannot prove the user is
+ * signed in, so the safe answer is `null` ("signed out").
  */
 export const initAuth = async (): Promise<void> => {
-	const identity = await AuthClientProvider.getInstance().loadIdentity();
+	try {
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
-	userStore.set(isNullish(identity) ? null : toUser(identity));
+		userStore.set(isNullish(identity) ? null : toUser(identity));
+	} catch (err) {
+		console.error('Failed to restore the session:', err);
+
+		userStore.set(null);
+	}
 };
