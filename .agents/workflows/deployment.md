@@ -27,18 +27,19 @@ This workflow covers the two flavours of deploy that pandame supports:
 > port 4943 collides with the emulator and confuses the agent's
 > `/api` proxy target.
 
-## Local emulator
+## Local network
 
-1. Stop any other replicas / emulators on your machine.
+1. Stop any other replicas on your machine.
 
-2. Start the Juno emulator (requires Docker or Podman):
+2. Start the local network:
 
    ```bash
-   juno emulator start
+   npx icp network start -d
    ```
 
-   The IC HTTP gateway is exposed on `http://127.0.0.1:5987`; the
-   emulator-side admin console at <http://localhost:5866>.
+   The IC HTTP gateway is exposed on `http://127.0.0.1:5987` — the port
+   `REPLICA_HOST` already expects — rather than the icp-cli default of 8000.
+   `icp` and `ic-wasm` are devDependencies, so `npm ci` installs them.
 
 3. **First run only — deploy the upstream escrow canister into the
    local replica.** Requires the
@@ -58,18 +59,13 @@ This workflow covers the two flavours of deploy that pandame supports:
    echo "VITE_ESCROW_CANISTER_ID=<id>" >> .env.local
    ```
 
-4. **Create the datastore collections** so they actually exist on the
-   running satellite. `juno emulator start` boots an empty satellite —
-   without this step every `getDoc` / `setDoc` will trap with
-   `juno.collections.error.not_found (Datastore - profiles)`:
+4. **Deploy the canisters** into the local network:
 
    ```bash
-   npm run dev:collections -- --pem <path-to-a-controller-identity.pem>
+   npm run deploy:local
    ```
 
-   Re-run this whenever you change `COLLECTIONS` in
-   [`scripts/setup-collections.mjs`](../../scripts/setup-collections.mjs)
-   (add a new collection, flip a permission, etc.).
+   That deploys both canisters into the running local network.
 
 5. In a new terminal, start the SvelteKit dev server:
 
@@ -98,19 +94,14 @@ This workflow covers the two flavours of deploy that pandame supports:
    Pass `--ledger-id <canister-id>` to target a different ICRC-1
    ledger.
 
-7. PandaMe provisions **one datastore collection** locally —
-   `profiles` — for editable user metadata (`memory: Stable`,
-   `read: Public`, `write: Private`; see
-   [`scripts/setup-collections.mjs`](../../scripts/setup-collections.mjs)).
-   The satellite IDs are pinned in
-   [`satellite.constants.ts`](../../src/lib/constants/satellite.constants.ts).
-   The same `COLLECTIONS` list is what gets applied to the production
-   satellite, so there is only one source of truth. Escrow / ledger state
-   lives in the canisters inside the same emulator (locally) or on mainnet (in
-   production). When you ship a new datastore collection, add the matching
-   entry to `COLLECTIONS`, update
-   [`Collection`](../../src/lib/constants/collections.constants.ts), and
-   re-run `npm run dev:collections` against the running emulator.
+7. User profiles live in the **profiles canister**
+   ([`src/profiles/`](../../src/profiles/)), which replaced the satellite's
+   `profiles` Datastore collection. It keeps the same access model —
+   publicly readable, writable only by the owner — but derives the owner from
+   the caller rather than a supplied key. Escrow / ledger state lives in the
+   canisters inside the same local network (locally) or on mainnet (in
+   production). `npm run deploy:local` prints the local profiles canister ID;
+   put it in `.env.local` as `VITE_PROFILES_CANISTER_ID`.
 
 8. (Optional) regenerate the candid bindings from upstream
    [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
@@ -138,8 +129,8 @@ tags and on manual dispatch:
 2. The `prepare` composite action installs Node from `.node-version`,
    runs `npm ci` and `npm run prepare`.
 3. `npm run build` produces the static site under `./build/`.
-4. `scripts/deploy-hosting.mjs` uploads `build/` to the satellite, using a
-   controller identity from the `DEPLOY_PEM` repository secret.
+4. `icp deploy -e ic` builds and deploys both canisters, using the identity
+   from the `DEPLOY_PEM` repository secret.
 
 > **Setup:** `DEPLOY_PEM` must hold a PEM whose principal is a controller of
 > the satellite. Generate one (`dfx identity new deploy --storage-mode
@@ -168,33 +159,27 @@ If CI is unavailable:
    npm run deploy
    ```
 
-   That builds and then uploads `build/` to the satellite with
-   [`scripts/deploy-hosting.mjs`](../../scripts/deploy-hosting.mjs). It needs a
-   controller identity — pass `--pem <path>` or set `DEPLOY_PEM_PATH`.
-   - Satellite: `wqhtf-fqaaa-aaaal-amssq-cai`
-   - Hosting source: `build/`
+   That runs `icp deploy -e ic`, building and deploying both canisters.
+   - Frontend asset canister: `wqhtf-fqaaa-aaaal-amssq-cai` (the canister that
+     used to hold Juno's satellite), serving `build/`
+   - Profiles canister: mapped in `.icp/data/mappings/ic.ids.json`
 
-   > `icp` and `dfx` cannot do this. The satellite does not implement the
-   > standard asset canister interface (`create_batch` / `commit_batch` /
-   > `store`); it exposes Juno's own `init_asset_upload` /
-   > `upload_asset_chunk` / `commit_asset_upload` instead.
+   The identity needs the frontend's `Commit` permission and controller rights
+   on the profiles canister.
 
 ## Troubleshooting
 
-- **`juno.collections.error.not_found (Datastore - profiles)` /
-  profile reads or writes trap.** The local satellite is empty — the
-  collections were never created. Run `npm run dev:collections` against the
-  running emulator and refresh the browser.
-- **Sign-in silently fails locally.** Most often:
-  (a) `juno emulator start` is not running, or
-  (b) `VITE_SATELLITE_ID` is set to the production satellite while you are
-  pointed at the local replica.
+- **Profile reads or writes fail locally.** `VITE_PROFILES_CANISTER_ID` in
+  `.env.local` is unset or stale — a fresh local network assigns new IDs every
+  time. Re-run `npm run deploy:local` and copy the printed ID.
+- **Sign-in silently fails locally.** Most often `npx icp network start -d` is
+  not running.
 - **`adapter-static` build warning about `index.html`.** Should be gone
   since `+layout.ts` sets `prerender = false`. If it reappears, somebody
   re-enabled prerender — revert.
-- **CORS / 404 on the emulator.** Make sure `dfx start` is not running
-  on a separate replica. Stop everything, then `juno emulator start`
-  only — pandame's `dfx.json` already targets the emulator's gateway.
+- **CORS / 404 on the local network.** Make sure `dfx start` is not running
+  on a separate replica. Stop everything, then `npx icp network start -d`
+  only — pandame's `dfx.json` also targets port 5987.
 - **`canister not found` (`IC0301`) calling escrow.** You haven't run
   `npm run dev:setup` yet, or `VITE_ESCROW_CANISTER_ID` in `.env.local`
   is stale. Re-deploy and copy the printed ID.

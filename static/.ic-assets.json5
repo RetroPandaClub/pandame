@@ -1,0 +1,40 @@
+// Asset canister configuration. `static/` is copied verbatim into `build/` by
+// adapter-static, which is how this file reaches the canister at deploy time —
+// icp-cli only reads it from the directory it uploads, not from the project root.
+[
+  {
+    // Defaults for everything. HTML and entry points must be revalidated so a
+    // deploy is visible immediately.
+    "match": "**/*",
+    "security_policy": "standard",
+    "headers": {
+      "Cache-Control": "public, max-age=0, must-revalidate",
+
+      // Overrides the standard policy's CSP for one reason: SvelteKit boots
+      // the app from a single inline <script> in index.html, which
+      // `script-src 'self'` blocks outright — the page renders but never
+      // hydrates. Everything else is kept from the standard policy.
+      //
+      // connect-src covers the IC API (escrow, ledgers, profiles) and Internet
+      // Identity. img-src allows the DiceBear default avatars and the inline
+      // data: URLs used for uploaded ones.
+      //
+      // This is still stricter than what the Juno satellite served, which set
+      // no CSP at all. Dropping 'unsafe-inline' would mean emitting a hash for
+      // SvelteKit's bootstrap script on every build.
+      "Content-Security-Policy": "default-src 'self';script-src 'self' 'unsafe-inline';connect-src 'self' https://icp-api.io https://icp0.io https://*.icp0.io https://id.ai;img-src 'self' data: https://api.dicebear.com;style-src 'self' 'unsafe-inline';font-src 'self';object-src 'none';base-uri 'self';frame-ancestors 'none';form-action 'self';upgrade-insecure-requests;"
+    },
+    // Serve only over the certified domains. On raw.icp0.io the gateway does
+    // not verify responses, so a boundary node could tamper with them
+    // undetected — there is no reason to offer that for this app.
+    "allow_raw_access": false
+  },
+  {
+    // SvelteKit fingerprints everything under _app/immutable, so those files
+    // are safe to cache forever.
+    "match": "_app/immutable/**/*",
+    "headers": {
+      "Cache-Control": "public, max-age=31536000, immutable"
+    }
+  }
+]

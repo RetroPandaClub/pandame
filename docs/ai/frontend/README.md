@@ -26,7 +26,7 @@ it once per session.
 - [ ] No relative parent imports under `src/` — use the aliases
       (eslint enforces).
 - [ ] I went through the service layer, not directly to
-      `EscrowCanister` / `IcrcLedgerCanister` / `$lib/api/satellite.api`.
+      `EscrowCanister` / `IcrcLedgerCanister` / `ProfilesCanister`.
 - [ ] If I regenerated bindings, I committed `src/declarations/escrow/**`
       together with the calling code change.
 - [ ] Local quality gates pass —
@@ -48,10 +48,9 @@ it once per session.
   `tailwind.config.ts`.
 - **`@icp-sdk/auth`** for Internet Identity sign-in (see
   [`auth.services.ts`](../../../src/lib/services/auth.services.ts)).
-- **`$lib/api/satellite.api`** for the editable `profiles` datastore
-  collection — a direct actor against the satellite canister (see
-  [`setup-collections.mjs`](../../../scripts/setup-collections.mjs) for its
-  rules +
+- **`$lib/api/profiles.api`** for the editable user profile — an actor against
+  the profiles canister, whose Rust source is in
+  [`src/profiles/`](../../../src/profiles/) (see
   [`profile.services.ts`](../../../src/lib/services/profile.services.ts)).
 - **`@dfinity/agent` + `@icp-sdk/canisters`** for talking to the escrow
   canister and the ICP ledger.
@@ -120,7 +119,7 @@ PRs to learn from (from `git log` on `main`):
 - `feat(profile): persist user-editable profile via the satellite datastore` —
   one cohesive addition (type + service + store + derived + UI),
   every file fits an existing bucket, datastore collection wired in
-  `scripts/setup-collections.mjs` in the same commit.
+  the profiles canister in the same commit.
 - `feat(ui,routes): turn create-deal into a full-screen /deals/new
 flow` — single concern (UI rewrite), drops the previous modal in
   the same commit.

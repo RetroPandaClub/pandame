@@ -17,17 +17,31 @@ jobs:
         with:
           persist-credentials: false
 
+      # Installs icp-cli and ic-wasm too: both are devDependencies, so they are
+      # version-pinned in the lock file and restored from the npm cache rather
+      # than downloaded unpinned on every run. There is no official setup
+      # action for icp-cli.
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Build
-        run: npm run build
+      # Needed only for the profiles canister.
+      - name: Install the Rust wasm target
+        run: rustup target add wasm32-unknown-unknown
 
-      # Uploads `build/` to the satellite with the satellite's own asset API.
-      # `icp`/`dfx` cannot do this: the satellite does not implement the
-      # standard asset canister interface. The identity below must be a
-      # controller of the satellite — see .agents/workflows/deployment.md.
-      - name: Write deploy identity
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      # The identity needs to be a controller of the profiles canister, and to
+      # hold the frontend asset canister's Commit permission — see
+      # .agents/workflows/deployment.md.
+      - name: Import deploy identity
         env:
           DEPLOY_PEM: ${{ secrets.DEPLOY_PEM }}
         run: |
@@ -37,11 +51,12 @@ jobs:
           fi
           umask 077
           printf '%s' "$DEPLOY_PEM" > "$RUNNER_TEMP/deploy.pem"
+          # `keyring` is the default store and is unavailable on a CI runner.
+          npx icp identity import --from-pem "$RUNNER_TEMP/deploy.pem" --storage plaintext deploy
+          npx icp identity default deploy
 
-      - name: Deploy to the satellite
-        env:
-          SATELLITE_ID: wqhtf-fqaaa-aaaal-amssq-cai
-        run: node scripts/deploy-hosting.mjs --network ic --pem "$RUNNER_TEMP/deploy.pem"
+      - name: Deploy
+        run: npm run deploy
 
       - name: Remove deploy identity
         if: always()

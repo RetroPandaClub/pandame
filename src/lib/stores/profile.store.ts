@@ -1,14 +1,13 @@
-import type { Doc } from '$lib/api/satellite.api';
 import type { UserProfile } from '$lib/types/profile';
 import { writable, type Readable } from 'svelte/store';
 
-interface ProfileStore extends Readable<Doc<UserProfile> | undefined> {
-	set: (doc: Doc<UserProfile>) => void;
+interface ProfileStore extends Readable<UserProfile | undefined> {
+	set: (profile: UserProfile) => void;
 	reset: () => void;
 }
 
 const initProfile = (): ProfileStore => {
-	const { subscribe, set } = writable<Doc<UserProfile> | undefined>(undefined);
+	const { subscribe, set } = writable<UserProfile | undefined>(undefined);
 
 	return {
 		subscribe,
@@ -18,9 +17,11 @@ const initProfile = (): ProfileStore => {
 };
 
 /**
- * The currently-signed-in user's profile document. `undefined` until
- * the first `getProfile` call resolves; the inner `version` is the
- * canister round-trip token used by `upsertProfile` for optimistic
- * concurrency.
+ * The currently-signed-in user's profile. `undefined` until the first
+ * `getProfile` call resolves.
+ *
+ * This used to wrap a Juno `Doc`, whose `version` was the optimistic-concurrency
+ * token for writes. The profiles canister keys by caller instead, so there is
+ * no version to carry around and the profile is stored directly.
  */
 export const profileStore = initProfile();

@@ -149,24 +149,18 @@ Each is a single `<svg viewBox="0 0 24 24">` stroked path keyed by
 
 ### Constants — `$lib/constants/`
 
-| File                    | Notes                                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------- |
-| `app.constants`         | `REPLICA_HOST`, `ZERO`, ms / ns time scales, `II_MAX_TIME_TO_LIVE_NS`.                            |
-| `canisters.constants`   | `ESCROW_CANISTER_ID`, `ICP_LEDGER_CANISTER_ID`, `TESTICP_LEDGER_CANISTER_ID`.                     |
-| `tokens.constants`      | `ICP_TOKEN`, `TESTICP_TOKEN`, `SETTLEMENT_TOKEN` (env-resolved default), `SUPPORTED_TOKENS` list. |
-| `routes.constants`      | `CLAIM_ROUTE`, `SHARE_URL` builders for the QR / share-link flow.                                 |
-| `collections.constants` | `Collection.PROFILES` — satellite datastore collection key registry.                              |
+| File                  | Notes                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------- |
+| `app.constants`       | `REPLICA_HOST`, `ZERO`, ms / ns time scales, `II_MAX_TIME_TO_LIVE_NS`.                            |
+| `canisters.constants` | `ESCROW_CANISTER_ID`, `ICP_LEDGER_CANISTER_ID`, `TESTICP_LEDGER_CANISTER_ID`.                     |
+| `tokens.constants`    | `ICP_TOKEN`, `TESTICP_TOKEN`, `SETTLEMENT_TOKEN` (env-resolved default), `SUPPORTED_TOKENS` list. |
+| `routes.constants`    | `CLAIM_ROUTE`, `SHARE_URL` builders for the QR / share-link flow.                                 |
 
 ### Enums — `$lib/enums/`
 
 | File          | Notes                                                                           |
 | ------------- | ------------------------------------------------------------------------------- |
 | `deal-status` | `DealStatuses` / `ConsentStates` const objects + `TERMINAL_DEAL_STATUSES` list. |
-
-(The `Collection` const-object enum lives in
-`$lib/constants/collections.constants.ts`, not in `$lib/enums/`, because
-it pairs the key with the satellite collection name — keep it next to the
-related constants so the enum file stays purely about lifecycle states.)
 
 ### Common utils — `$lib/utils/`
 

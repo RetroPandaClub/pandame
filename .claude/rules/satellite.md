@@ -28,8 +28,7 @@ things:
    editable user metadata (username / name / address / email) keyed
    by principal. See
    [`profile.services.ts`](../../src/lib/services/profile.services.ts),
-   [`Collection.PROFILES`](../../src/lib/constants/collections.constants.ts),
-   and [`satellite.api.ts`](../../src/lib/api/satellite.api.ts).
+   and [`profiles.api.ts`](../../src/lib/api/profiles.api.ts).
 
 **Internet Identity sign-in** (no other auth provider) is handled directly by
 `@icp-sdk/auth` — see [`auth.services.ts`](../../src/lib/services/auth.services.ts).
@@ -54,16 +53,9 @@ push deal state into the satellite.
   [`userStore`](../../src/lib/stores/user.store.ts) and the
   [`userSignedIn` / `userNotSignedIn`](../../src/lib/derived/user.derived.ts)
   derived stores.
-- **Datastore:** [`satellite.api.ts`](../../src/lib/api/satellite.api.ts)
-  exposes `getDoc` / `setDoc` / `deleteDoc` against a trimmed Candid interface
-  in [`satellite.did.ts`](../../src/lib/api/satellite.did.ts).
-
-> [!IMPORTANT]
-> Document payloads are encoded by
-> [`doc-data.utils.ts`](../../src/lib/utils/doc-data.utils.ts), which
-> reproduces the Juno SDK's format byte for byte so documents written before
-> the migration stay readable. Never change that encoding — it is pinned by
-> tests against bytes captured from `@junobuild/utils`.
+- **Profiles:** [`profiles.api.ts`](../../src/lib/api/profiles.api.ts) exposes
+  `getProfile` / `setProfile` against the profiles canister, whose Rust source
+  is in [`src/profiles/`](../../src/profiles/).
 
 > [!IMPORTANT]
 > `signIn()` takes no arguments for plain Internet Identity. Pass
@@ -95,24 +87,21 @@ push deal state into the satellite.
 | `TESTICP_LEDGER_CANISTER_ID`  | `$lib/constants/canisters.constants.ts` | `xafvr-biaaa-aaaai-aql5q-cai` (https://github.com/dfinity/ledger-faucet)       |
 | `ICP_TOKEN` / `TESTICP_TOKEN` | `$lib/constants/tokens.constants.ts`    | 8 decimals, fee 10_000 e8s                                                     |
 | `SETTLEMENT_TOKEN`            | `$lib/constants/tokens.constants.ts`    | active default — `ICP_TOKEN` under `vite dev` / `vitest`, else `TESTICP_TOKEN` |
-| Satellite (hosting + data)    | `$lib/constants/satellite.constants.ts` | `wqhtf-fqaaa-aaaal-amssq-cai`                                                  |
+| Frontend asset canister       | `.icp/data/mappings/ic.ids.json`        | `wqhtf-fqaaa-aaaal-amssq-cai`                                                  |
+| Profiles canister             | `.icp/data/mappings/ic.ids.json`        | created on first mainnet deploy                                                |
 
 ## Local development
 
-- **Emulator:** `juno emulator start` (needs the `@junobuild/cli` installed
-  globally, plus Docker or Podman). This is the only remaining Juno
-  dependency: it provides a local satellite to develop against, and never
-  ships to production. Replacing it means installing the satellite wasm into
-  a plain local replica. It
-  exposes the IC HTTP gateway on `http://127.0.0.1:5987` and the admin
-  console on <http://localhost:5866>. The emulator is a fully
-  self-contained local IC replica — it **does not** proxy to mainnet.
+- **Local network:** `npx icp network start -d`. Exposes the IC HTTP gateway
+  on `http://127.0.0.1:5987` — the port `REPLICA_HOST` already expects, rather
+  than the icp-cli default of 8000. It is a fully self-contained local replica
+  — it **does not** proxy to mainnet.
 - **Vite proxy:** [`vite.config.ts`](../../vite.config.ts) forwards
   `/api/*` to `http://localhost:5987` so the agent's HTTP gateway calls
-  reach the emulator via the dev-server origin.
-- **Satellite ID:** resolved in
-  [`satellite.constants.ts`](../../src/lib/constants/satellite.constants.ts)
-  from the build mode, with a `VITE_SATELLITE_ID` override for E2E.
+  reach the local replica via the dev-server origin.
+- **Canister IDs:** mainnet IDs live in `.icp/data/mappings/ic.ids.json`. A
+  fresh local network assigns new ones each time — put the profiles ID in
+  `.env.local` as `VITE_PROFILES_CANISTER_ID`.
 - **Agent host:** in dev, `REPLICA_HOST` is `window.location.origin`
   (so the Vite `/api` proxy can route the agent at the local replica).
   In prod it's `https://icp-api.io`. See
@@ -198,16 +187,14 @@ Arbitrator + admin curation:
 
 ## Profile collection is real
 
-`profile.services.ts` reads / writes the `profiles` collection through
-[`satellite.api.ts`](../../src/lib/api/satellite.api.ts)'s `getDoc` / `setDoc`.
-The collection key is `Collection.PROFILES` (string `'profiles'`) and its
-rules — `memory: Stable`, `read: Public`, `write: Private` — live in
-[`scripts/setup-collections.mjs`](../../scripts/setup-collections.mjs). If you
-change the schema, mirror it in
-[`src/lib/types/profile.ts`](../../src/lib/types/profile.ts). A freshly started
-emulator boots empty, so run `npm run dev:collections` to create the
-collection before using the app locally; the production satellite already has
-it. The avatar is
+`profile.services.ts` reads / writes profiles through
+[`profiles.api.ts`](../../src/lib/api/profiles.api.ts). The canister keeps the
+old access model — publicly readable, writable only by the owner — but derives
+the owner from `msg_caller()` rather than a caller-supplied key, so one
+principal cannot write another's profile. If you change the schema, change
+[`src/profiles/src/lib.rs`](../../src/profiles/src/lib.rs), regenerate
+`src/declarations/profiles/profiles.did`, and mirror it in
+[`src/lib/types/profile.ts`](../../src/lib/types/profile.ts). The avatar is
 stored inline on the profile doc as a JPEG data URL produced by
 [`fileToAvatarDataUrl`](../../src/lib/utils/image.utils.ts); see
 [`UserProfile.avatar_url`](../../src/lib/types/profile.ts).

@@ -136,15 +136,12 @@ mirrored in [`vite.config.ts`](./vite.config.ts)):
 
 - [Node.js](https://nodejs.org/) — version pinned in
   [`.node-version`](./.node-version).
-- [Juno CLI](https://juno.build/docs/miscellaneous/cli) — only for the local
-  emulator; deploys no longer use it
-  to a satellite.
-- Docker (or Podman) — required by the local Juno emulator
-  (`juno emulator start`).
+- A Rust toolchain (`rustup target add wasm32-unknown-unknown`) — for the
+  profiles canister, and for building the upstream escrow canister into a
+  local network.
 - The [`dfx`](https://internetcomputer.org/docs/current/developer-docs/setup/install/)
-  CLI and a Rust toolchain (`rustup target add wasm32-unknown-unknown`) —
-  required only the first time you set up a local replica, to build and
-  deploy the upstream escrow canister into the Juno emulator. See
+  CLI — required only the first time you set up a local network, to deploy
+  the upstream escrow canister into it. See
   [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md).
 
 ### Installation
@@ -179,18 +176,17 @@ pre-installed there, so a working local setup needs the upstream
 [`../escrow/`](../escrow/) repo built and deployed into the same local
 replica.
 
-1. **Start the local Juno emulator** (requires Docker / Podman):
+1. **Start the local network:**
 
    ```bash
-   juno emulator start
+   npx icp network start -d
    ```
 
-   The IC HTTP gateway is exposed on `http://127.0.0.1:5987`; the Juno
-   admin console on <http://localhost:5866>.
+   The IC HTTP gateway is exposed on `http://127.0.0.1:5987`.
 
 2. **First run only — deploy the escrow canister into the local
-   replica.** Pandame's [`dfx.json`](./dfx.json) points `dfx` at the
-   emulator's gateway (`--network local`) so the escrow wasm built from
+   network.** Pandame's [`dfx.json`](./dfx.json) points `dfx` at the same
+   gateway (`--network local`) so the escrow wasm built from
    `../escrow/` lands inside the same replica the dashboard talks to:
 
    ```bash
@@ -210,7 +206,7 @@ replica.
    the emulator, so the agent in the browser reaches the local
    replica via the same origin as the dev server. The satellite
    hosts the `profiles` datastore for editable user metadata (see
-   [`scripts/setup-collections.mjs`](./scripts/setup-collections.mjs)).
+   the profiles canister, whose source is in [`src/profiles/`](./src/profiles/)).
 
 > Don't run `dfx start`. Pandame's `dfx.json` is wired to use the
 > emulator's replica as its `local` network — running a separate
@@ -231,28 +227,30 @@ npm run e2e       # playwright
 
 ## 🧞 Common Commands
 
-| Command                   | Action                                                                                            |
-| :------------------------ | :------------------------------------------------------------------------------------------------ |
-| `npm install`             | Install dependencies                                                                              |
-| `npm run dev`             | Start the dev server at `http://localhost:5173`                                                   |
-| `juno emulator start`     | Start the local Juno emulator (requires Docker / Podman)                                          |
-| `npm run dev:setup`       | Build & deploy the upstream escrow canister into the local Juno emulator (first-time local setup) |
-| `npm run build`           | Type-check and build the production site to `./build/`                                            |
-| `npm run preview`         | Preview the production build locally                                                              |
-| `npm run check`           | Run `svelte-check`                                                                                |
-| `npm run quality`         | Run `format` then `lint` in one shot                                                              |
-| `npm run test`            | Run the Vitest unit tests                                                                         |
-| `npm run e2e`             | Run the Playwright E2E suite                                                                      |
-| `npm run did`             | Re-pull `escrow.did` from upstream and regenerate TS bindings                                     |
-| `npm run i18n`            | Regenerate the typed i18n dictionary                                                              |
-| `npm run deploy`          | Build and upload the site to the production satellite                                             |
-| `npm run dev:collections` | Create the datastore collections on the local emulator                                            |
+| Command                    | Action                                                                                      |
+| :------------------------- | :------------------------------------------------------------------------------------------ |
+| `npm install`              | Install dependencies                                                                        |
+| `npm run dev`              | Start the dev server at `http://localhost:5173`                                             |
+| `npx icp network start -d` | Start the local network on port 5987                                                        |
+| `npm run dev:setup`        | Build & deploy the upstream escrow canister into the local network (first-time local setup) |
+| `npm run build`            | Type-check and build the production site to `./build/`                                      |
+| `npm run preview`          | Preview the production build locally                                                        |
+| `npm run check`            | Run `svelte-check`                                                                          |
+| `npm run quality`          | Run `format` then `lint` in one shot                                                        |
+| `npm run test`             | Run the Vitest unit tests                                                                   |
+| `npm run e2e`              | Run the Playwright E2E suite                                                                |
+| `npm run did`              | Re-pull `escrow.did` from upstream and regenerate TS bindings                               |
+| `npm run i18n`             | Regenerate the typed i18n dictionary                                                        |
+| `npm run deploy`           | Build and deploy the frontend and profiles canisters to mainnet                             |
+| `npm run deploy:local`     | Same, against the local network                                                             |
 
 ## 🚀 Deploy
 
-Production deploys upload `build/` to the satellite with
-[`scripts/deploy-hosting.mjs`](./scripts/deploy-hosting.mjs)
-(`npm run deploy`). See
+`npm run deploy` runs `icp deploy -e ic`, which builds and deploys both
+canisters: the frontend asset canister (`wqhtf-fqaaa-aaaal-amssq-cai`, the
+canister that used to hold Juno's satellite) and the profiles canister. IDs are
+mapped in [`.icp/data/mappings/ic.ids.json`](./.icp/data/mappings/ic.ids.json),
+which is committed on purpose. See
 [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md)
 for the full local + CI deploy runbook.
 

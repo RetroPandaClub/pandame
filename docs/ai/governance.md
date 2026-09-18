@@ -57,20 +57,20 @@ Before opening / merging, self-review against:
 These paths are **protected**. Agents may read them, but must not modify
 them without an explicit ask in the user prompt.
 
-| Path                                                                                           | Reason                                                                     | Owner            |
-| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------- |
-| `.github/workflows/**`                                                                         | CI integrity. Only `ci(...)` PRs touch these.                              | repo maintainers |
-| `.github/CODEOWNERS`, `.github/actions/**`                                                     | Review routing & action policy.                                            | repo maintainers |
-| `.github/dependabot.yml`                                                                       | Dependency update policy.                                                  | repo maintainers |
-| `package.json` (deps), `package-lock.json`                                                     | New / upgraded dependencies require explicit approval.                     | repo maintainers |
-| `src/lib/constants/satellite.constants.ts`, `scripts/setup-collections.mjs`                    | Satellite IDs + collection rules. Drift breaks data + auth.                | repo maintainers |
-| `eslint.config.js`, `.prettierrc`, `tsconfig*.json`                                            | Lint / format / TS policy.                                                 | repo maintainers |
-| `src/lib/utils/doc-data.utils.ts`                                                              | Document wire format. Must stay byte-identical to what the Juno SDK wrote. | repo maintainers |
-| `src/lib/types/i18n.d.ts`                                                                      | Generated from `src/lib/i18n/*.json` by `npm run i18n`. Don't hand-edit.   | —                |
-| `src/declarations/**`                                                                          | Generated from upstream `escrow.did` by `npm run did`. Don't hand-edit.    | —                |
-| `scripts/{did,import-candid,compile-idl-js}.sh`, `scripts/lib/**`                              | Bindings pipeline. Touch only when prompted.                               | repo maintainers |
-| [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow) (locally `../escrow/**`) | External repo. Open it as a separate workspace; obey its README first.     | escrow team      |
-| `node_modules/`, `.svelte-kit/`, `build/`, `target/`, `.dfx/`                                  | Build output. Never commit.                                                | —                |
+| Path                                                                                           | Reason                                                                   | Owner            |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------- |
+| `.github/workflows/**`                                                                         | CI integrity. Only `ci(...)` PRs touch these.                            | repo maintainers |
+| `.github/CODEOWNERS`, `.github/actions/**`                                                     | Review routing & action policy.                                          | repo maintainers |
+| `.github/dependabot.yml`                                                                       | Dependency update policy.                                                | repo maintainers |
+| `package.json` (deps), `package-lock.json`                                                     | New / upgraded dependencies require explicit approval.                   | repo maintainers |
+| `icp.yaml`, `.icp/data/mappings/`                                                              | Canister IDs and recipes. Losing the mapping loses the canisters.        | repo maintainers |
+| `eslint.config.js`, `.prettierrc`, `tsconfig*.json`                                            | Lint / format / TS policy.                                               | repo maintainers |
+| `src/profiles/`, `src/declarations/profiles/profiles.did`                                      | The profiles canister and its Candid surface. Drift breaks stored data.  | repo maintainers |
+| `src/lib/types/i18n.d.ts`                                                                      | Generated from `src/lib/i18n/*.json` by `npm run i18n`. Don't hand-edit. | —                |
+| `src/declarations/**`                                                                          | Generated from upstream `escrow.did` by `npm run did`. Don't hand-edit.  | —                |
+| `scripts/{did,import-candid,compile-idl-js}.sh`, `scripts/lib/**`                              | Bindings pipeline. Touch only when prompted.                             | repo maintainers |
+| [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow) (locally `../escrow/**`) | External repo. Open it as a separate workspace; obey its README first.   | escrow team      |
+| `node_modules/`, `.svelte-kit/`, `build/`, `target/`, `.dfx/`                                  | Build output. Never commit.                                              | —                |
 
 If a change must touch a protected path, call it out explicitly in the PR
 description.

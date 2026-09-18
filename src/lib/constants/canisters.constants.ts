@@ -15,6 +15,15 @@ export const ESCROW_CANISTER_ID = Principal.fromText(
 	viteEnvString('VITE_ESCROW_CANISTER_ID') ?? ESCROW_CANISTER_ID_DEFAULT
 );
 
+// Profiles canister — what used to be the satellite's `profiles` Datastore
+// collection. `npm run dev:setup` overrides this via `.env.local` for a local
+// replica, where the canister ID differs on every fresh network.
+const PROFILES_CANISTER_ID_DEFAULT = 'aaaaa-aa';
+
+export const PROFILES_CANISTER_ID = Principal.fromText(
+	viteEnvString('VITE_PROFILES_CANISTER_ID') ?? PROFILES_CANISTER_ID_DEFAULT
+);
+
 // Mainnet ICP ledger. The Juno emulator pre-installs the same ID, so
 // no override is needed for local dev.
 const ICP_LEDGER_CANISTER_ID_DEFAULT = 'ryjl3-tyaaa-aaaaa-aaaba-cai';

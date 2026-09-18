@@ -146,9 +146,52 @@ jobs:
       - name: Test
         run: npm run test -- --run
 
+  canister:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install the Rust wasm target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Clippy
+        run: cargo clippy --target wasm32-unknown-unknown --release --all-targets -- -D warnings
+
+      - name: Format
+        run: cargo fmt --check
+
+      # Fails if the committed Candid interface has drifted from the code.
+      - name: Fail if the Candid interface drifted
+        run: |
+          cargo install candid-extractor --locked
+          cargo build --target wasm32-unknown-unknown --release -p profiles
+          candid-extractor target/wasm32-unknown-unknown/release/profiles.wasm \
+            > src/declarations/profiles/profiles.did
+          if [[ -n "$(git status --porcelain -- src/declarations/profiles/profiles.did)" ]]; then
+            echo "::error::src/declarations/profiles/profiles.did is out of date. Regenerate it and commit the result."
+            git --no-pager diff -- src/declarations/profiles/profiles.did
+            exit 1
+          fi
+
   checks-pass:
     if: always()
-    needs: ['format', 'lint', 'check', 'build', 'test']
+    needs: ['format', 'lint', 'check', 'build', 'test', 'canister']
     runs-on: ubuntu-24.04
     permissions:
       contents: read

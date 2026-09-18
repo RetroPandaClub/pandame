@@ -34,8 +34,8 @@
 		}
 		(async () => {
 			try {
-				const doc = await ensureProfile(text);
-				profileStore.set(doc);
+				const profile = await ensureProfile(text);
+				profileStore.set(profile);
 			} catch (err) {
 				console.error('Failed to bootstrap profile after sign-in:', err);
 			}

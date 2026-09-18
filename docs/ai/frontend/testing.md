@@ -60,7 +60,7 @@ Notes:
   function.
 - One `it` per behaviour — name it from the user/caller perspective.
 - Reset side effects in `beforeEach`. Never let test order matter.
-- For satellite calls (`getDoc` / `setDoc` / …): mock `$lib/api/satellite.api`;
+- For profile calls (`getProfile` / `setProfile`): mock `$lib/api/profiles.api`;
   for auth (`signIn` / `signOut` / …): mock `$lib/services/auth.services`.
   Mock the module rather than stubbing globals.
 

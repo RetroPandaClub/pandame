@@ -38,8 +38,7 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 - **Routing:** single SvelteKit page (`src/routes/+page.svelte`) plus
   `/claim/[deal_id]` for the share-link flow. No nav-store; if/when one
   is needed, surface a question first.
-- **Local replica:** the satellite emulator only (`juno emulator start`, the
-  one remaining Juno dependency — dev-only). **Never** run
+- **Local replica:** `npx icp network start -d` (port 5987). **Never** run
   `dfx start`.
 - **Dispute UI:** the Dispute button in
   [`DealActions.svelte`](./src/lib/components/DealActions.svelte) is a
@@ -83,8 +82,8 @@ Claude-specific runtime layer. Anything not contradicted here defers to
     [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow/tree/main/src/escrow)
     (locally `../escrow/src/escrow/`) — go work on the escrow repo
     first, then come back here for `npm run did`.
-- Modifying `src/lib/constants/satellite.constants.ts` or
-  `scripts/setup-collections.mjs` (satellite IDs + collection rules +
+- Modifying `icp.yaml`, `.icp/data/mappings/` or `src/profiles/`
+  (canister IDs + the profiles canister +
   emulator runner — schema drift breaks data + auth).
 - Touching anything under `.github/workflows/**` or
   `.github/actions/**`.

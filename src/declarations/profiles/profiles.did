@@ -1,0 +1,26 @@
+type Profile = record {
+  updated_at : nat64;
+  username : text;
+  owner : principal;
+  avatar_url : opt text;
+  name : text;
+  surname : text;
+  // Nanoseconds since the epoch, set by the canister.
+  created_at : nat64;
+};
+type Result = variant { Ok : Profile; Err : text };
+// What a caller may set. The owner and the timestamps are not in here: they
+// are derived from the caller and the clock, never trusted from input.
+type SetProfile = record {
+  username : text;
+  avatar_url : opt text;
+  name : text;
+  surname : text;
+};
+service : {
+  // Publicly readable, as the Juno collection was: any caller can resolve a
+  // profile from a principal.
+  get_profile : (principal) -> (opt Profile) query;
+  // Creates or replaces the caller's own profile.
+  set_profile : (SetProfile) -> (Result);
+}
