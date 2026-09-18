@@ -20,22 +20,28 @@ export const ESCROW_CANISTER_ID = Principal.fromText(
  * Profiles canister — what used to be the satellite's `profiles` Datastore
  * collection.
  *
- * There is deliberately no fallback. `vite.config.ts` injects this at build
- * time from `.icp/data/mappings/<env>.ids.json`, so a production build carries
- * the real ID; locally, `.env.local` overrides it because a fresh network
- * assigns a new one each time. A wrong-but-plausible default (the management
- * canister, say) would send every profile call somewhere harmless-looking and
- * fail at the wire boundary instead of here.
+ * Resolved on use rather than at module load, and with no fallback. A
+ * wrong-but-plausible default (the management canister, say) would send every
+ * profile call somewhere harmless-looking and fail at the wire boundary; a
+ * module-level throw would take down the whole app, and every test that
+ * transitively imports this file, in any environment without the ID.
+ *
+ * `vite.config.ts` injects it at build time from
+ * `.icp/data/mappings/<env>.ids.json`, so a production build carries the real
+ * ID; locally, `.env.local` overrides it because a fresh network assigns a new
+ * one each time.
  */
-const profilesCanisterId = viteEnvString('VITE_PROFILES_CANISTER_ID');
+export const profilesCanisterId = (): Principal => {
+	const canisterId = viteEnvString('VITE_PROFILES_CANISTER_ID');
 
-if (isNullish(profilesCanisterId) || profilesCanisterId.length === 0) {
-	throw new Error(
-		'VITE_PROFILES_CANISTER_ID is not set. Deploy the profiles canister and commit its mapping, or set it in .env.local for local development.'
-	);
-}
+	if (isNullish(canisterId) || canisterId.length === 0) {
+		throw new Error(
+			'VITE_PROFILES_CANISTER_ID is not set. Deploy the profiles canister and commit its mapping, or set it in .env.local for local development.'
+		);
+	}
 
-export const PROFILES_CANISTER_ID = Principal.fromText(profilesCanisterId);
+	return Principal.fromText(canisterId);
+};
 
 // Mainnet ICP ledger. The Juno emulator pre-installs the same ID, so
 // no override is needed for local dev.

@@ -1,7 +1,7 @@
 import type { ProfilesDid } from '$declarations';
 import { getAgent } from '$lib/actors/agents.ic';
 import { ProfilesCanister } from '$lib/canisters/profiles.canister';
-import { PROFILES_CANISTER_ID } from '$lib/constants/canisters.constants';
+import { profilesCanisterId } from '$lib/constants/canisters.constants';
 import type { QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
@@ -40,6 +40,6 @@ const profilesCanister = async ({
 
 	return ProfilesCanister.create({
 		agent,
-		canisterId: PROFILES_CANISTER_ID
+		canisterId: profilesCanisterId()
 	});
 };
