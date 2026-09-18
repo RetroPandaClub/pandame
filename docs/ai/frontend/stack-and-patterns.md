@@ -1,7 +1,7 @@
 # Stack & Patterns
 
 Idiomatic patterns for the **SvelteKit 2 + Svelte 5 + TypeScript +
-Tailwind v4 + Juno + Escrow canister** stack as it lives in this repo.
+Tailwind v4 + satellite + Escrow canister** stack as it lives in this repo.
 If a pattern here disagrees with code in `src/`, the code wins (truth
 hierarchy in [governance.md](../governance.md)). Update this page in the
 same PR — that's the
@@ -150,7 +150,7 @@ export const createAndFundDeal = async (
 - Use `getIdentityOrAnonymous` for public reads (the `/claim` preview).
 - Use `safeGetIdentityOnce` for authenticated actions (throws if the
   user isn't signed in).
-- Auth uses Internet Identity via Juno. The single subscription to
+- Auth uses Internet Identity via `@icp-sdk/auth`. The single call to
   `onAuthStateChange` lives in
   [`Auth.svelte`](../../../src/lib/components/Auth.svelte). Other
   components read from
@@ -381,18 +381,18 @@ Pandame ships several mobile-first routes wrapped in the shared device
 frame (see [structure.md](./structure.md#top-level-src) for the full
 tree):
 
-| Route                      | What                                                                |
-| -------------------------- | ------------------------------------------------------------------- |
-| `/`                        | Logged-out → `WelcomeScreen`; logged-in → History dashboard.        |
-| `/deals/new`               | Create-deal full-screen flow with Pay/Receive tabs.                 |
-| `/deals/[deal_id]`         | Per-deal detail with the lifecycle action bar.                      |
-| `/deals/[deal_id]/dispute` | Dispute mockup (v2 stub — disabled inputs + warning banner).        |
-| `/profile`                 | User profile (avatar + reliability + sign-out).                     |
-| `/profile/edit`            | Editable user metadata persisted to the Juno `profiles` collection. |
-| `/profile/arbitrator`      | Arbitrator dashboard preview (v2 stub).                             |
-| `/profile/admin`           | Admin console preview (v2 stub).                                    |
-| `/send`                    | Direct send/receive (v2 stub).                                      |
-| `/claim/[deal_id]?code=…`  | Public claim page for the QR / share-link flow.                     |
+| Route                      | What                                                           |
+| -------------------------- | -------------------------------------------------------------- |
+| `/`                        | Logged-out → `WelcomeScreen`; logged-in → History dashboard.   |
+| `/deals/new`               | Create-deal full-screen flow with Pay/Receive tabs.            |
+| `/deals/[deal_id]`         | Per-deal detail with the lifecycle action bar.                 |
+| `/deals/[deal_id]/dispute` | Dispute mockup (v2 stub — disabled inputs + warning banner).   |
+| `/profile`                 | User profile (avatar + reliability + sign-out).                |
+| `/profile/edit`            | Editable user metadata persisted to the `profiles` collection. |
+| `/profile/arbitrator`      | Arbitrator dashboard preview (v2 stub).                        |
+| `/profile/admin`           | Admin console preview (v2 stub).                               |
+| `/send`                    | Direct send/receive (v2 stub).                                 |
+| `/claim/[deal_id]?code=…`  | Public claim page for the QR / share-link flow.                |
 
 `src/routes/+layout.ts` sets `ssr = false` and `prerender = false`
 (SPA fallback via `adapter-static`). Deeply-linked routes work because
@@ -424,14 +424,10 @@ the typed shape is generated into
 
 ## Custom DOM events
 
-Two custom events are typed in
+One custom event is typed in
 [`src/custom-events.d.ts`](../../../src/custom-events.d.ts) (augmenting
 `svelte/elements`):
 
-- **`junoSignOutAuthTimer`** — emitted by Juno's `auth` worker when
-  the Internet Identity session expires. Listen for it (see
-  [`Auth.svelte`](../../../src/lib/components/Auth.svelte)); never
-  emit it.
 - **`pandameReloadDeals`** — project-local refresh signal for
   `dealsStore` + `disputesStore`. The lone listener lives in
   [`DealsLoader.svelte`](../../../src/lib/components/DealsLoader.svelte).
@@ -464,11 +460,8 @@ behaviour-only loader component instead of piling onto
 - Project-local events MUST use the `pandame*` prefix
   (`pandameReloadDeals`, `pandameRefresh<Concept>`, etc.) so they're
   trivially greppable and never collide with library-emitted events.
-- Library-emitted events keep their original prefix (`juno*` for
-  Juno).
-- Don't ship event names from a library template (the previous
-  `junoExampleReload` was Juno-starter-template residue — it's not
-  a Juno event).
+- Library-emitted events keep their original prefix.
+- Don't ship event names from a library template.
 
 When you add a new event, declare it in `src/custom-events.d.ts`
 and add a row to the catalog in
@@ -509,7 +502,6 @@ and add a row to the catalog in
   `eslint-disable-next-line svelte/no-at-html-tags`.
 - `console.log` left in committed code (eslint allows only
   `console.warn` / `console.error`).
-- Calling `signIn()` without a provider object (`@junobuild/core` 5.x
-  requires it: `signIn({ internet_identity: {} })`).
-- Binding `signOut` directly to `onclick` (it accepts `SignOutOptions`,
-  not a `MouseEvent` — wrap it in an arrow).
+- Passing a Juno-style provider object to `signIn()` — `$lib/services/auth.services`
+  takes no argument for plain Internet Identity, or
+  `{ openIdProvider: 'google' | 'apple' | 'microsoft' }` for One-Click sign-in.

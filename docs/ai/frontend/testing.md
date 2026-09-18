@@ -60,8 +60,9 @@ Notes:
   function.
 - One `it` per behaviour — name it from the user/caller perspective.
 - Reset side effects in `beforeEach`. Never let test order matter.
-- For Juno calls (`setDoc` / `listDocs` / `signIn` / …): mock the
-  `@junobuild/core` module rather than stubbing globals.
+- For satellite calls (`getDoc` / `setDoc` / …): mock `$lib/api/satellite.api`;
+  for auth (`signIn` / `signOut` / …): mock `$lib/services/auth.services`.
+  Mock the module rather than stubbing globals.
 
 ### Component testing
 
@@ -172,7 +173,7 @@ raw `test-results/` ship only on failure.
 - Hard-coded waits (`page.waitForTimeout(...)`). Use
   `expect(locator).toBeVisible()` / `toHaveText()` instead.
 - Logging in by stuffing identities into `localStorage` / `IndexedDB`.
-- Real network calls outside the local Juno emulator. The whole point of
+- Real network calls outside the local emulator. The whole point of
   the emulator is reproducibility.
 
 ### Adding a new E2E test

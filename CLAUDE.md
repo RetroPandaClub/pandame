@@ -13,9 +13,9 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 
 ## Project memory (quick reference)
 
-- **What this is:** SvelteKit + Juno frontend for the standalone Escrow
+- **What this is:** SvelteKit frontend for the standalone Escrow
   Rust canister (`umxj5-niaaa-aaaae-af2sq-cai`, mainnet). Svelte 5 runes,
-  Tailwind v4, `@junobuild/core` for II auth, `@dfinity/agent` +
+  Tailwind v4, `@icp-sdk/auth` for II auth, `@dfinity/agent` +
   `@icp-sdk/canisters` for talking to the escrow + ICP ledger.
 - **Default settlement token:** ICP (`ryjl3-tyaaa-aaaaa-aaaba-cai`,
   8 decimals, fee 10_000 e8s). Defined in
@@ -38,7 +38,8 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 - **Routing:** single SvelteKit page (`src/routes/+page.svelte`) plus
   `/claim/[deal_id]` for the share-link flow. No nav-store; if/when one
   is needed, surface a question first.
-- **Local replica:** Juno emulator only (`juno dev start`). **Never** run
+- **Local replica:** the satellite emulator only (`juno emulator start`, the
+  one remaining Juno dependency — dev-only). **Never** run
   `dfx start`.
 - **Dispute UI:** the Dispute button in
   [`DealActions.svelte`](./src/lib/components/DealActions.svelte) is a
@@ -82,7 +83,8 @@ Claude-specific runtime layer. Anything not contradicted here defers to
     [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow/tree/main/src/escrow)
     (locally `../escrow/src/escrow/`) — go work on the escrow repo
     first, then come back here for `npm run did`.
-- Modifying `juno.config.ts` (collection rules + satellite IDs +
+- Modifying `src/lib/constants/satellite.constants.ts` or
+  `scripts/setup-collections.mjs` (satellite IDs + collection rules +
   emulator runner — schema drift breaks data + auth).
 - Touching anything under `.github/workflows/**` or
   `.github/actions/**`.

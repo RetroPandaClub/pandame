@@ -1,4 +1,4 @@
-name: Deploy to Juno
+name: Deploy
 
 on:
   workflow_dispatch:
@@ -10,15 +10,39 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
+      contents: read
     steps:
       - name: Check out the repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Deploy to Juno
-        uses: junobuild/juno-action@main
-        with:
-          args: hosting deploy
+      - name: Build
+        run: npm run build
+
+      # Uploads `build/` to the satellite with the satellite's own asset API.
+      # `icp`/`dfx` cannot do this: the satellite does not implement the
+      # standard asset canister interface. The identity below must be a
+      # controller of the satellite — see docs/ai/frontend/workflows/deploy.md.
+      - name: Write deploy identity
+        env:
+          DEPLOY_PEM: ${{ secrets.DEPLOY_PEM }}
+        run: |
+          if [[ -z "$DEPLOY_PEM" ]]; then
+            echo "::error::Missing DEPLOY_PEM secret."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$DEPLOY_PEM" > "$RUNNER_TEMP/deploy.pem"
+
+      - name: Deploy to the satellite
+        env:
+          SATELLITE_ID: wqhtf-fqaaa-aaaal-amssq-cai
+        run: node scripts/deploy-hosting.mjs --network ic --pem "$RUNNER_TEMP/deploy.pem"
+
+      - name: Remove deploy identity
+        if: always()
+        run: rm -f "$RUNNER_TEMP/deploy.pem"

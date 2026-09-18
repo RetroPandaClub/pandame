@@ -58,19 +58,18 @@ This workflow covers the two flavours of deploy that pandame supports:
    echo "VITE_ESCROW_CANISTER_ID=<id>" >> .env.local
    ```
 
-4. **Apply the Juno satellite config** so the datastore collections
-   declared in [`juno.config.ts`](../../juno.config.ts) (under
-   `satellite.collections.datastore`) actually exist on the running
-   satellite. `juno emulator start` boots an empty satellite — without
-   this step every `getDoc` / `setDoc` will trap with
+4. **Create the datastore collections** so they actually exist on the
+   running satellite. `juno emulator start` boots an empty satellite —
+   without this step every `getDoc` / `setDoc` will trap with
    `juno.collections.error.not_found (Datastore - profiles)`:
 
    ```bash
-   juno config apply --mode development
+   npm run dev:collections -- --pem <path-to-a-controller-identity.pem>
    ```
 
-   Re-run this command whenever you change the `collections` block in
-   `juno.config.ts` (add a new collection, flip a permission, etc.).
+   Re-run this whenever you change `COLLECTIONS` in
+   [`scripts/setup-collections.mjs`](../../scripts/setup-collections.mjs)
+   (add a new collection, flip a permission, etc.).
 
 5. In a new terminal, start the SvelteKit dev server:
 
@@ -99,23 +98,19 @@ This workflow covers the two flavours of deploy that pandame supports:
    Pass `--ledger-id <canister-id>` to target a different ICRC-1
    ledger.
 
-7. PandaMe provisions **one Juno datastore collection** locally —
-   `profiles` — for editable user metadata (see the
-   `satellite.collections.datastore` block in
-   [`juno.config.ts`](../../juno.config.ts):
-   `memory: 'stable'`, `read: 'public'`, `write: 'private'`). The
-   local satellite ID is pinned in the same file under
-   `satellite.ids.development` so the Juno SDK resolves it
-   deterministically. The same `collections` block is what
-   `juno deploy` pushes to the production satellite, so there is
-   only one source of truth. Escrow / ledger state lives in the
-   canisters inside the same emulator (locally) or on mainnet (in
-   production). When you ship a new datastore collection, add the
-   matching rule block to `satellite.collections.datastore` in
-   `juno.config.ts`, update
-   [`Collection`](../../src/lib/constants/collections.constants.ts),
-   and re-run `juno config apply --mode development` against the
-   running emulator.
+7. PandaMe provisions **one datastore collection** locally —
+   `profiles` — for editable user metadata (`memory: Stable`,
+   `read: Public`, `write: Private`; see
+   [`scripts/setup-collections.mjs`](../../scripts/setup-collections.mjs)).
+   The satellite IDs are pinned in
+   [`satellite.constants.ts`](../../src/lib/constants/satellite.constants.ts).
+   The same `COLLECTIONS` list is what gets applied to the production
+   satellite, so there is only one source of truth. Escrow / ledger state
+   lives in the canisters inside the same emulator (locally) or on mainnet (in
+   production). When you ship a new datastore collection, add the matching
+   entry to `COLLECTIONS`, update
+   [`Collection`](../../src/lib/constants/collections.constants.ts), and
+   re-run `npm run dev:collections` against the running emulator.
 
 8. (Optional) regenerate the candid bindings from upstream
    [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow)
@@ -136,19 +131,23 @@ This workflow covers the two flavours of deploy that pandame supports:
 
 ## Production deploy — via GitHub Actions
 
-The [`deploy.yml`](../../.github/workflows/deploy.yml) workflow runs on
-every push to `main` and on `v*` tags:
+The [`deploy.yml`](../../.github/workflows/deploy.yml) workflow runs on `v*`
+tags and on manual dispatch:
 
 1. `actions/checkout@v6.0.2` checks out the ref.
 2. The `prepare` composite action installs Node from `.node-version`,
    runs `npm ci` and `npm run prepare`.
 3. `npm run build` produces the static site under `./build/`.
-4. `junobuild/juno-action` deploys via `juno deploy` using the
-   `JUNO_TOKEN` repository secret.
+4. `scripts/deploy-hosting.mjs` uploads `build/` to the satellite, using a
+   controller identity from the `DEPLOY_PEM` repository secret.
+
+> **Setup:** `DEPLOY_PEM` must hold a PEM whose principal is a controller of
+> the satellite. Generate one (`dfx identity new deploy --storage-mode
+plaintext`), then add its principal as a controller of the satellite before
+> the first CI deploy — otherwise `init_asset_upload` is rejected.
 
 Trigger a deploy by:
 
-- Pushing to `main` (`git push origin main`), or
 - Tagging a release (`git tag v0.1.0 && git push origin v0.1.0`), or
 - Re-running the workflow manually from the **Actions** tab
   (`workflow_dispatch`).
@@ -166,31 +165,30 @@ If CI is unavailable:
 2. Build and deploy:
 
    ```bash
-   npm run build
-   juno deploy
+   npm run deploy
    ```
 
-   The satellite ID + hosting source are pinned in
-   [`juno.config.ts`](../../juno.config.ts):
+   That builds and then uploads `build/` to the satellite with
+   [`scripts/deploy-hosting.mjs`](../../scripts/deploy-hosting.mjs). It needs a
+   controller identity — pass `--pem <path>` or set `DEPLOY_PEM_PATH`.
    - Satellite: `wqhtf-fqaaa-aaaal-amssq-cai`
    - Hosting source: `build/`
+
+   > `icp` and `dfx` cannot do this. The satellite does not implement the
+   > standard asset canister interface (`create_batch` / `commit_batch` /
+   > `store`); it exposes Juno's own `init_asset_upload` /
+   > `upload_asset_chunk` / `commit_asset_upload` instead.
 
 ## Troubleshooting
 
 - **`juno.collections.error.not_found (Datastore - profiles)` /
   profile reads or writes trap.** The local satellite is empty — the
-  collections declared in `juno.config.ts` (under
-  `satellite.collections.datastore`) were never applied. Run
-  `juno config apply --mode development` against the running
-  emulator and refresh the browser.
+  collections were never created. Run `npm run dev:collections` against the
+  running emulator and refresh the browser.
 - **Sign-in silently fails locally.** Most often:
   (a) `juno emulator start` is not running, or
-  (b) `juno.config.ts` is missing `satellite.ids.development` and the
-  SDK resolves the production satellite ID against the local
-  replica, or
-  (c) the auth worker is stale — run `npm run postinstall:copy-auth`
-  to re-sync `static/workers/` from
-  `node_modules/@junobuild/core/dist/workers/`.
+  (b) `VITE_SATELLITE_ID` is set to the production satellite while you are
+  pointed at the local replica.
 - **`adapter-static` build warning about `index.html`.** Should be gone
   since `+layout.ts` sets `prerender = false`. If it reappears, somebody
   re-enabled prerender — revert.

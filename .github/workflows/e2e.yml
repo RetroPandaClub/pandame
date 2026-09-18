@@ -45,7 +45,6 @@ jobs:
               - 'static/**'
               - 'scripts/**'
               - 'playwright.config.ts'
-              - 'juno.config.ts'
               - 'svelte.config.js'
               - 'vite.config.ts'
               - 'tsconfig.json'
