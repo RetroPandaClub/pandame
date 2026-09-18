@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { signIn } from '@junobuild/core';
 	import Button from '$lib/components/Button.svelte';
+	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
@@ -23,7 +23,7 @@
 	const login = async () => {
 		progress = true;
 		try {
-			await signIn({ internet_identity: {} });
+			await signIn();
 		} catch (err) {
 			console.error('Sign-in failed:', err);
 		} finally {

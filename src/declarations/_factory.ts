@@ -4,4 +4,17 @@ import { idlFactory as idlFactoryCertifiedEscrow } from '$declarations/escrow/es
 
 import type { _SERVICE as EscrowService } from '$declarations/escrow/escrow';
 
-export { idlFactoryCertifiedEscrow, idlFactoryEscrow, type EscrowService };
+import { idlFactory as idlFactoryProfiles } from '$declarations/profiles/profiles.idl';
+
+import { idlFactory as idlFactoryCertifiedProfiles } from '$declarations/profiles/profiles.certified.idl';
+
+import type { _SERVICE as ProfilesService } from '$declarations/profiles/profiles';
+
+export {
+	idlFactoryCertifiedEscrow,
+	idlFactoryCertifiedProfiles,
+	idlFactoryEscrow,
+	idlFactoryProfiles,
+	type EscrowService,
+	type ProfilesService
+};
