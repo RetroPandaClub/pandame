@@ -1,8 +1,8 @@
+import { getDoc, setDoc, type Doc } from '$lib/api/satellite.api';
 import { Collection } from '$lib/constants/collections.constants';
 import { emptyProfile, type UserProfile } from '$lib/types/profile';
 import { defaultAvatarUrlForPrincipal } from '$lib/utils/avatar.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { getDoc, setDoc, type Doc } from '@junobuild/core';
 
 // Returns an empty shell (no `version`, no remote write) for unknown
 // principals so the caller can render placeholders without a null-check.

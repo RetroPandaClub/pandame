@@ -88,7 +88,8 @@ export default tseslint.config(
 		}
 	},
 	{
-		files: ['scripts/**/*.ts'],
+		// CLI scripts report progress on stdout.
+		files: ['scripts/**/*.ts', 'scripts/**/*.mjs'],
 		rules: {
 			'no-console': 'off'
 		}

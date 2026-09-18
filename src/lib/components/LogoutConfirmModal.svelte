@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { signOut } from '@junobuild/core';
 	import Button from '$lib/components/Button.svelte';
+	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {

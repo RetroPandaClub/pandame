@@ -1,5 +1,5 @@
+import type { Doc } from '$lib/api/satellite.api';
 import type { UserProfile } from '$lib/types/profile';
-import type { Doc } from '@junobuild/core';
 import { writable, type Readable } from 'svelte/store';
 
 interface ProfileStore extends Readable<Doc<UserProfile> | undefined> {

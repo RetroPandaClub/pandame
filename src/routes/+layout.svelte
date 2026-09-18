@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { initSatellite } from '@junobuild/core';
 	import type { Snippet } from 'svelte';
 	import Auth from '$lib/components/Auth.svelte';
 	import DealsLoader from '$lib/components/DealsLoader.svelte';
@@ -14,18 +13,8 @@
 
 	let { children }: Props = $props();
 
-	const init = async () => {
-		await initSatellite({
-			workers: {
-				auth: true
-			}
-		});
-
-		await i18n.init();
-	};
-
 	$effect(() => {
-		init();
+		i18n.init();
 	});
 </script>
 
