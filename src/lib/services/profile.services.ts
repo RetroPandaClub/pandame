@@ -1,82 +1,79 @@
-import { Collection } from '$lib/constants/collections.constants';
+import type { ProfilesDid } from '$declarations';
+import { getProfile as getProfileApi, setProfile } from '$lib/api/profiles.api';
+import { getIdentityOrAnonymous, safeGetIdentityOnce } from '$lib/services/identity.services';
 import { emptyProfile, type UserProfile } from '$lib/types/profile';
 import { defaultAvatarUrlForPrincipal } from '$lib/utils/avatar.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { getDoc, setDoc, type Doc } from '@junobuild/core';
+import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
-// Returns an empty shell (no `version`, no remote write) for unknown
-// principals so the caller can render placeholders without a null-check.
-export const getProfile = async (principal: string): Promise<Doc<UserProfile>> => {
-	const existing = await getDoc<UserProfile>({
-		collection: Collection.PROFILES,
-		key: principal
+/**
+ * Profiles live in the profiles canister, which replaced the satellite's
+ * `profiles` Datastore collection. Reads are public, so they go through the
+ * anonymous identity when signed out; writes are owner-only and the canister
+ * derives the owner from the caller.
+ */
+
+const toUserProfile = (profile: ProfilesDid.Profile): UserProfile => ({
+	owner: profile.owner.toText(),
+	username: profile.username,
+	name: profile.name,
+	surname: profile.surname,
+	avatar_url: fromNullable(profile.avatar_url),
+	version: profile.version
+});
+
+// Returns an empty shell (no remote write) for unknown principals so the caller
+// can render placeholders without a null-check.
+export const getProfile = async (principal: string): Promise<UserProfile> => {
+	const existing = await getProfileApi({
+		identity: await getIdentityOrAnonymous(),
+		owner: Principal.fromText(principal),
+		certified: false
 	});
 
-	if (nonNullish(existing)) {
-		return existing;
-	}
-
-	return {
-		key: principal,
-		data: emptyProfile(principal)
-	};
+	return nonNullish(existing) ? toUserProfile(existing) : emptyProfile(principal);
 };
 
-// Reads the latest `version` first so concurrent edits surface as an
-// explicit error instead of silently overwriting.
-export const upsertProfile = async (
-	profileDoc: Doc<UserProfile> | { key: string; data: UserProfile }
-): Promise<Doc<UserProfile>> => {
-	const { key, data } = profileDoc;
-
-	const existing = await getDoc<UserProfile>({
-		collection: Collection.PROFILES,
-		key
-	});
-
-	if (isNullish(existing)) {
-		return await setDoc<UserProfile>({
-			collection: Collection.PROFILES,
-			doc: { key, data }
-		});
-	}
-
-	if (isNullish(existing.version)) {
-		throw new Error('Cannot update profile: existing document is missing a version.');
-	}
-
-	return await setDoc<UserProfile>({
-		collection: Collection.PROFILES,
-		doc: {
-			key,
-			version: existing.version,
-			data: {
-				...existing.data,
-				...data,
-				owner: key
-			}
+/**
+ * Writes the signed-in user's own profile.
+ *
+ * `version` is the optimistic-concurrency token: it must be the version the
+ * profile was last read at, or `undefined` to create it. Keying by caller stops
+ * one *user* clobbering another's profile, but not one of their own tabs
+ * clobbering the other — that is what this guards.
+ */
+export const upsertProfile = async (profile: UserProfile): Promise<UserProfile> => {
+	const saved = await setProfile({
+		identity: await safeGetIdentityOnce(),
+		profile: {
+			username: profile.username,
+			name: profile.name,
+			surname: profile.surname,
+			avatar_url: toNullable(profile.avatar_url),
+			version: toNullable(profile.version)
 		}
 	});
+
+	return toUserProfile(saved);
 };
 
-// First-load-on-sign-in path: guarantees a `version` (so later edits
-// don't fail) and a deterministic DiceBear `avatar_url` (so every user
-// has a stable default avatar without leaking the raw principal to the
-// image host).
-export const ensureProfile = async (principal: string): Promise<Doc<UserProfile>> => {
-	const doc = await getProfile(principal);
+// First-load-on-sign-in path: guarantees a deterministic DiceBear `avatar_url`
+// so every user has a stable default without leaking the raw principal to the
+// image host.
+export const ensureProfile = async (principal: string): Promise<UserProfile> => {
+	const profile = await getProfile(principal);
 
-	const hasAvatar = nonNullish(doc.data.avatar_url) && doc.data.avatar_url.length > 0;
+	const hasAvatar = nonNullish(profile.avatar_url) && profile.avatar_url.length > 0;
 
-	if (nonNullish(doc.version) && hasAvatar) {
-		return doc;
+	if (hasAvatar) {
+		return profile;
 	}
 
 	return await upsertProfile({
-		...doc,
-		data: {
-			...doc.data,
-			avatar_url: hasAvatar ? doc.data.avatar_url : defaultAvatarUrlForPrincipal(principal)
-		}
+		...profile,
+		avatar_url: defaultAvatarUrlForPrincipal(principal)
 	});
 };
+
+export const profileIsEmpty = (profile: UserProfile): boolean =>
+	isNullish(profile.username) || profile.username.length === 0;

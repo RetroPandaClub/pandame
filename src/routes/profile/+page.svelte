@@ -25,7 +25,7 @@
 	let principalText = $derived($userPrincipalText);
 	let logoutOpen = $state(false);
 
-	let profile = $derived($profileStore?.data);
+	let profile = $derived($profileStore);
 	let avatarUrl = $derived(profile?.avatar_url);
 
 	let avatarSheetOpen = $state(false);
@@ -41,8 +41,8 @@
 		}
 		(async () => {
 			try {
-				const doc = await ensureProfile(text);
-				profileStore.set(doc);
+				const loaded = await ensureProfile(text);
+				profileStore.set(loaded);
 			} catch (err) {
 				console.error('Failed to ensure profile:', err);
 			}
@@ -60,12 +60,9 @@
 
 	const saveAvatarUrl = async (text: string, nextUrl: string) => {
 		const updated = await upsertProfile({
-			key: text,
-			data: {
-				...(profile ?? { owner: text, username: '', name: '', surname: '' }),
-				avatar_url: nextUrl,
-				owner: text
-			}
+			...(profile ?? { owner: text, username: '', name: '', surname: '' }),
+			avatar_url: nextUrl,
+			owner: text
 		});
 		profileStore.set(updated);
 	};

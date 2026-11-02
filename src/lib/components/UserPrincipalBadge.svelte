@@ -19,7 +19,7 @@
 	// bootstraps `profileStore` after sign-in; `ensureProfile` seeds
 	// `avatar_url` with a deterministic DiceBear default, so this is
 	// defined for every signed-in user).
-	let avatarSrc = $derived($profileStore?.data?.avatar_url);
+	let avatarSrc = $derived($profileStore?.avatar_url);
 	let avatarLabel = $derived($profileDisplayName || $userPrincipalShort);
 
 	let copied = $state(false);

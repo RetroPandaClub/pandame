@@ -29,3 +29,7 @@ target
 /playwright-report/
 /test-results/
 /playwright/.cache/
+
+# icp-cli build cache and local network state are rebuilt automatically.
+# `.icp/data/` holds the mainnet canister ID mapping and must stay committed.
+.icp/cache/

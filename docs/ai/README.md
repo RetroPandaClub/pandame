@@ -17,7 +17,7 @@ docs/ai/
 └── frontend/
     ├── README.md                Frontend bootstrap (start here for any FE change)
     ├── structure.md             Folder taxonomy, naming, aliases
-    ├── stack-and-patterns.md    Svelte 5 (runes), TS, Tailwind v4, Juno + escrow usage
+    ├── stack-and-patterns.md    Svelte 5 (runes), TS, Tailwind v4, satellite + escrow usage
     ├── reusability.md           Catalog of components / services / api / canisters / stores / utils
     ├── a11y.md                  Accessibility rules
     ├── testing.md               Vitest + Playwright policy and conventions

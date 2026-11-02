@@ -146,7 +146,7 @@ jobs:
       - name: Test
         run: npm run test -- --run
 
-  satellite-schema:
+  canister:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -157,37 +157,54 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Prepare
-        uses: ./.github/actions/prepare
+      - name: Install the Rust wasm target
+        run: rustup target add wasm32-unknown-unknown
 
-      # `junobuild/juno-action@full` bundles an older `@icp-sdk/bindgen` than
-      # our devDeps — drift check becomes a permanent false positive.
-      - name: Install Juno CLI
-        run: npm i -g @junobuild/cli@0.15.4
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
 
-      - name: Regenerate satellite Candid surface
-        run: npm run juno:functions:build
+      - name: Clippy
+        run: cargo clippy --target wasm32-unknown-unknown --release --all-targets -- -D warnings
 
-      - name: Quality
-        run: npm run quality
+      - name: Format
+        run: cargo fmt --check
 
-      - name: Fail if satellite Candid / declarations drifted
+      # The TypeScript declarations and IDL factories are generated from the
+      # .did, so checking only the .did would let CI pass while the frontend
+      # still compiled against stale bindings and failed at the wire boundary.
+      # Regenerate the whole chain and diff all of it.
+      - name: Setup node
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fail if the Candid interface or its bindings drifted
         run: |
-          drift_paths=(
-            src/satellite/satellite.did
-            src/satellite/satellite_extension.did
-            src/declarations/satellite
-          )
-          if [[ -n "$(git status --porcelain -- "${drift_paths[@]}")" ]]; then
-            echo "::error::Satellite schema/.did/declarations are out of date. Run 'npm run juno:functions:build && npm run quality' locally and commit the result. Diff follows:"
-            git --no-pager diff --stat -- "${drift_paths[@]}"
-            git --no-pager diff -- "${drift_paths[@]}"
+          cargo install candid-extractor --locked
+          cargo build --target wasm32-unknown-unknown --release -p profiles
+          candid-extractor target/wasm32-unknown-unknown/release/profiles.wasm \
+            > src/declarations/profiles/profiles.did
+          ./scripts/compile-idl-js.sh --staging
+          if [[ -n "$(git status --porcelain -- src/declarations/profiles/)" ]]; then
+            echo "::error::src/declarations/profiles/ is out of date. Run 'cargo build', re-extract the Candid interface, then './scripts/compile-idl-js.sh --staging' and commit the result."
+            git --no-pager diff -- src/declarations/profiles/
             exit 1
           fi
 
   checks-pass:
     if: always()
-    needs: ['format', 'lint', 'check', 'build', 'test', 'satellite-schema']
+    needs: ['format', 'lint', 'check', 'build', 'test', 'canister']
     runs-on: ubuntu-24.04
     permissions:
       contents: read

@@ -1,4 +1,4 @@
-name: Deploy to Juno
+name: Deploy
 
 on:
   workflow_dispatch:
@@ -10,15 +10,56 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
+      contents: read
     steps:
       - name: Check out the repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
+      # Installs icp-cli and ic-wasm too: both are devDependencies, so they are
+      # version-pinned in the lock file and restored from the npm cache rather
+      # than downloaded unpinned on every run. There is no official setup
+      # action for icp-cli.
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Deploy to Juno
-        uses: junobuild/juno-action@main
+      # Needed only for the profiles canister.
+      - name: Install the Rust wasm target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Cache cargo
+        uses: actions/cache@v4
         with:
-          args: hosting deploy
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      # The identity needs controller rights on the profiles canister and the
+      # frontend's Commit permission. That permission only exists once the
+      # frontend canister has been reinstalled as an asset canister by a
+      # controller — see .agents/workflows/deployment.md. This workflow fails
+      # until that has happened.
+      - name: Import deploy identity
+        env:
+          DEPLOY_PEM: ${{ secrets.DEPLOY_PEM }}
+        run: |
+          if [[ -z "$DEPLOY_PEM" ]]; then
+            echo "::error::Missing DEPLOY_PEM secret."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$DEPLOY_PEM" > "$RUNNER_TEMP/deploy.pem"
+          # `keyring` is the default store and is unavailable on a CI runner.
+          npx icp identity import --from-pem "$RUNNER_TEMP/deploy.pem" --storage plaintext deploy
+          npx icp identity default deploy
+
+      - name: Deploy
+        run: npm run deploy
+
+      - name: Remove deploy identity
+        if: always()
+        run: rm -f "$RUNNER_TEMP/deploy.pem"

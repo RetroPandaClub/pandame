@@ -7,7 +7,7 @@ canister at
 `umxj5-niaaa-aaaae-af2sq-cai`). It lets a payer lock funds against a
 known recipient, share a tip link to anyone via QR / URL, and reclaim
 unclaimed deals after expiry — all from a single Internet Identity
-session powered by [Juno](https://juno.build). The UI is a mobile-first
+session. The UI is a mobile-first
 "phone frame" (max-width 420 px, centred on tablet / desktop) wired to
 a purple-and-green design system that's CSS-variable-themed and ready
 to flip to dark mode in one file.
@@ -55,7 +55,7 @@ entry point:
   `get_claimable_deal`, prompts II sign-in if needed, then runs
   `accept_deal` to release funds.
 - **Profile** (`/profile`, `/profile/edit`): editable user metadata
-  (username / name / address / email) persisted in a Juno datastore
+  (username / name / address / email) persisted in a satellite datastore
   collection (`profiles`), plus a reliability summary read from the
   escrow canister. `/profile/arbitrator` and `/profile/admin` ship
   as visual stubs for v2.
@@ -65,7 +65,7 @@ entry point:
   [`AntonioVentilii/escrow#future-expansion`](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md#future-expansion)).
 - **ICP balance**: the header pill reads the caller's ICP balance
   from the NNS ledger (`ryjl3-tyaaa-aaaaa-aaaba-cai`).
-- **Authentication**: Internet Identity via `@junobuild/core`.
+- **Authentication**: Internet Identity via `@icp-sdk/auth`.
 - **Theming**: every brand colour resolves through CSS variables, so
   a dark theme is a single-file change in
   [`src/app.css`](./src/app.css). Today only the `light` theme ships.
@@ -81,8 +81,8 @@ entry point:
   declared via `@theme` in [`src/app.css`](./src/app.css). All
   brand-aware colours are wired through CSS variables on
   `[data-theme]` so dark mode is a one-file swap.
-- **Auth**: [Juno](https://juno.build/) +
-  [Internet Identity](https://identity.ic0.app/).
+- **Auth**: [Internet Identity](https://id.ai/) via
+  [`@icp-sdk/auth`](https://www.npmjs.com/package/@icp-sdk/auth).
 - **IC client**: [`@dfinity/agent`](https://github.com/dfinity/agent-js),
   [`@icp-sdk/canisters`](https://github.com/dfinity/icp-sdk-canisters)
   (ICRC-1 / -2 ledger), [`@icp-sdk/core`](https://github.com/dfinity/icp-sdk),
@@ -99,7 +99,7 @@ entry point:
 ```
 src/
 ├── app.{css,html,d.ts}     Theme tokens, base HTML, ambient types
-├── custom-events.d.ts      Custom Juno DOM events typing
+├── custom-events.d.ts      Custom DOM events typing
 ├── routes/                 SvelteKit shell — multiple mobile-first routes:
 │                             /, /claim/[id], /deals/{new,[id],[id]/dispute},
 │                             /profile/{,,edit,arbitrator,admin}, /send
@@ -136,14 +136,12 @@ mirrored in [`vite.config.ts`](./vite.config.ts)):
 
 - [Node.js](https://nodejs.org/) — version pinned in
   [`.node-version`](./.node-version).
-- [Juno CLI](https://juno.build/docs/miscellaneous/cli) — for deploying
-  to a satellite.
-- Docker (or Podman) — required by the local Juno emulator
-  (`juno emulator start`).
+- A Rust toolchain (`rustup target add wasm32-unknown-unknown`) — for the
+  profiles canister, and for building the upstream escrow canister into a
+  local network.
 - The [`dfx`](https://internetcomputer.org/docs/current/developer-docs/setup/install/)
-  CLI and a Rust toolchain (`rustup target add wasm32-unknown-unknown`) —
-  required only the first time you set up a local replica, to build and
-  deploy the upstream escrow canister into the Juno emulator. See
+  CLI — required only the first time you set up a local network, to deploy
+  the upstream escrow canister into it. See
   [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md).
 
 ### Installation
@@ -178,18 +176,28 @@ pre-installed there, so a working local setup needs the upstream
 [`../escrow/`](../escrow/) repo built and deployed into the same local
 replica.
 
-1. **Start the local Juno emulator** (requires Docker / Podman):
+1. **Start the local network:**
 
    ```bash
-   juno emulator start
+   npx icp network start -d
    ```
 
-   The IC HTTP gateway is exposed on `http://127.0.0.1:5987`; the Juno
-   admin console on <http://localhost:5866>.
+   The IC HTTP gateway is exposed on `http://127.0.0.1:5987`.
 
-2. **First run only — deploy the escrow canister into the local
-   replica.** Pandame's [`dfx.json`](./dfx.json) points `dfx` at the
-   emulator's gateway (`--network local`) so the escrow wasm built from
+2. **Deploy this project's canisters into the local network:**
+
+   ```bash
+   npm run deploy:local
+   ```
+
+   Copy the printed `profiles` canister ID into `.env.local` as
+   `VITE_PROFILES_CANISTER_ID` — a fresh network assigns a new one each time,
+   and the app refuses to start without it rather than calling the wrong
+   canister.
+
+3. **First run only — deploy the escrow canister into the local
+   network.** Pandame's [`dfx.json`](./dfx.json) points `dfx` at the same
+   gateway (`--network local`) so the escrow wasm built from
    `../escrow/` lands inside the same replica the dashboard talks to:
 
    ```bash
@@ -199,22 +207,20 @@ replica.
    The script prints the assigned local canister ID; copy it into a
    `.env.local` at the repo root as `VITE_ESCROW_CANISTER_ID=<id>`.
 
-3. **Start the dev server** in a new terminal:
+4. **Start the dev server** in a new terminal:
 
    ```bash
    npm run dev
    ```
 
-   The app boots at <http://localhost:5173>. Vite proxies `/api/*` to
-   the Juno emulator, so the agent in the browser reaches the local
-   replica via the same origin as the dev server. The Juno satellite
-   hosts the `profiles` datastore for editable user metadata (see
-   the `satellite.collections.datastore` block in
-   [`juno.config.ts`](./juno.config.ts)).
+   The app boots at <http://localhost:5173>. Vite proxies `/api/*` to the
+   local gateway, so the agent in the browser reaches the replica via the same
+   origin as the dev server. User profiles come from the profiles canister,
+   whose source is in [`src/profiles/`](./src/profiles/).
 
-> Don't run `dfx start`. Pandame's `dfx.json` is wired to use the Juno
-> emulator's replica as its `local` network — running a separate
-> replica on port 4943 will collide and confuse you.
+> Don't run `dfx start`. Pandame's `dfx.json` targets the same port 5987 as
+> the icp local network — running a separate replica on port 4943 will collide
+> and confuse you.
 
 ### Quality gates
 
@@ -231,26 +237,30 @@ npm run e2e       # playwright
 
 ## 🧞 Common Commands
 
-| Command               | Action                                                                                            |
-| :-------------------- | :------------------------------------------------------------------------------------------------ |
-| `npm install`         | Install dependencies                                                                              |
-| `npm run dev`         | Start the dev server at `http://localhost:5173`                                                   |
-| `juno emulator start` | Start the local Juno emulator (requires Docker / Podman)                                          |
-| `npm run dev:setup`   | Build & deploy the upstream escrow canister into the local Juno emulator (first-time local setup) |
-| `npm run build`       | Type-check and build the production site to `./build/`                                            |
-| `npm run preview`     | Preview the production build locally                                                              |
-| `npm run check`       | Run `svelte-check`                                                                                |
-| `npm run quality`     | Run `format` then `lint` in one shot                                                              |
-| `npm run test`        | Run the Vitest unit tests                                                                         |
-| `npm run e2e`         | Run the Playwright E2E suite                                                                      |
-| `npm run did`         | Re-pull `escrow.did` from upstream and regenerate TS bindings                                     |
-| `npm run i18n`        | Regenerate the typed i18n dictionary                                                              |
-| `juno deploy`         | Deploy the build output to a Juno satellite                                                       |
+| Command                    | Action                                                                                      |
+| :------------------------- | :------------------------------------------------------------------------------------------ |
+| `npm install`              | Install dependencies                                                                        |
+| `npm run dev`              | Start the dev server at `http://localhost:5173`                                             |
+| `npx icp network start -d` | Start the local network on port 5987                                                        |
+| `npm run dev:setup`        | Build & deploy the upstream escrow canister into the local network (first-time local setup) |
+| `npm run build`            | Type-check and build the production site to `./build/`                                      |
+| `npm run preview`          | Preview the production build locally                                                        |
+| `npm run check`            | Run `svelte-check`                                                                          |
+| `npm run quality`          | Run `format` then `lint` in one shot                                                        |
+| `npm run test`             | Run the Vitest unit tests                                                                   |
+| `npm run e2e`              | Run the Playwright E2E suite                                                                |
+| `npm run did`              | Re-pull `escrow.did` from upstream and regenerate TS bindings                               |
+| `npm run i18n`             | Regenerate the typed i18n dictionary                                                        |
+| `npm run deploy`           | Build and deploy the frontend and profiles canisters to mainnet                             |
+| `npm run deploy:local`     | Same, against the local network (production build — see the deploy notes)                   |
 
 ## 🚀 Deploy
 
-Production deploys are handled by the Juno satellite configured in
-[`juno.config.ts`](./juno.config.ts). See
+`npm run deploy` runs `icp deploy -e ic`, which builds and deploys both
+canisters: the frontend asset canister (`wqhtf-fqaaa-aaaal-amssq-cai`, the
+canister that used to hold Juno's satellite) and the profiles canister. IDs are
+mapped in [`.icp/data/mappings/ic.ids.json`](./.icp/data/mappings/ic.ids.json),
+which is committed on purpose. See
 [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md)
 for the full local + CI deploy runbook.
 

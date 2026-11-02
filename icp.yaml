@@ -1,0 +1,35 @@
+canisters:
+  # The app's static frontend.
+  #
+  # It runs in the canister that previously held Juno's satellite —
+  # wqhtf-fqaaa-aaaal-amssq-cai, recorded in .icp/data/mappings/ic.ids.json —
+  # so the app keeps its URL. Switching the wasm is what removes the last piece
+  # of Juno, and it is why `icp` can deploy the assets at all: the satellite
+  # spoke Juno's own upload API, not the standard asset canister one.
+  - name: frontend
+    recipe:
+      type: '@dfinity/asset-canister@v2.3.0'
+      configuration:
+        # No `build` here on purpose. The recipe would always run the same
+        # command, and the local deploy needs the `skylab` mode so the app
+        # targets the local gateway instead of mainnet. `npm run deploy` and
+        # `npm run deploy:local` each build first, with the right mode.
+        dir: build
+
+  # User profiles, previously the satellite's `profiles` Datastore collection.
+  - name: profiles
+    recipe:
+      type: '@dfinity/rust@v3.4.0'
+      configuration:
+        package: profiles
+        candid: src/declarations/profiles/profiles.did
+
+networks:
+  # The default gateway port is 8000, which collides with too much else. 5987
+  # is what `REPLICA_HOST` in src/lib/constants/app.constants.ts already points
+  # at for local development.
+  - name: local
+    mode: managed
+    gateway:
+      host: 127.0.0.1
+      port: 5987

@@ -1,4 +1,4 @@
-# Juno + Escrow Integration (Claude quick-reference)
+# Satellite + Escrow Integration (Claude quick-reference)
 
 > **Authoritative sources:**
 >
@@ -7,49 +7,60 @@
 > - Local deployment runbook: [`.agents/workflows/deployment.md`](../../.agents/workflows/deployment.md)
 > - Bindings regeneration: [`docs/ai/frontend/workflows/regenerate-bindings.md`](../../docs/ai/frontend/workflows/regenerate-bindings.md)
 > - Upstream escrow canister: [`AntonioVentilii/escrow` README](https://github.com/AntonioVentilii/escrow/blob/main/src/escrow/README.md), [TIPS.md](https://github.com/AntonioVentilii/escrow/blob/main/TIPS.md) (locally `../escrow/src/escrow/README.md`, `../escrow/TIPS.md`)
-> - External docs: [Juno LLM Documentation](https://juno.build/llms-full.txt)
+>
+> **Juno status:** the app no longer uses the Juno SDK or CLI — Juno is being
+> deprecated. The satellite _canister_ is unchanged and still hosts the app and
+> its `profiles` collection; we now call it directly. The one remaining Juno
+> touchpoint is the local emulator image used for development (see below),
+> which never ships to production.
 >
 > This card is a Claude-only summary. If it disagrees with the docs
 > above, the docs above win.
 
 ## Overview
 
-Pandame uses Juno for two things:
+Pandame uses its satellite canister (`wqhtf-fqaaa-aaaal-amssq-cai`) for two
+things:
 
-1. **Internet Identity sign-in** (no other auth provider).
+1. **Hosting** — the built frontend is uploaded to the satellite's `#dapp`
+   asset collection.
 2. **One datastore collection — `profiles`** — that stores
    editable user metadata (username / name / address / email) keyed
    by principal. See
    [`profile.services.ts`](../../src/lib/services/profile.services.ts),
-   [`Collection.PROFILES`](../../src/lib/constants/collections.constants.ts),
-   and the `satellite.collections.datastore` block in
-   [`juno.config.ts`](../../juno.config.ts).
+   and [`profiles.api.ts`](../../src/lib/api/profiles.api.ts).
+
+**Internet Identity sign-in** (no other auth provider) is handled directly by
+`@icp-sdk/auth` — see [`auth.services.ts`](../../src/lib/services/auth.services.ts).
 
 All **escrow** / ledger state lives in the standalone **Escrow** Rust
 canister ([`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow);
 locally `../escrow/`; mainnet `umxj5-niaaa-aaaae-af2sq-cai`). The
 frontend talks to it directly via a generated `@dfinity/agent` actor
 and to ICRC-1 / -2 ledgers via `@icp-sdk/canisters/ledger/icrc`. Don't
-push deal state into Juno.
+push deal state into the satellite.
 
-## Key SDK functions (`@junobuild/core`)
+## Auth and datastore
 
-- **Initialization:** `initSatellite({ workers: { auth: true } })`
-  (called exactly once in `src/routes/+layout.svelte`'s `$effect`,
-  followed by `i18n.init()`).
-- **Auth:** `signIn({ internet_identity: {} })`, `signOut()`,
-  `onAuthStateChange()`. Subscribe to `onAuthStateChange` exactly once,
-  inside [`Auth.svelte`](../../src/lib/components/Auth.svelte).
+- **Auth:** [`auth.services.ts`](../../src/lib/services/auth.services.ts)
+  exposes `signIn()`, `signOut()` and `initAuth()`. `initAuth` restores the
+  session and is called exactly once, inside
+  [`Auth.svelte`](../../src/lib/components/Auth.svelte).
+- The `AuthClient` and its delegation live behind
+  [`auth-client.providers.ts`](../../src/lib/providers/auth-client.providers.ts).
+  Don't construct an `AuthClient` anywhere else.
 - Other components read auth state via
   [`userStore`](../../src/lib/stores/user.store.ts) and the
   [`userSignedIn` / `userNotSignedIn`](../../src/lib/derived/user.derived.ts)
   derived stores.
+- **Profiles:** [`profiles.api.ts`](../../src/lib/api/profiles.api.ts) exposes
+  `getProfile` / `setProfile` against the profiles canister, whose Rust source
+  is in [`src/profiles/`](../../src/profiles/).
 
 > [!IMPORTANT]
-> `signIn` requires the provider object — `signIn()` with no arguments
-> is a TypeScript error in `@junobuild/core` 5.x. `signOut` accepts
-> `SignOutOptions`, so wrap it in an arrow function when binding to
-> `onclick`: `onclick={() => signOut()}`.
+> `signIn()` takes no arguments for plain Internet Identity. Pass
+> `{ openIdProvider: 'google' | 'apple' | 'microsoft' }` for One-Click
+> sign-in; II 2.0 runs the OIDC flow and returns an ordinary delegation.
 
 ## Talking to the escrow canister
 
@@ -76,23 +87,21 @@ push deal state into Juno.
 | `TESTICP_LEDGER_CANISTER_ID`  | `$lib/constants/canisters.constants.ts` | `xafvr-biaaa-aaaai-aql5q-cai` (https://github.com/dfinity/ledger-faucet)       |
 | `ICP_TOKEN` / `TESTICP_TOKEN` | `$lib/constants/tokens.constants.ts`    | 8 decimals, fee 10_000 e8s                                                     |
 | `SETTLEMENT_TOKEN`            | `$lib/constants/tokens.constants.ts`    | active default — `ICP_TOKEN` under `vite dev` / `vitest`, else `TESTICP_TOKEN` |
-| Juno satellite (hosting)      | `juno.config.ts`                        | `wqhtf-fqaaa-aaaal-amssq-cai`                                                  |
-| Juno orbiter (analytics)      | `juno.config.ts`                        | `gfpjj-5iaaa-aaaal-amr4a-cai`                                                  |
+| Frontend asset canister       | `.icp/data/mappings/ic.ids.json`        | `wqhtf-fqaaa-aaaal-amssq-cai`                                                  |
+| Profiles canister             | `.icp/data/mappings/ic.ids.json`        | created on first mainnet deploy                                                |
 
 ## Local development
 
-- **Emulator:** `juno emulator start` (requires Docker or Podman). It
-  exposes the IC HTTP gateway on `http://127.0.0.1:5987` and the admin
-  console on <http://localhost:5866>. The emulator is a fully
-  self-contained local IC replica — it **does not** proxy to mainnet.
+- **Local network:** `npx icp network start -d`. Exposes the IC HTTP gateway
+  on `http://127.0.0.1:5987` — the port `REPLICA_HOST` already expects, rather
+  than the icp-cli default of 8000. It is a fully self-contained local replica
+  — it **does not** proxy to mainnet.
 - **Vite proxy:** [`vite.config.ts`](../../vite.config.ts) forwards
   `/api/*` to `http://localhost:5987` so the agent's HTTP gateway calls
-  reach the emulator via the dev-server origin.
-- **Vite plugin:** `@junobuild/vite-plugin` is wired alongside the proxy
-  for env-var injection (resolves `satellite.ids.development` from
-  [`juno.config.ts`](../../juno.config.ts)).
-- **Tailwind v4:** the Vite plugin runs alongside `@tailwindcss/vite` —
-  don't reorder the `plugins` array.
+  reach the local replica via the dev-server origin.
+- **Canister IDs:** mainnet IDs live in `.icp/data/mappings/ic.ids.json`. A
+  fresh local network assigns new ones each time — put the profiles ID in
+  `.env.local` as `VITE_PROFILES_CANISTER_ID`.
 - **Agent host:** in dev, `REPLICA_HOST` is `window.location.origin`
   (so the Vite `/api` proxy can route the agent at the local replica).
   In prod it's `https://icp-api.io`. See
@@ -100,16 +109,16 @@ push deal state into Juno.
 - **Local escrow:** the upstream escrow canister at
   [`../escrow/`](../../../escrow/) is **not** pre-installed in the
   emulator. `npm run dev:setup` builds it via `cargo` and deploys it
-  with `dfx --network local` into the same Juno replica. The deployed
+  with `dfx --network local` into the same emulator replica. The deployed
   canister ID is read from `VITE_ESCROW_CANISTER_ID` (set in
   `.env.local`). See
   [`.agents/workflows/deployment.md`](../../.agents/workflows/deployment.md).
 
 > [!IMPORTANT]
 > Do **NOT** run `dfx start`. Pandame's [`dfx.json`](../../dfx.json)
-> wires the `local` network at `http://127.0.0.1:5987` (the Juno
-> emulator's gateway) so dfx commands deploy into the emulator's
-> replica without standing up a second one.
+> wires the `local` network at `http://127.0.0.1:5987` (the emulator's
+> gateway) so dfx commands deploy into the emulator's replica without
+> standing up a second one.
 
 ## Bindings pipeline
 
@@ -128,16 +137,12 @@ push deal state into Juno.
 - **Auth guards.** Read auth state from `userSignedIn` before calling
   authenticated APIs. Service helpers (`safeGetIdentityOnce`) throw if
   the user isn't signed in.
-- **Post-install.** Auth workers are synced via `npm run postinstall`
-  to `./static/workers`. Don't hand-edit those files.
-- **Custom DOM events.** `junoSignOutAuthTimer` is the only event Juno
-  itself emits in this app (fired by the `auth` worker when the II
-  session expires). The project's own refresh signal is
+- **Custom DOM events.** The project's refresh signal is
   `pandameReloadDeals` — fired by `DealsLoader` on a 30 s timer, by
   every action service after a successful canister call, and by
   pages on mount; the lone listener lives in
   [`DealsLoader.svelte`](../../src/lib/components/DealsLoader.svelte).
-  Both events are typed in
+  It is typed in
   [`src/custom-events.d.ts`](../../src/custom-events.d.ts). New
   project-local events use the `pandame*` prefix.
 
@@ -182,16 +187,14 @@ Arbitrator + admin curation:
 
 ## Profile collection is real
 
-`profile.services.ts` reads / writes the `profiles` Juno collection
-through `@junobuild/core`'s `getDoc` / `setDoc`. The collection key
-is `Collection.PROFILES` (string `'profiles'`) and rules in
-[`juno.config.ts`](../../juno.config.ts)'s
-`satellite.collections.datastore` block are `memory: 'stable'`,
-`read: 'public'`, `write: 'private'`. If you change the schema,
-mirror it in [`src/lib/types/profile.ts`](../../src/lib/types/profile.ts)
-and re-run `juno config apply --mode development` to push the new
-rules into the running emulator (the freshly-started emulator boots
-empty — the collection only exists after `apply`). The avatar is
+`profile.services.ts` reads / writes profiles through
+[`profiles.api.ts`](../../src/lib/api/profiles.api.ts). The canister keeps the
+old access model — publicly readable, writable only by the owner — but derives
+the owner from `msg_caller()` rather than a caller-supplied key, so one
+principal cannot write another's profile. If you change the schema, change
+[`src/profiles/src/lib.rs`](../../src/profiles/src/lib.rs), regenerate
+`src/declarations/profiles/profiles.did`, and mirror it in
+[`src/lib/types/profile.ts`](../../src/lib/types/profile.ts). The avatar is
 stored inline on the profile doc as a JPEG data URL produced by
 [`fileToAvatarDataUrl`](../../src/lib/utils/image.utils.ts); see
 [`UserProfile.avatar_url`](../../src/lib/types/profile.ts).

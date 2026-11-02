@@ -26,7 +26,7 @@ it once per session.
 - [ ] No relative parent imports under `src/` — use the aliases
       (eslint enforces).
 - [ ] I went through the service layer, not directly to
-      `EscrowCanister` / `IcrcLedgerCanister` / `@junobuild/core`.
+      `EscrowCanister` / `IcrcLedgerCanister` / `ProfilesCanister`.
 - [ ] If I regenerated bindings, I committed `src/declarations/escrow/**`
       together with the calling code change.
 - [ ] Local quality gates pass —
@@ -46,10 +46,11 @@ it once per session.
   `@custom-variant`. Brand-aware colours resolve through CSS
   variables on `[data-theme]` so dark mode is a one-file swap. No
   `tailwind.config.ts`.
-- **`@junobuild/core`** for Internet Identity sign-in **and** for
-  the editable `profiles` datastore collection (see the
-  `satellite.collections.datastore` block in
-  [`juno.config.ts`](../../../juno.config.ts) +
+- **`@icp-sdk/auth`** for Internet Identity sign-in (see
+  [`auth.services.ts`](../../../src/lib/services/auth.services.ts)).
+- **`$lib/api/profiles.api`** for the editable user profile — an actor against
+  the profiles canister, whose Rust source is in
+  [`src/profiles/`](../../../src/profiles/) (see
   [`profile.services.ts`](../../../src/lib/services/profile.services.ts)).
 - **`@dfinity/agent` + `@icp-sdk/canisters`** for talking to the escrow
   canister and the ICP ledger.
@@ -81,7 +82,7 @@ it once per session.
 ```
 src/
 ├── app.{css,html,d.ts}     Tailwind theme, HTML shell (data-theme="light"), ambient types
-├── custom-events.d.ts      Juno DOM events typing
+├── custom-events.d.ts      Custom DOM events typing
 ├── routes/
 │   ├── +layout.svelte      Mobile-first phone-frame shell, mounts <Auth />
 │   ├── +layout.ts          ssr=false, prerender=false (SPA fallback)
@@ -91,7 +92,6 @@ src/
 │   ├── send/+page.svelte
 │   └── claim/[deal_id]/+page.svelte    Public QR / share-link claim flow
 ├── declarations/           Generated Candid bindings (DO NOT hand-edit)
-├── satellite/              Juno serverless functions (`defineHook` / `defineQuery` / `defineAssert`)
 └── lib/
     ├── actors/             Shared agent / actor manager
     ├── api/                Identity-passing facades (`*.api.ts`)
@@ -116,10 +116,10 @@ Full taxonomy and naming conventions: [`structure.md`](./structure.md).
 A 10x change is small, focused, and reuses what's there. Recent merged
 PRs to learn from (from `git log` on `main`):
 
-- `feat(profile): persist user-editable profile via Juno datastore` —
+- `feat(profile): persist user-editable profile via the satellite datastore` —
   one cohesive addition (type + service + store + derived + UI),
   every file fits an existing bucket, datastore collection wired in
-  `juno.config.ts` in the same commit.
+  the profiles canister in the same commit.
 - `feat(ui,routes): turn create-deal into a full-screen /deals/new
 flow` — single concern (UI rewrite), drops the previous modal in
   the same commit.

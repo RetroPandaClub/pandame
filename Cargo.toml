@@ -1,0 +1,12 @@
+[workspace]
+members = ["src/profiles"]
+resolver = "2"
+
+[profile.release]
+# Canisters are charged for the bytes they carry, so optimise for size and let
+# the linker drop everything unreachable.
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
