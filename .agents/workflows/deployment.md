@@ -120,6 +120,26 @@ This workflow covers the two flavours of deploy that pandame supports:
    npm run e2e
    ```
 
+## Production canisters
+
+| Canister                  | ID                            | Notes                                                                                |
+| ------------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
+| Frontend (asset canister) | `wqhtf-fqaaa-aaaal-amssq-cai` | Was Juno's satellite until 2026-11-02, when it was reinstalled as an asset canister. |
+| Profiles (Rust)           | `uoa62-6aaaa-aaaai-aye4q-cai` | Created 2026-11-02, on subnet `brlsh-zidhj-…-oae`.                                   |
+
+Both IDs are recorded in
+[`.icp/data/mappings/ic.ids.json`](../../.icp/data/mappings/ic.ids.json), which
+the frontend build reads to inject the profiles ID. Keep that file committed.
+
+The profiles canister could not go on the frontend's subnet: that is a Juno
+subnet where the Cycles Ledger is not authorised to create canisters. If a new
+canister is ever needed, pass `--subnet` with one of the CMC's default subnets
+(`get_default_subnets` on `rkp4c-7iaaa-aaaaa-aaaca-cai`).
+
+A snapshot of the frontend taken just before the reinstall — while it was still
+Juno's satellite — is kept on the canister (`…000c…`, 2026-11-02 12:57 UTC).
+`icp canister snapshot list wqhtf-fqaaa-aaaal-amssq-cai -n ic` shows it.
+
 ## Production deploy — via GitHub Actions
 
 The [`deploy.yml`](../../.github/workflows/deploy.yml) workflow runs on `v*`
@@ -128,14 +148,16 @@ tags and on manual dispatch:
 1. `actions/checkout@v6.0.2` checks out the ref.
 2. The `prepare` composite action installs Node from `.node-version`,
    runs `npm ci` and `npm run prepare`.
-3. `npm run build` produces the static site under `./build/`.
-4. `icp deploy -e ic` builds and deploys both canisters, using the identity
-   from the `DEPLOY_PEM` repository secret.
+3. `npm run deploy:profiles` upgrades the profiles canister (`icp deploy`,
+   with `--no-create` so a broken mapping fails instead of creating a second
+   canister).
+4. `npm run deploy:assets` builds the site and publishes it with `icp sync`.
 
-> **Setup:** `DEPLOY_PEM` must hold a PEM whose principal is a controller of
-> the satellite. Generate one (`dfx identity new deploy --storage-mode
-plaintext`), then add its principal as a controller of the satellite before
-> the first CI deploy — otherwise `init_asset_upload` is rejected.
+The `DEPLOY_PEM` identity is a controller of the profiles canister, since
+upgrading a wasm is controller-only, and holds only the `Commit` permission on
+the frontend. It is deliberately not a controller of the frontend: `icp sync`
+needs nothing more, and `icp deploy` against the frontend would also change
+canister settings.
 
 Trigger a deploy by:
 
@@ -145,27 +167,18 @@ Trigger a deploy by:
 
 ## Production deploy — manually
 
-If CI is unavailable:
+If CI is unavailable, with an identity that has the same rights:
 
-1. Ensure you have the Juno CLI installed and logged in:
+```bash
+npm run deploy:profiles
+npm run deploy:assets
+```
 
-   ```bash
-   juno login
-   ```
-
-2. Build and deploy:
-
-   ```bash
-   npm run deploy
-   ```
-
-   That runs `icp deploy -e ic`, building and deploying both canisters.
-   - Frontend asset canister: `wqhtf-fqaaa-aaaal-amssq-cai` (the canister that
-     used to hold Juno's satellite), serving `build/`
-   - Profiles canister: mapped in `.icp/data/mappings/ic.ids.json`
-
-   The identity needs the frontend's `Commit` permission and controller rights
-   on the profiles canister.
+Building the profiles canister needs Rust with the `wasm32-unknown-unknown`
+target. On macOS, if linking fails with `tapi error: malformed file`, a newer
+SDK than the Command Line Tools' linker understands is installed — point the
+build at a compatible one, e.g.
+`SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk`.
 
 ## Troubleshooting
 
