@@ -38,11 +38,10 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
 
-      # The identity needs controller rights on the profiles canister and the
-      # frontend's Commit permission. That permission only exists once the
-      # frontend canister has been reinstalled as an asset canister by a
-      # controller — see .agents/workflows/deployment.md. This workflow fails
-      # until that has happened.
+      # The identity is a controller of the profiles canister — upgrading a
+      # canister's wasm is controller-only — and holds only the `Commit`
+      # permission on the frontend asset canister, which is all publishing
+      # assets needs. It is deliberately not a controller of the frontend.
       - name: Import deploy identity
         env:
           DEPLOY_PEM: ${{ secrets.DEPLOY_PEM }}
@@ -57,8 +56,15 @@ jobs:
           npx icp identity import --from-pem "$RUNNER_TEMP/deploy.pem" --storage plaintext deploy
           npx icp identity default deploy
 
-      - name: Deploy
-        run: npm run deploy
+      # Backend first, so the frontend never ships ahead of the interface it
+      # calls.
+      - name: Deploy the profiles canister
+        run: npm run deploy:profiles
+
+      # `icp sync` rather than `icp deploy`: deploy also updates canister
+      # settings, which only controllers may do.
+      - name: Publish the frontend
+        run: npm run deploy:assets
 
       - name: Remove deploy identity
         if: always()

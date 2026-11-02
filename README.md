@@ -251,16 +251,19 @@ npm run e2e       # playwright
 | `npm run e2e`              | Run the Playwright E2E suite                                                                |
 | `npm run did`              | Re-pull `escrow.did` from upstream and regenerate TS bindings                               |
 | `npm run i18n`             | Regenerate the typed i18n dictionary                                                        |
-| `npm run deploy`           | Build and deploy the frontend and profiles canisters to mainnet                             |
-| `npm run deploy:local`     | Same, against the local network (production build — see the deploy notes)                   |
+| `npm run deploy:assets`    | Build and publish the frontend (needs `Commit`)                                             |
+| `npm run deploy:profiles`  | Upgrade the profiles canister (controllers only)                                            |
+| `npm run deploy`           | Deploy both canisters, including settings (controllers only)                                |
+| `npm run deploy:local`     | Deploy both canisters to the local network (`--mode skylab` build)                          |
 
 ## 🚀 Deploy
 
-`npm run deploy` runs `icp deploy -e ic`, which builds and deploys both
-canisters: the frontend asset canister (`wqhtf-fqaaa-aaaal-amssq-cai`, the
-canister that used to hold Juno's satellite) and the profiles canister. IDs are
-mapped in [`.icp/data/mappings/ic.ids.json`](./.icp/data/mappings/ic.ids.json),
-which is committed on purpose. See
+Routine releases publish the frontend with `npm run deploy:assets` (`icp sync`)
+and upgrade the profiles canister with `npm run deploy:profiles`. The frontend
+is the asset canister `wqhtf-fqaaa-aaaal-amssq-cai` (Juno's satellite until
+2026-11-02); profiles live in `uoa62-6aaaa-aaaai-aye4q-cai`. IDs are mapped in
+[`.icp/data/mappings/ic.ids.json`](./.icp/data/mappings/ic.ids.json), which is
+committed on purpose. See
 [`.agents/workflows/deployment.md`](./.agents/workflows/deployment.md)
 for the full local + CI deploy runbook.
 
