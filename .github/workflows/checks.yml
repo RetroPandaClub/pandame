@@ -19,21 +19,12 @@ jobs:
       contents: write
 
     steps:
-      - name: Generate GitHub App token
-        id: app-token
-        if: github.event_name == 'pull_request' && vars.BOT_APP_ID != '' && vars.BOT_APP_INSTALLATION_ID != ''
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          app-id: ${{ vars.BOT_APP_ID }}
-          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
           echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
         env:
-          CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
+          CAN_ADD_COMMIT: ${{ secrets.BOT_CREATE_PR_PAT != '' && github.event_name == 'pull_request' }}
 
       - name: Checkout for pull request
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
@@ -41,7 +32,7 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.BOT_CREATE_PR_PAT }}
           persist-credentials: false
 
       - name: Checkout
@@ -52,11 +43,6 @@ jobs:
 
       - name: Prepare
         uses: ./.github/actions/prepare
-
-      # A bindgen bump changes the generated bindings without touching the .did,
-      # so regenerate them here and let the commit below pick them up.
-      - name: Regenerate bindings
-        run: ./scripts/compile-idl-js.sh --staging
 
       - name: Format
         run: npm run format
@@ -74,13 +60,13 @@ jobs:
         if: steps.check_changes.outputs.changes_detected == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'true'
         uses: ./.github/actions/add-and-commit
         with:
-          message: '🤖 Apply generated bindings and formatting changes'
-          token: ${{ steps.app-token.outputs.token }}
+          message: '🤖 Apply formatting changes'
+          token: ${{ secrets.BOT_CREATE_PR_PAT }}
 
-      - name: Fail for changes that cannot be committed
+      - name: Fail for formatting changes that cannot be committed
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
         run: |
-          echo "::error::Bindings or formatting changes are needed but couldn't be committed: this isn't a pull request, or the bot app token isn't available (BOT_APP_ID / BOT_APP_INSTALLATION_ID variables, and BOT_APP_PRIVATE_KEY as both an Actions and a Dependabot secret)."
+          echo "::error::Formatting changes are needed but couldn't be committed: this isn't a pull request, or BOT_CREATE_PR_PAT isn't available (it must exist as both an Actions and a Dependabot secret)."
           git status --porcelain
           exit 1
 
@@ -158,7 +144,24 @@ jobs:
       contents: read
 
     steps:
+      - name: Check if commits can be added
+        id: check_can_add_commit
+        run: |
+          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
+        env:
+          CAN_ADD_COMMIT: ${{ secrets.BOT_CREATE_PR_PAT != '' && github.event_name == 'pull_request' }}
+
+      - name: Checkout for pull request
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.BOT_CREATE_PR_PAT }}
+          persist-credentials: false
+
       - name: Checkout
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -185,7 +188,8 @@ jobs:
       # The TypeScript declarations and IDL factories are generated from the
       # .did, so checking only the .did would let CI pass while the frontend
       # still compiled against stale bindings and failed at the wire boundary.
-      # Regenerate the whole chain and diff all of it.
+      # Regenerate the whole chain (a bindgen bump alone changes every file) and
+      # commit it back; formatting stays with the format job.
       - name: Setup node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -195,18 +199,37 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fail if the Candid interface or its bindings drifted
+      - name: Regenerate the Candid interface and its bindings
         run: |
           cargo install candid-extractor --locked
           cargo build --target wasm32-unknown-unknown --release -p profiles
           candid-extractor target/wasm32-unknown-unknown/release/profiles.wasm \
             > src/declarations/profiles/profiles.did
           ./scripts/compile-idl-js.sh --staging
-          if [[ -n "$(git status --porcelain -- src/declarations/profiles/)" ]]; then
-            echo "::error::src/declarations/profiles/ is out of date. Run 'cargo build', re-extract the Candid interface, then './scripts/compile-idl-js.sh --staging' and commit the result."
-            git --no-pager diff -- src/declarations/profiles/
-            exit 1
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if [[ -n "$(git status --porcelain -- src/declarations/)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Commit bindings
+        if: steps.check_changes.outputs.changes_detected == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'true'
+        uses: ./.github/actions/add-and-commit
+        with:
+          add: src/declarations
+          message: '🤖 Regenerate bindings'
+          token: ${{ secrets.BOT_CREATE_PR_PAT }}
+
+      - name: Fail for bindings changes that cannot be committed
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
+        run: |
+          echo "::error::src/declarations/ is out of date and couldn't be committed: this isn't a pull request, or BOT_CREATE_PR_PAT isn't available (it must exist as both an Actions and a Dependabot secret). Run 'cargo build', re-extract the Candid interface, then './scripts/compile-idl-js.sh --staging' and commit the result."
+          git --no-pager diff -- src/declarations/
+          exit 1
 
   checks-pass:
     if: always()

@@ -18,19 +18,17 @@ jobs:
           echo "This workflow should not be triggered on main"
           exit 1
 
-      - name: Generate GitHub App token
-        id: app-token
-        if: vars.BOT_APP_ID != '' && vars.BOT_APP_INSTALLATION_ID != ''
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          app-id: ${{ vars.BOT_APP_ID }}
-          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
+      - name: Check if commits can be added
+        id: check_can_add_commit
+        run: |
+          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
+        env:
+          CAN_ADD_COMMIT: ${{ secrets.BOT_CREATE_PR_PAT != '' }}
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ steps.app-token.outputs.token || github.token }}
+          token: ${{ secrets.BOT_CREATE_PR_PAT || github.token }}
           persist-credentials: false
 
       - name: Prepare
@@ -43,9 +41,9 @@ jobs:
         run: npm run e2e:snapshots
 
       - name: Commit Playwright updated snapshots
-        if: steps.app-token.outputs.token != ''
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
         uses: ./.github/actions/add-and-commit
         with:
           add: e2e
           message: '🤖 Update snapshots'
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.BOT_CREATE_PR_PAT }}
