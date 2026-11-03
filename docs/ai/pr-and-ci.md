@@ -111,21 +111,22 @@ npm run e2e
 ```
 
 The CI workflow [`.github/workflows/checks.yml`](../../.github/workflows/checks.yml)
-runs `format`, `lint`, `check`, `build`, and `test`. The `format` job
-regenerates the bindings from the committed `.did` files
-(`scripts/compile-idl-js.sh`), runs `npm run format` (prettier + eslint
-`--fix`) and auto-commits the result back to your branch on PRs from
-non-forks. That needs the bot GitHub App: the `BOT_APP_ID` and
-`BOT_APP_INSTALLATION_ID` repo variables, plus `BOT_APP_PRIVATE_KEY`
-stored as both an Actions secret and a **Dependabot** secret (runs
-triggered by Dependabot only see Dependabot secrets). You should still
-run `npm run format` locally to keep diffs reviewable.
+runs `format`, `lint`, `check`, `build`, `test` and `canister`. On PRs
+two jobs commit their fixes back to your branch: `format` runs
+`npm run format` (prettier + eslint `--fix`), and `canister` re-extracts
+the profiles `.did` and regenerates every binding under
+`src/declarations/` (a bindgen bump alone changes them all). Both push
+with the org `BOT_CREATE_PR_PAT` secret, which must exist as an Actions
+secret **and** as a Dependabot secret (runs triggered by Dependabot only
+see Dependabot secrets); without it they fail and print the diff. You
+should still run `npm run format` locally to keep diffs reviewable.
 
 ## 5. CI jobs you must keep green
 
 | Workflow               | Job(s)           | What it runs                                                |
 | ---------------------- | ---------------- | ----------------------------------------------------------- |
-| `checks.yml`           | `format`         | Bindings regen + `npm run format`; auto-commits on PRs.     |
+| `checks.yml`           | `format`         | `npm run format`; auto-commits the fixes on PRs.            |
+| `checks.yml`           | `canister`       | Clippy, `cargo fmt`, bindings regen; auto-commits on PRs.   |
 | `checks.yml`           | `lint`           | `npm run lint` (prettier `--check` + eslint).               |
 | `checks.yml`           | `check`          | `npm run check` (`svelte-check`).                           |
 | `checks.yml`           | `build`          | `npm run build` (tsc --noEmit + vite build).                |
