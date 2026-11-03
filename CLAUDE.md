@@ -153,8 +153,8 @@ These are on top of the [11 commandments](./AGENTS.md#2-the-11-commandments-read
   codegen header in `src/declarations/escrow/**` — are exceptions
   because they're config values, not narrative comments.
 - **No relative parent imports under `src/**`** — use `$lib`, `$routes`,
-`$root` or `$declarations`aliases (eslint enforces`import/no-relative-parent-imports`). The single tolerated exception
-is the side-effect CSS import in `+layout.svelte`.
+  `$root` or `$declarations`aliases (eslint enforces`import/no-relative-parent-imports`). The single tolerated exception
+  is the side-effect CSS import in `+layout.svelte`.
 - **i18n discipline.** New user-visible copy goes through `$i18n.*` keys —
   see [`docs/ai/frontend/workflows/i18n.md`](./docs/ai/frontend/workflows/i18n.md).
 - **Never push force / amend pushed commits / rewrite shared history.**
