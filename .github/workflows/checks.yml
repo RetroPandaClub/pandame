@@ -67,7 +67,7 @@ jobs:
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
         run: |
           echo "::error::Formatting changes are needed but couldn't be committed: this isn't a pull request, or BOT_CREATE_PR_PAT isn't available (it must exist as both an Actions and a Dependabot secret)."
-          git status --porcelain
+          git --no-pager diff
           exit 1
 
   lint:

@@ -29,6 +29,8 @@ runs:
         add: ${{ inputs.add }}
         default_author: github_actions
         message: ${{ inputs.message }}
+        # format and canister can both commit to the same PR head at once.
+        pull: '--rebase --autostash'
 
     - name: Unset local git remote config
       run: |
