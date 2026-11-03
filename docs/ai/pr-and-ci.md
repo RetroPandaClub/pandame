@@ -112,26 +112,31 @@ npm run e2e
 
 The CI workflow [`.github/workflows/checks.yml`](../../.github/workflows/checks.yml)
 runs `format`, `lint`, `check`, `build`, and `test`. The `format` job
-auto-commits prettier/eslint fixes back to your branch on PRs from
-non-forks (when the bot app token is configured); you should still run
-`npm run format` locally to keep diffs reviewable.
+regenerates the bindings from the committed `.did` files
+(`scripts/compile-idl-js.sh`), runs `npm run format` (prettier + eslint
+`--fix`) and auto-commits the result back to your branch on PRs from
+non-forks. That needs the bot GitHub App: the `BOT_APP_ID` and
+`BOT_APP_INSTALLATION_ID` repo variables, plus `BOT_APP_PRIVATE_KEY`
+stored as both an Actions secret and a **Dependabot** secret (runs
+triggered by Dependabot only see Dependabot secrets). You should still
+run `npm run format` locally to keep diffs reviewable.
 
 ## 5. CI jobs you must keep green
 
-| Workflow               | Job(s)           | What it runs                                                   |
-| ---------------------- | ---------------- | -------------------------------------------------------------- |
-| `checks.yml`           | `format`         | `npm run format`. Auto-commits prettier fixes on non-fork PRs. |
-| `checks.yml`           | `lint`           | `npm run lint` (prettier `--check` + eslint).                  |
-| `checks.yml`           | `check`          | `npm run check` (`svelte-check`).                              |
-| `checks.yml`           | `build`          | `npm run build` (tsc --noEmit + vite build).                   |
-| `checks.yml`           | `test`           | `npm run test -- --run` (vitest, single pass).                 |
-| `checks.yml`           | `checks-pass`    | Aggregator — must be green to merge.                           |
-| `e2e.yml`              | `e2e`            | Playwright — only runs on UI/src/config-touching PRs.          |
-| `e2e.yml`              | `e2e-pass`       | Aggregator — passes when `e2e` passed _or_ was skipped.        |
-| `pr-checks.yml`        | check-pr-title   | Conventional-commits regex on the PR title.                    |
-| `auto-update-i18n.yml` | auto_update      | Re-runs `npm run i18n` on PRs that touch `src/lib/i18n/**`.    |
-| `deploy.yml`           | deploy           | Deploys on push to `main` / tag. Don't bypass.                 |
-| `snapshots.yml`        | update_snapshots | Manual-only Playwright snapshot refresh.                       |
+| Workflow               | Job(s)           | What it runs                                                |
+| ---------------------- | ---------------- | ----------------------------------------------------------- |
+| `checks.yml`           | `format`         | Bindings regen + `npm run format`; auto-commits on PRs.     |
+| `checks.yml`           | `lint`           | `npm run lint` (prettier `--check` + eslint).               |
+| `checks.yml`           | `check`          | `npm run check` (`svelte-check`).                           |
+| `checks.yml`           | `build`          | `npm run build` (tsc --noEmit + vite build).                |
+| `checks.yml`           | `test`           | `npm run test -- --run` (vitest, single pass).              |
+| `checks.yml`           | `checks-pass`    | Aggregator — must be green to merge.                        |
+| `e2e.yml`              | `e2e`            | Playwright — only runs on UI/src/config-touching PRs.       |
+| `e2e.yml`              | `e2e-pass`       | Aggregator — passes when `e2e` passed _or_ was skipped.     |
+| `pr-checks.yml`        | check-pr-title   | Conventional-commits regex on the PR title.                 |
+| `auto-update-i18n.yml` | auto_update      | Re-runs `npm run i18n` on PRs that touch `src/lib/i18n/**`. |
+| `deploy.yml`           | deploy           | Deploys on push to `main` / tag. Don't bypass.              |
+| `snapshots.yml`        | update_snapshots | Manual-only Playwright snapshot refresh.                    |
 
 If your change is doc-only, the `format` and `lint` jobs still run
 because they cover the whole repo. The `check` and `build` jobs are
