@@ -14,9 +14,7 @@
 	let { tokens = SUPPORTED_TOKENS }: Props = $props();
 
 	type RowState =
-		| { status: 'loading' }
-		| { status: 'ready'; balance: bigint }
-		| { status: 'error' };
+		{ status: 'loading' } | { status: 'ready'; balance: bigint } | { status: 'error' };
 
 	// Keyed by ledger canister id so it stays stable when the list reorders.
 	let states = $state<Record<string, RowState>>({});
