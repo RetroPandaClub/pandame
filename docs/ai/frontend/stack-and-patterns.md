@@ -79,8 +79,13 @@ route / component
   ICRC-2 allowance, calls the facade, then `reflectDeal` (`:17`) upserts the
   result into `dealsStore` and emits `pandameReloadDeals`. Every action
   service ends the same way; `dispute.services.ts` mirrors it for disputes.
-- **Public reads** (the `/claim` preview) use `getIdentityOrAnonymous`
-  ([`identity.services.ts:9`](../../../src/lib/services/identity.services.ts)).
+- **Public reads** use `getIdentityOrAnonymous`
+  ([`identity.services.ts:9`](../../../src/lib/services/identity.services.ts)),
+  as `getProfile` in
+  [`profile.services.ts:29`](../../../src/lib/services/profile.services.ts)
+  does to resolve any principal's profile. The `/claim` preview is not one
+  today: the page loads it only once signed in, and `getClaimableDeal` uses
+  `safeGetIdentityOnce`.
 - Identity is resolved per call, never cached in a service, so an expired
   session surfaces.
 
@@ -102,7 +107,9 @@ route / component
 
 - **Store factory:** [`deals.store.ts:11`](../../../src/lib/stores/deals.store.ts)
   wraps a `writable` and exposes intent methods (`set`, `upsert`, `remove`,
-  `reset`). `undefined` means not loaded, `null` means loaded and empty.
+  `reset`). `undefined` means not loaded; a loaded empty collection is `[]`.
+  `null` appears only where absence is itself a state: `userStore` (signed
+  out) and `arbitratorStore` (not an arbitrator).
 - **Derived:** [`deals.derived.ts:69`](../../../src/lib/derived/deals.derived.ts)
   `dealsAttentionCount` combines `dealsStore` and `userStore`; pure, no I/O.
 - **Loader component:** [`DealsLoader.svelte`](../../../src/lib/components/DealsLoader.svelte)
@@ -197,8 +204,11 @@ authenticated page is
 `<AuthGuard />` + `BrandHeader` (with `BrandHeaderBackButton` in `leading`
 and `UserPrincipalBadge` in `trailing`) + a `Sheet` or content section +
 `AppBottomNav`; see [`/transactions`](../../../src/routes/transactions/+page.svelte).
-Public pages (welcome, claim) drop `AppBottomNav`. There is one global
-`<title>` in `app.html`.
+Public pages (welcome, claim) drop `AppBottomNav`. Every route sets its own
+localized title in `<svelte:head>` as `<title>{title} · {$i18n.layout.title}</title>`
+(for example [`deals/new/+page.svelte:135`](../../../src/routes/deals/new/+page.svelte));
+`<title>PandaMe</title>` in `app.html` is only the fallback. A new route keeps
+that pattern.
 
 ## i18n
 

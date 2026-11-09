@@ -17,8 +17,10 @@
 3. **Shape:** for loaded data, a factory over `writable<T | undefined>` that
    exposes intent methods, as
    [`deals.store.ts`](../../../../src/lib/stores/deals.store.ts) does
-   (`set`, `upsert`, `remove`, `reset`). `undefined` means not loaded, `null`
-   loaded and empty.
+   (`set`, `upsert`, `remove`, `reset`). `undefined` means not loaded; a
+   loaded empty collection is `[]`. Use `T | null | undefined` only when
+   absence is a real state, as in `userStore` (signed out) or
+   `arbitratorStore` (not an arbitrator).
 4. **Writers:** services write the store after a canister call; components
    read it. Reset it on sign-out where `DealsLoader` / `Auth` already do.
 5. **Tests** if it has logic; **catalog** row; **gates**.
