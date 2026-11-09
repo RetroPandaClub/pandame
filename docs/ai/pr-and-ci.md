@@ -91,7 +91,7 @@ npm run test -- --run   # vitest, single pass
 and comments excluded, generated `i18n.d.ts` excluded), no explicit `any`, no
 non-null assertion, and import boundaries (routes and components may not
 import `$declarations`, `$lib/api`, `$lib/canisters`, `$lib/actors`; utils may
-not import api, canisters, actors, services or stores).
+not import `$declarations`, api, canisters, actors, services or stores).
 
 Today's violations are baselined in
 [`eslint-suppressions.json`](../../eslint-suppressions.json), which ESLint

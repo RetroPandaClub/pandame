@@ -135,13 +135,15 @@ export default tseslint.config(
 					patterns: [
 						{
 							group: [
+								'$declarations',
+								'$declarations/*',
 								'$lib/api/*',
 								'$lib/canisters/*',
 								'$lib/actors/*',
 								'$lib/services/*',
 								'$lib/stores/*'
 							],
-							message: 'Utils are pure: no I/O, no stores.'
+							message: 'Utils are pure: no I/O, no stores, generated types only through $lib/types.'
 						}
 					]
 				}
