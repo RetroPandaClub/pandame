@@ -37,7 +37,9 @@ Dependencies point one way:
 `routes` → `components` → `services` → `api` → `canisters` → `actors`.
 `stores`, `derived`, `utils`, `constants`, `enums`, `types` are leaves any
 layer may import. `$declarations` is imported only by `api`, `canisters`,
-`services`, `types` and `enums`, never by `components` or `routes`.
+`services`, `types` and `enums`, never by `components` or `routes`. ESLint
+enforces the UI and utils boundaries
+([quality gate](../pr-and-ci.md#the-quality-gate-inside-lint)).
 
 ## Routes
 

@@ -224,7 +224,10 @@ General, never do:
   anything but a `*_html` key; `console.log` (only `warn` / `error` pass lint).
 - A wrapper component that only re-exports another.
 
-Found in the code today; do not copy, and fix only in a PR of their own:
+Found in the code today; do not copy, and fix only in a PR of their own. The
+god pages, the canister-layer imports and the one over-complex function are
+also baselined in `eslint-suppressions.json`
+([quality gate](../pr-and-ci.md#the-quality-gate-inside-lint)):
 
 | Smell                                                                       | Where                                                                                                                                                                                                                                                                                                | Do instead                                                                                 |
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |

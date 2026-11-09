@@ -84,6 +84,25 @@ npm run test -- --run   # vitest, single pass
 - `cargo clippy --target wasm32-unknown-unknown --release --all-targets -- -D warnings`
   and `cargo fmt --check` if you touched `src/profiles/**`.
 
+### The quality gate inside `lint`
+
+[`eslint.config.js`](../../eslint.config.js) enforces, on `src/**/*.{ts,svelte}`:
+`complexity` 10, `max-depth` 3, `max-params` 3, `max-lines` 300 (blank lines
+and comments excluded, generated `i18n.d.ts` excluded), no explicit `any`, no
+non-null assertion, and import boundaries (routes and components may not
+import `$declarations`, `$lib/api`, `$lib/canisters`, `$lib/actors`; utils may
+not import api, canisters, actors, services or stores).
+
+Today's violations are baselined in
+[`eslint-suppressions.json`](../../eslint-suppressions.json), which ESLint
+reads on its own. The baseline only shrinks:
+
+- New code that breaks a rule fails `lint`; fix the code.
+- When you fix a baselined violation, run `npx eslint . --prune-suppressions`
+  and commit the smaller file; a stale entry makes `lint` fail.
+- Never add entries (`--suppress-all`, `--suppress-rule`) or raise a
+  threshold without asking.
+
 ## 5. CI
 
 | Workflow               | Job                | Runs                                                                                                    |
@@ -110,7 +129,8 @@ When a job fails:
 
 - **`format` pushed a commit:** pull it. Run `npm run format` locally next time.
 - **`lint`:** run `npm run lint`. Typical causes: a relative parent import
-  (use an alias), an `{#each}` without a key. Never silence a rule.
+  (use an alias), an `{#each}` without a key, a [quality gate](#the-quality-gate-inside-lint)
+  threshold or boundary, a stale suppression to prune. Never silence a rule.
 - **`check`:** fix the type error. No `@ts-ignore`, `as any`, `as unknown as`.
 - **`test`:** reproduce with `npm run test -- --run`. Never `.skip`.
 - **`canister`:** reproduce the clippy / fmt command from section 4.

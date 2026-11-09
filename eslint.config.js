@@ -88,6 +88,67 @@ export default tseslint.config(
 		}
 	},
 	{
+		// Quality gate. Today's violations are baselined in eslint-suppressions.json;
+		// a fixed one must be pruned (`npx eslint . --prune-suppressions`), so the
+		// baseline only shrinks.
+		files: ['src/**/*.ts', 'src/**/*.svelte'],
+		ignores: ['src/lib/types/i18n.d.ts'],
+		rules: {
+			complexity: ['error', 10],
+			'max-depth': ['error', 3],
+			'max-params': ['error', 3],
+			'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+			'@typescript-eslint/no-explicit-any': 'error',
+			'@typescript-eslint/no-non-null-assertion': 'error'
+		}
+	},
+	{
+		// UI reaches canisters only through services, and generated types only through $lib/types.
+		files: ['src/routes/**', 'src/lib/components/**'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: [
+								'$declarations',
+								'$declarations/*',
+								'$lib/api/*',
+								'$lib/canisters/*',
+								'$lib/actors/*'
+							],
+							message: 'Go through $lib/services and $lib/types.'
+						}
+					]
+				}
+			]
+		}
+	},
+	{
+		// Utils stay pure.
+		files: ['src/lib/utils/**'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: [
+								'$lib/api/*',
+								'$lib/canisters/*',
+								'$lib/actors/*',
+								'$lib/services/*',
+								'$lib/stores/*'
+							],
+							message: 'Utils are pure: no I/O, no stores.'
+						}
+					]
+				}
+			]
+		}
+	},
+	{
 		// CLI scripts report progress on stdout.
 		files: ['scripts/**/*.ts', 'scripts/**/*.mjs'],
 		rules: {
