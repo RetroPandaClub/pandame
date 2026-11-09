@@ -1,185 +1,70 @@
-# Frontend Testing
+# Frontend testing
 
-Pandame ships **two** test runners: Vitest for unit / module tests and
-Playwright for end-to-end. Both are wired into CI via
-[`.github/workflows/checks.yml`](../../../.github/workflows/checks.yml)
-(Vitest) and [`.github/workflows/e2e.yml`](../../../.github/workflows/e2e.yml)
-(Playwright).
+Two runners: Vitest for units (CI `checks.yml` → `test`) and Playwright for
+end-to-end (`e2e.yml`). The profiles canister has none yet; see
+[backend](../backend/README.md#testing).
 
-## Unit tests — Vitest
+## Vitest
 
-### Stack
+- **Config:** [`vitest.config.ts`](../../../vitest.config.ts): the SvelteKit
+  plugin, `jsdom`, `globals: true`, specs matched by
+  `src/**/*.{test,spec}.{js,ts}`.
+- **Setup:** [`vitest.setup.ts`](../../../vitest.setup.ts) imports
+  `@testing-library/jest-dom`, but the config has no `setupFiles` entry, so
+  those matchers are **not loaded** today. Wire it before relying on
+  `toBeInTheDocument`.
+- **Where:** a `*.spec.ts` next to the file under test. `*.test.ts` is
+  reserved for Playwright.
+- **Today:** `src/lib/utils/{avatar,clipboard,dispute,format,storage}.utils.spec.ts`.
+  [`storage.utils.spec.ts`](../../../src/lib/utils/storage.utils.spec.ts) is
+  the model: a hoisted `vi.mock('$app/environment', …)`, one `describe` per
+  module, nested per function, one `it` per behaviour.
 
-- **Runner:** [Vitest 4](https://vitest.dev/).
-- **Environment:** `jsdom` (configured in
-  [`vitest.config.ts`](../../../vitest.config.ts)).
-- **Setup file:** [`vitest.setup.ts`](../../../vitest.setup.ts) —
-  loads `@testing-library/jest-dom` matchers.
+| Test                                                     | Skip                          |
+| -------------------------------------------------------- | ----------------------------- |
+| Every exported function of a `*.utils.ts`                | Re-exports, generated files   |
+| Stores and derived stores with logic                     | Pure passthrough stores       |
+| Services with branching (mock `$lib/api/*.api`)          | One-off presentational markup |
+| Every bug fix: a test that fails on `main`, passes after |                               |
 
-### Layout
-
-- **Colocated `*.spec.ts`** next to the file under test. Example:
-  [`src/lib/utils/storage.utils.ts`](../../../src/lib/utils/storage.utils.ts)
-  has [`storage.utils.spec.ts`](../../../src/lib/utils/storage.utils.spec.ts)
-  in the same directory.
-- **Naming:** `*.spec.ts` for Vitest specs.
-- **Don't use `*.test.ts` for unit tests** — that suffix is reserved for
-  Playwright (see below).
-
-### What to test
-
-| Add tests for                                                  | Don't bother                                          |
-| -------------------------------------------------------------- | ----------------------------------------------------- |
-| Pure utils (`*.utils.ts`) — every public function              | Re-exports, barrels                                   |
-| Stores / derived stores with non-trivial logic                 | Generated files (`src/lib/types/i18n.d.ts`)           |
-| Components with logic (any non-trivial branch / event handler) | Throwaway prototypes                                  |
-| Bug fixes (write the regression test that fails on `main`)     | One-off presentational components used in 1 page only |
-
-If you fix a bug, **the PR contains a test that fails on `main` and
-passes on your branch**. Otherwise it's an "I think this is fine" PR.
-
-### File shape
-
-```ts
-import { describe, expect, it } from 'vitest';
-import { get, set } from '$lib/utils/storage.utils';
-
-describe('storage.utils', () => {
-	describe('set / get', () => {
-		it('round-trips a primitive', () => {
-			set({ key: 'k', value: 42 });
-			expect(get<number>({ key: 'k' })).toEqual(42);
-		});
-	});
-});
-```
-
-Notes:
-
-- One `describe` per module under test, nested `describe` per public
-  function.
-- One `it` per behaviour — name it from the user/caller perspective.
-- Reset side effects in `beforeEach`. Never let test order matter.
-- For profile calls (`getProfile` / `setProfile`): mock `$lib/api/profiles.api`;
-  for auth (`signIn` / `signOut` / …): mock `$lib/services/auth.services`.
-  Mock the module rather than stubbing globals.
-
-### Component testing
-
-When testing a Svelte component:
-
-```ts
-import { render, screen } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
-import Button from '$lib/components/Button.svelte';
-
-describe('Button', () => {
-	it('renders the children', () => {
-		render(Button, { props: { children: () => 'Confirm' } });
-		expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
-	});
-});
-```
-
-Prefer `getByRole`, `getByLabelText`, `getByText` — they exercise the
-same semantics as a screen reader.
-
-> [!NOTE]
-> `@testing-library/svelte` is **not** in `package.json` today. If your
-> first component test needs it, add it under `devDependencies` (with
-> explicit user approval — see
-> [`governance.md`](../governance.md#forbidden-without-explicit-prompt))
-> and update this page in the same PR.
-
-### Forbidden in unit tests
-
-- `it.skip` / `describe.skip` / `it.todo` left on `main`.
-- Real network calls.
-- `setTimeout`-based waits. Use `vi.useFakeTimers()` or `await waitFor(...)`.
-- `console.log` debug output. Remove before commit.
-
-### Local commands
+- Mock modules, not globals: `vi.mock('$lib/api/escrow.api')`,
+  `vi.mock('$lib/api/profiles.api')`, `vi.mock('$lib/services/auth.services')`.
+- Reset state in `beforeEach`; order must never matter.
+- No real network, no `setTimeout` waits (`vi.useFakeTimers()`), no
+  `console.log`, no `.skip` / `.todo` on `main`.
+- `@testing-library/svelte` is not installed; the first component test needs
+  it as an approved dev dependency, and this page updated.
 
 ```bash
-npm run test            # watch mode
-npm run test -- --run   # single pass (matches CI)
+npm run test            # watch
+npm run test -- --run   # single pass, as CI
 ```
 
-## E2E — Playwright
+## Playwright
 
-### Stack
-
-- **Runner:** `@playwright/test` 1.59+.
-- **Devices:** desktop (Chrome / Firefox / Edge / Safari) + mobile
-  (iPhone SE / iPhone 14 Pro Max / Galaxy S8 / Pixel 7) + tablets (iPad
-  gen 7 / iPad Pro 11). Every spec runs against every project.
-- **Web server:** Playwright auto-boots `npm run build && npm run preview`
-  on `:4173` (see [`playwright.config.ts`](../../../playwright.config.ts)).
-
-### Layout
-
-```text
-e2e/
-├── homepage.test.ts             # logged-out smoke test
-└── homepage.test.ts-snapshots/  # generated screenshots, one per device
-```
-
-- **One `*.test.ts` per high-level user-facing flow.** Don't co-locate
-  specs with components.
-- **`*.test.ts` is reserved for Playwright** in this repo (Vitest uses
-  `*.spec.ts`).
-- **Selectors** go through `page.getByTestId(...)`. Playwright is
-  configured with `testIdAttribute: 'data-tid'`, so a component opts in
-  by exposing `data-tid="…"`.
-
-### Snapshots
-
-Pandame snapshots the rendered home page per device. To refresh after
-intentional UI changes:
+- **Config:** [`playwright.config.ts`](../../../playwright.config.ts) boots
+  `npm run build && npm run preview` on `:4173`, `testDir: 'e2e'`,
+  `testIdAttribute: 'data-tid'`.
+- **Projects:** every spec runs on Desktop Chrome, Firefox, Edge, Safari;
+  iPhone 15 Pro Max, iPhone 13 Mini, Galaxy S24; iPad (gen 7), iPad Pro 11.
+- **Today:** [`e2e/homepage.test.ts`](../../../e2e/homepage.test.ts), the
+  signed-out welcome screen. No screenshot baselines are committed.
+- One `e2e/<flow>.test.ts` per user flow. Target elements by role first,
+  `getByTestId` with a `data-tid="kebab-case"` when a role is not enough
+  (`DealCard`, `PanelSizePicker` already expose one).
+- No `waitForTimeout`, no identities stuffed into storage, no network outside
+  the local stack, no `test.skip` on `main`.
 
 ```bash
-npm run e2e:snapshots
+npm run e2e            # full suite, installs browsers first
+npm run e2e:ci         # HTML reporter
+npm run e2e:report     # open the last report
+npm run e2e:snapshots  # refresh screenshot baselines
 ```
 
-Or trigger the manual
-[`Update E2E Snapshots`](../../../.github/workflows/snapshots.yml)
-workflow on a PR branch and the bot will commit the regenerated PNGs.
-
-### Local commands
-
-```bash
-npm run e2e            # run the full suite (installs browsers on first run)
-npm run e2e:ci         # CI-style run (HTML reporter)
-npm run e2e:report     # open the last HTML report
-npm run e2e:snapshots  # update snapshots
-```
-
-### CI
-
-[`e2e.yml`](../../../.github/workflows/e2e.yml) auto-runs on every push
-to `main`, every relevant pull request (path-filtered to `e2e/**`,
-`src/**`, `static/**`, configs, lockfile, and the workflow itself), every
-`merge_group`, on a nightly schedule, and on `workflow_dispatch`. PRs
-that don't touch UI code skip E2E entirely; the `e2e-pass` aggregator
-treats that skip as a pass. Add the `run-e2e` label to a PR to force
-the run anyway.
-
-The HTML report is uploaded as the `playwright-report` artifact (always);
-raw `test-results/` ship only on failure.
-
-### Forbidden in E2E
-
-- `test.skip` left on `main`. Either remove the test or make it pass.
-- Hard-coded waits (`page.waitForTimeout(...)`). Use
-  `expect(locator).toBeVisible()` / `toHaveText()` instead.
-- Logging in by stuffing identities into `localStorage` / `IndexedDB`.
-- Real network calls outside the local emulator. The whole point of
-  the emulator is reproducibility.
-
-### Adding a new E2E test
-
-1. Add a `data-tid="…"` on the smallest meaningful element you need to
-   target.
-2. Write the spec under `e2e/<flow>.test.ts`.
-3. Run `npm run e2e` locally before pushing. If the spec uses
-   screenshots, run `npm run e2e:snapshots` to seed them.
+CI runs E2E on pushes to `main`, on PRs that touch `e2e/**`, `src/**`,
+`static/**`, configs or the lockfile, on the merge queue, nightly, on manual
+dispatch, and on any PR labelled `run-e2e`. `e2e-pass` treats a skip as a
+pass. The `playwright-report` artifact is always uploaded; `test-results` only
+on failure. Baselines can also be refreshed with the manual
+[`snapshots.yml`](../../../.github/workflows/snapshots.yml) workflow.

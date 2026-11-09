@@ -1,56 +1,39 @@
-# AI Agents Documentation
+# Agent docs
 
-This is the long-form documentation that backs the agent entry points
-([`AGENTS.md`](../../AGENTS.md), [`CLAUDE.md`](../../CLAUDE.md), and the
-legacy [`.claude/rules/`](../../.claude/rules/) cards).
-
-If you are an agent: do **not** read everything. Read the entry point first
-(`AGENTS.md`), then jump to the specific page you need.
-
-## Map
+Long-form pages behind [`AGENTS.md`](../../AGENTS.md). Do not read them all:
+start from `AGENTS.md` and open the page its table names. The universal rules
+are in the
+[officina standard](https://github.com/AntonioVentilii/officina/blob/main/standards/code.md);
+these pages only say what is specific to PandaMe.
 
 ```
 docs/ai/
-├── README.md                    ← you are here
-├── governance.md                Truth hierarchy, boundaries, capabilities, meta-update rule
-├── pr-and-ci.md                 PR title regex, body template, CI cheatsheet, local gates
-└── frontend/
-    ├── README.md                Frontend bootstrap (start here for any FE change)
-    ├── structure.md             Folder taxonomy, naming, aliases
-    ├── stack-and-patterns.md    Svelte 5 (runes), TS, Tailwind v4, satellite + escrow usage
-    ├── reusability.md           Catalog of components / services / api / canisters / stores / utils
-    ├── a11y.md                  Accessibility rules
-    ├── testing.md               Vitest + Playwright policy and conventions
-    └── workflows/
-        ├── new-component.md
-        ├── new-service.md
-        ├── new-store.md
-        ├── regenerate-bindings.md
-        └── i18n.md
+├── README.md                 this index
+├── governance.md             protected and generated paths, ask-first list, meta-update map
+├── pr-and-ci.md              PR title and body, local gates, CI jobs, updating a PR
+├── frontend/
+│   ├── README.md             pre-flight checklist and stack at a glance (start here)
+│   ├── structure.md          folder taxonomy, routes, naming, aliases, where new code goes
+│   ├── stack-and-patterns.md patterns with real examples, anti-patterns found in the code
+│   ├── reusability.md        catalog of every shared component, service, store, util, constant, type
+│   ├── a11y.md               accessibility rules
+│   ├── testing.md            Vitest and Playwright conventions
+│   └── workflows/
+│       ├── new-component.md
+│       ├── new-service.md    wiring a new escrow endpoint or service
+│       ├── new-store.md
+│       ├── i18n.md
+│       └── regenerate-bindings.md
+└── backend/
+    └── README.md             the profiles canister (Rust)
 ```
 
-## Audience
+Related docs kept where tools expect them:
 
-- **AI agents** (Claude Code, Cursor, Copilot, Codex, Aider, opencode, …).
-- **Humans** giving instructions to those agents — including non-engineers
-  writing prompts for small visual / copy / refactor PRs.
+- [`.agents/workflows/deployment.md`](../../.agents/workflows/deployment.md):
+  local network, local escrow, deploys, production canister IDs.
+- [`README.md`](../../README.md): the human-facing overview.
+- [`CLAUDE.md`](../../CLAUDE.md): a pointer here for Claude Code.
 
-## Maintenance — auto-adapting
-
-These docs **must auto-adapt**. When you (agent or human) introduce a new
-pattern, naming convention, shared component, shared type, or workflow,
-update the relevant page in the **same PR** as the code change. See the
+These pages adapt with the code: see the
 [meta-update rule](./governance.md#meta-update-rule).
-
-## Relationship to the legacy `.claude/rules/`
-
-The repository also keeps Claude-specific guidance under
-[`.claude/rules/`](../../.claude/rules/) and operational runbooks under
-[`.agents/workflows/`](../../.agents/workflows/):
-
-- `.claude/rules/*.md` — short Claude-only quick-reference cards. Defer to
-  the matching `docs/ai/**` page; only Claude-specific tweaks live there.
-- `.agents/workflows/*.md` — operational runbooks (e.g. local deploy).
-
-If two pages disagree, the page under `docs/ai/` wins (see the
-[truth hierarchy](./governance.md#truth-hierarchy)).
