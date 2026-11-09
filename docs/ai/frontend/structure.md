@@ -10,7 +10,7 @@ concern. What lives in each folder today is catalogued in
 ```
 src/
 ├── app.css              Tailwind v4 entry: @theme tokens, @font-face, light / dark blocks
-├── app.html             Shell: viewport, theme-color, <html data-theme="light">, one global <title>
+├── app.html             Shell: viewport, theme-color, <html data-theme="light">, fallback <title> (routes set their own)
 ├── app.d.ts             Ambient SvelteKit types
 ├── custom-events.d.ts   Typed project DOM events (pandameReloadDeals)
 ├── routes/              Pages (see Routes below)

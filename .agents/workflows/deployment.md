@@ -46,8 +46,12 @@ Two flavours:
    npm run dev:setup
    ```
 
-   The script builds `escrow.wasm` from `../escrow/` with `cargo`, runs
-   `dfx deploy escrow --network local` and prints the canister ID. Add it to
+   The script first checks that the gateway on port 5987 answers. Its
+   messages still say "Juno emulator" and suggest `juno emulator start`:
+   ignore that and start the network with `npx icp network start -d` (step
+   2), then rerun the script. It builds `escrow.wasm` from `../escrow/` with
+   `cargo`, runs `dfx deploy escrow --network local` and prints the canister
+   ID. Add it to
    `.env.local` (gitignored):
 
    ```bash
