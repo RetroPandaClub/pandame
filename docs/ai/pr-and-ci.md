@@ -1,201 +1,139 @@
-# PR & CI
+# PR and CI
 
-Everything an agent needs to open a green PR.
+Everything needed to open a green PR.
 
-## 1. PR title
+## 1. Title
 
-The repo follows [Conventional Commits](https://www.conventionalcommits.org/).
-The [`pr-checks.yml`](../../.github/workflows/pr-checks.yml) workflow
-enforces the regex below on every PR title.
-
-Pattern: `verb(scope)?: description` — scope optional but encouraged.
-
-### Verbs
-
-| verb       | when                                                         |
-| ---------- | ------------------------------------------------------------ |
-| `feat`     | new user-visible feature                                     |
-| `fix`      | bug fix                                                      |
-| `refactor` | internal change with no behaviour change                     |
-| `style`    | visual / CSS only — no logic change                          |
-| `perf`     | performance improvement                                      |
-| `docs`     | docs only (incl. `docs/ai/**`, `README.md`, …)               |
-| `test`     | tests only                                                   |
-| `chore`    | misc maintenance (dependency bumps, release housekeeping, …) |
-| `build`    | build system / packaging                                     |
-| `ci`       | CI workflows / actions                                       |
-
-### Scope
-
-Single word or comma-separated list of affected areas. Use the existing
-vocabulary so it shows up grouped in changelogs:
-
-- `ui`, `routes`, `layout`, `theme`, `profile`, `auth`, `i18n`,
-  `services`, `stores`, `canisters`, `declarations`, `e2e`,
-  `npm-deps`, `npm-deps-dev`, `github-actions`, `ai` (for
-  `docs/ai/**` updates).
-
-If you introduce a new scope, keep it short and lowercase, no spaces.
-
-### Breaking changes
-
-If your change breaks the public datastore shape (`UserProfile`, the
-`Profile` record in `src/profiles/`, or the on-chain
-escrow `.did` mirror under `$declarations/escrow/**`), mark the title
-with `!`:
+[Conventional Commits](https://www.conventionalcommits.org/), enforced by
+[`pr-checks.yml`](../../.github/workflows/pr-checks.yml):
 
 ```
-feat(profile)!: rename `display_name` field to `username`
+^(feat|fix|chore|build|ci|docs|style|refactor|perf|test)(\([-a-zA-Z0-9,]+\))?!?:
 ```
 
-…and add a `BREAKING CHANGE:` block in the body explaining the migration.
+| Verb       | When                                                |
+| ---------- | --------------------------------------------------- |
+| `feat`     | New user-visible feature                            |
+| `fix`      | Bug fix                                             |
+| `refactor` | Internal change, no behaviour change                |
+| `style`    | Visual or CSS only                                  |
+| `perf`     | Performance                                         |
+| `docs`     | Docs only (`docs/ai/**`, `README.md`)               |
+| `test`     | Tests only                                          |
+| `chore`    | Maintenance, dependency bumps, release housekeeping |
+| `build`    | Build system, packaging                             |
+| `ci`       | Workflows and actions                               |
 
-## 2. PR body — template
+Scopes in use (from `git log`): `ui`, `routes`, `layout`, `theme`, `home`,
+`profile`, `deals`, `disputes`, `history`, `transactions`, `admin`, `escrow`,
+`auth`, `i18n`, `services`, `stores`, `canisters`, `declarations`, `dev`,
+`e2e`, `ai`, `npm-deps`, `npm-deps-dev`, `github-actions`. A new scope is
+short, lowercase, no spaces.
 
-Honor [`.github/pull_request_template.md`](../../.github/pull_request_template.md):
+A change that breaks stored data (the `Profile` record in `src/profiles/`,
+`UserProfile`) or the escrow contract mirror takes `!`
+(`feat(profile)!: rename name to display_name`) and a `BREAKING CHANGE:`
+block in the body with the migration.
+
+## 2. Body
+
+Use [`.github/pull_request_template.md`](../../.github/pull_request_template.md)
+with its exact headings:
 
 ```markdown
 # Motivation
 
-<!-- Describe the motivation that lead to the PR -->
-
 # Changes
 
-<!-- List the changes that have been developed -->
-
 # Tests
-
-<!-- Please provide any information or screenshots about the tests that have been done -->
 ```
 
-Rules:
-
-- **All three sections are required.** Don't leave them empty. Even tiny PRs benefit from one bullet per section.
-- **Use the exact section headings** (`# Motivation`, `# Changes`, `# Tests`) so downstream tooling (release notes, search, changelog grep) can find them.
-- **Do not hard-wrap lines.** Write one line per paragraph or list item and let the GitHub renderer wrap. Hard-wrapping at ~80 columns (a default many models fall back to) breaks rendering inside lists, blockquotes, and tables, and makes later edits in the GitHub UI ugly. This applies to the PR body only — source files still follow `.prettierrc`.
-- **Atomicity statement** if the PR touches more than one logical thing — add a one-liner explaining why they belong together. If you can't, split.
-- **Mention `docs/ai/` updates** under `# Changes` whenever the [meta-update rule](./governance.md#meta-update-rule) fired.
-- **Screenshots are welcome** for visual changes — link them; don't paste giant base64 in the body.
-- **For datastore-breaking changes**, include a `BREAKING CHANGE:` block in `# Changes` listing what existing data has to be migrated.
+- All three sections, even for a tiny PR.
+- No hard wrapping: one line per paragraph or list item.
+- A PR that touches more than one thing says in one line why they belong
+  together; if you cannot, split it.
+- Mention `docs/ai/**` updates under `# Changes` when the
+  [meta-update rule](./governance.md#meta-update-rule) fired.
+- Link screenshots for visual changes; no pasted base64.
+- No AI attribution lines.
 
 ## 3. Atomicity
 
-One logical change per PR. If you catch yourself writing
-"and also" / "while I was here" / "I noticed that" in the body, split.
-
-| Anti-pattern                                | Do this instead                                                        |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| "Add feature X and rename old component"    | PR 1: `refactor: rename`. PR 2: `feat: X`.                             |
-| "Fix bug Y and update unrelated typography" | Two PRs.                                                               |
-| "Refactor 5 components into shared `Foo`"   | PR 1: introduce `Foo` + migrate 1 caller. PR 2..N: migrate the others. |
+| Instead of                                | Do                                                             |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| "Add feature X and rename a component"    | `refactor:` the rename, then `feat:` X                         |
+| "Fix bug Y and tidy unrelated typography" | Two PRs                                                        |
+| "Move five components onto a new `Foo`"   | Introduce `Foo` with one caller, then migrate the rest         |
+| "Bump bindings" alone                     | Regenerated `src/declarations/**` ships with the code using it |
 
 ## 4. Local quality gates
 
-From the repo root, before opening the PR:
+From the repo root, before every PR:
 
 ```bash
-# Always
 npm run format          # prettier --write + eslint --fix
 npm run lint            # prettier --check + eslint
 npm run check           # svelte-check
-npm run test -- --run   # vitest
-
-# Or in one shot for the lint + format pair
-npm run quality         # = format && lint
-
-# Regenerate the typed i18n dictionary if you touched src/lib/i18n/*.json
-npm run i18n
-
-# E2E (only if you touched UI / src / static / configs)
-npm run e2e
+npm run test -- --run   # vitest, single pass
 ```
 
-The CI workflow [`.github/workflows/checks.yml`](../../.github/workflows/checks.yml)
-runs `format`, `lint`, `check`, `build`, `test` and `canister`. On PRs
-two jobs commit their fixes back to your branch: `format` runs
-`npm run format` (prettier + eslint `--fix`), and `canister` re-extracts
-the profiles `.did` and regenerates every binding under
-`src/declarations/` (a bindgen bump alone changes them all). Both push
-with the org `BOT_CREATE_PR_PAT` secret, which must exist as an Actions
-secret **and** as a Dependabot secret (runs triggered by Dependabot only
-see Dependabot secrets); without it they fail and print the diff. You
-should still run `npm run format` locally to keep diffs reviewable.
+`npm run quality` runs `format` then `lint`. Also:
 
-## 5. CI jobs you must keep green
+- `npm run i18n` if you touched `src/lib/i18n/*.json`.
+- `npm run e2e` if you touched UI, `src/**`, `static/**` or configs.
+- `cargo clippy --target wasm32-unknown-unknown --release --all-targets -- -D warnings`
+  and `cargo fmt --check` if you touched `src/profiles/**`.
 
-| Workflow               | Job(s)           | What it runs                                                |
-| ---------------------- | ---------------- | ----------------------------------------------------------- |
-| `checks.yml`           | `format`         | `npm run format`; auto-commits the fixes on PRs.            |
-| `checks.yml`           | `canister`       | Clippy, `cargo fmt`, bindings regen; auto-commits on PRs.   |
-| `checks.yml`           | `lint`           | `npm run lint` (prettier `--check` + eslint).               |
-| `checks.yml`           | `check`          | `npm run check` (`svelte-check`).                           |
-| `checks.yml`           | `build`          | `npm run build` (tsc --noEmit + vite build).                |
-| `checks.yml`           | `test`           | `npm run test -- --run` (vitest, single pass).              |
-| `checks.yml`           | `checks-pass`    | Aggregator — must be green to merge.                        |
-| `e2e.yml`              | `e2e`            | Playwright — only runs on UI/src/config-touching PRs.       |
-| `e2e.yml`              | `e2e-pass`       | Aggregator — passes when `e2e` passed _or_ was skipped.     |
-| `pr-checks.yml`        | check-pr-title   | Conventional-commits regex on the PR title.                 |
-| `auto-update-i18n.yml` | auto_update      | Re-runs `npm run i18n` on PRs that touch `src/lib/i18n/**`. |
-| `deploy.yml`           | deploy           | Deploys on push to `main` / tag. Don't bypass.              |
-| `snapshots.yml`        | update_snapshots | Manual-only Playwright snapshot refresh.                    |
+## 5. CI
 
-If your change is doc-only, the `format` and `lint` jobs still run
-because they cover the whole repo. The `check` and `build` jobs are
-trivial for doc-only PRs.
+| Workflow               | Job                | Runs                                                                                                    |
+| ---------------------- | ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `checks.yml`           | `format`           | `npm run format`; on PRs commits the fixes back                                                         |
+| `checks.yml`           | `canister`         | Clippy, `cargo fmt --check`, re-extracts `profiles.did`, regenerates every binding; commits back on PRs |
+| `checks.yml`           | `lint`             | `npm run lint`                                                                                          |
+| `checks.yml`           | `check`            | `npm run check`                                                                                         |
+| `checks.yml`           | `build`            | `npm run build`                                                                                         |
+| `checks.yml`           | `test`             | `npm run test -- --run`                                                                                 |
+| `checks.yml`           | `checks-pass`      | Aggregator, required to merge                                                                           |
+| `e2e.yml`              | `e2e`              | Playwright; path-filtered, nightly, or forced with the `run-e2e` label                                  |
+| `e2e.yml`              | `e2e-pass`         | Aggregator; a skipped `e2e` counts as a pass                                                            |
+| `pr-checks.yml`        | `check-pr-title`   | The title regex above                                                                                   |
+| `auto-update-i18n.yml` | `auto_update`      | `npm run i18n` on PRs touching `src/lib/i18n/**`                                                        |
+| `deploy.yml`           | `deploy`           | On `v*` tags or manual dispatch: profiles canister, then assets                                         |
+| `snapshots.yml`        | `update_snapshots` | Manual Playwright snapshot refresh                                                                      |
 
-## 6. After CI fails
+The two committing jobs push with the org `BOT_CREATE_PR_PAT`, which must
+exist as an Actions secret and as a Dependabot secret (Dependabot runs only
+see Dependabot secrets); without it they fail and print the diff.
 
-- **`format` pushed a formatting commit** → pull, you're fine. Don't
-  fight it. Run `npm run format` locally next time to avoid it.
-- **`lint` failed** → run `npm run lint` locally. Don't silence with
-  `// eslint-disable` unless you can justify it in code review. Common
-  catches:
-  - Relative imports across folders under `src/**` → use the path
-    aliases (see
-    [`frontend/structure.md`](./frontend/structure.md#imports--aliases-only)).
-  - Each block missing a key → `{#each items as item (item.key)}`.
-- **`check` failed** → fix `svelte-check` errors. No `// @ts-ignore`,
-  no `as any`, no `as unknown as …`.
-- **`test` failed** → run `npm run test -- --run` locally and fix.
-  Don't `.skip` the test.
-- **`checks-pass` red but children green** → the aggregator has a stale
-  cache; push an empty no-op commit or rerun.
-- **`e2e` failed** → download the `playwright-report` artifact from the
-  job for the rendered HTML report, plus `test-results` for the trace
-  files.
+When a job fails:
 
-## 7. Updating an existing PR
+- **`format` pushed a commit:** pull it. Run `npm run format` locally next time.
+- **`lint`:** run `npm run lint`. Typical causes: a relative parent import
+  (use an alias), an `{#each}` without a key. Never silence a rule.
+- **`check`:** fix the type error. No `@ts-ignore`, `as any`, `as unknown as`.
+- **`test`:** reproduce with `npm run test -- --run`. Never `.skip`.
+- **`canister`:** reproduce the clippy / fmt command from section 4.
+- **`checks-pass` red with green children:** rerun the workflow.
+- **`e2e`:** download the `playwright-report` artifact (and `test-results`
+  for traces).
 
-- **Add commits.** Never `git push --force` to a PR branch. Don't
-  `git commit --amend` after pushing. Don't rebase a PR onto `main` to
-  "tidy history".
-- **What counts as "the user explicitly asks":** the user names the
-  operation directly — any unambiguous phrasing works. Examples that
-  count: "force-push", "force push", "push --force", "push -f",
-  "amend", "amend the commit", "git commit --amend", "rebase",
-  "git rebase", "rewrite history", "rewrite the history". Selecting
-  a multi-choice option whose label itself contains one of those
-  phrases also counts. Anything else **DOES NOT** count, including:
-  - "do what you think is best",
-  - "do what's most correct" / "do it the idiomatic way",
-  - "do it your way" / "use your judgement",
-  - approval of a stacked-PR plan,
-  - approval of a refactor that would "look cleaner" in the originating
-    PR.
+## 6. Updating an existing PR
 
-  If in doubt, **add a new commit** even if the result looks messier.
-  Squash-merge tidies history at merge time; force-push destroys it.
+- Add commits. Never `git push --force`, never `git commit --amend` after
+  pushing, never rebase a PR branch onto `main` to tidy it. Squash-merge
+  tidies history at merge time.
+- Only the user naming the operation counts as permission: "force-push",
+  "push --force", "push -f", "amend", "git commit --amend", "rebase",
+  "rewrite history", or picking an option whose label says so. "Do what you
+  think is best", "do it the idiomatic way", approval of a plan or of a
+  refactor do not count.
+- When offering choices, the default is always the no-force-push option.
+- To drop a commit, push a revert commit.
+- Legitimate reasons the user might ask (illustrative): an accidentally
+  committed secret (rotate it too), recovering from a catastrophic mistake.
 
-- When the agent is offering choices, the **default** must always be the
-  no-force-push option. Do not put a force-push option first, and do not
-  pick a force-push option in response to delegated decisions.
-- Typical legitimate reasons a user might ask for a force-push include
-  removing an accidentally-committed secret (rotate the secret afterwards
-  too) or recovering from a catastrophic mistake. These are illustrative,
-  not an exhaustive whitelist.
-- If you need to drop a commit, push a new revert commit instead.
+## 7. Reviewers
 
-## 8. CODEOWNERS auto-routing
-
-[`.github/CODEOWNERS`](../../.github/CODEOWNERS) routes reviews. Agents do
-not assign reviewers — the file does it.
+[`.github/CODEOWNERS`](../../.github/CODEOWNERS) routes reviews; agents do not
+assign reviewers.

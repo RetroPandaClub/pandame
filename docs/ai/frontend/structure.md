@@ -1,227 +1,128 @@
-# Frontend Structure & Naming
+# Frontend structure and naming
 
-The folder taxonomy is **closed**: do not add new top-level folders under
-`src/lib/` (or `src/`) without explicit user approval. Place new code in
-the folder that already owns the concern.
+The taxonomy is **closed**: no new top-level folder under `src/` or
+`src/lib/` without asking. New code goes in the folder that already owns the
+concern. What lives in each folder today is catalogued in
+[`reusability.md`](./reusability.md); this page says where things go.
 
-## Top level (`src/`)
+## `src/`
 
 ```
 src/
-├── app.css                 Tailwind v4 entry + @theme tokens + @font-face
-├── app.d.ts                Ambient SvelteKit types
-├── app.html                HTML shell (mobile-first viewport, theme-color, font preloads)
-├── custom-events.d.ts      Ambient custom-event types for the project's DOM events
-│
-├── routes/                 SvelteKit file-based routing (mobile-first)
-│   ├── +layout.svelte      Phone-frame shell (max-w-[420px], safe-area, mounts <Auth />)
-│   ├── +layout.ts          ssr=false, prerender=false (SPA fallback)
-│   ├── +page.svelte        / — chatbot wizard (logged-in) / WelcomeScreen (logged-out)
-│   │
-│   ├── claim/[deal_id]/+page.svelte       /claim/[id]?code=xxx  Public claim page
-│   │
-│   ├── deals/
-│   │   ├── new/+page.svelte               /deals/new           Create-deal full-screen form
-│   │   └── [deal_id]/
-│   │       ├── +page.svelte               /deals/[id]          Deal detail
-│   │       └── dispute/+page.svelte       /deals/[id]/dispute  Dispute flow (stubbed v2)
-│   │
-│   ├── history/+page.svelte               /history             History list (FilterChip + DealCards)
-│   ├── transactions/+page.svelte          /transactions        Pending / Created / Disputate tabs
-│   │
-│   └── profile/+page.svelte               /profile             Profile (inline editable rows)
-│
-├── declarations/           Generated Candid bindings (DO NOT hand-edit)
-│   ├── _factory.ts
-│   ├── _types.ts
-│   ├── index.ts
-│   ├── escrow/
-│
-│
-└── lib/                    Application code (cross-route)
-    ├── actors/             Shared agent / actor manager (`agents.ic.ts`)
-    ├── api/                Identity-passing facades (`*.api.ts`)
-    ├── canisters/          `Canister<S>` wrappers (`*.canister.ts`)
-    ├── components/         UI components (flat — no feature folders today)
-    │   └── icons/          Inline-SVG icon components (no lucide-svelte dep yet)
-    ├── constants/          App-wide constants & lookup tables (`*.constants.ts`)
-    ├── derived/            Derived stores (`*.derived.ts`)
-    ├── enums/              Plain TS enums / const objects (`*.ts`)
-    ├── env/                Vite env wrappers (`app.env.ts`)
-    ├── i18n/               Translation dictionaries (one JSON per locale)
-    ├── services/           Side-effectful orchestration (`*.services.ts`)
-    ├── stores/             Writable / readable Svelte stores (`*.store.ts`)
-    ├── types/              TS interfaces / types (incl. generated `i18n.d.ts`)
-    └── utils/              Pure helpers — no I/O, no DOM (`*.utils.ts`)
+├── app.css              Tailwind v4 entry: @theme tokens, @font-face, light / dark blocks
+├── app.html             Shell: viewport, theme-color, <html data-theme="light">, one global <title>
+├── app.d.ts             Ambient SvelteKit types
+├── custom-events.d.ts   Typed project DOM events (pandameReloadDeals)
+├── routes/              Pages (see Routes below)
+├── declarations/        GENERATED bindings: escrow/, profiles/, plus _factory.ts, _types.ts, index.ts
+├── profiles/            Rust profiles canister, see ../backend/README.md
+└── lib/
+    ├── actors/          agents.ic.ts: the one shared AgentManager
+    ├── api/             *.api.ts: identity-passing facades, one function per endpoint
+    ├── canisters/       *.canister.ts: Canister<S> wrappers over the generated IDL
+    ├── components/      *.svelte, flat; icons/ holds the icon components
+    ├── constants/       *.constants.ts: IDs, tokens, routes, time scales
+    ├── derived/         *.derived.ts: derived stores
+    ├── enums/           const-object enums and the lists built from them
+    ├── env/             app.env.ts: isDev / isProd / isSkylab
+    ├── i18n/            en.json, the only locale
+    ├── providers/       auth-client.providers.ts: the AuthClient singleton
+    ├── services/        *.services.ts: orchestration, identity, store writes, events
+    ├── stores/          *.store.ts: writable / readable stores
+    ├── types/           app types, re-exports of generated types, generated i18n.d.ts
+    └── utils/           *.utils.ts: pure helpers plus colocated *.spec.ts
 ```
 
-## Components — current inventory
+Dependencies point one way:
+`routes` → `components` → `services` → `api` → `canisters` → `actors`.
+`stores`, `derived`, `utils`, `constants`, `enums`, `types` are leaves any
+layer may import. `$declarations` is imported only by `api`, `canisters`,
+`services`, `types` and `enums`, never by `components` or `routes`.
 
-`src/lib/components/` is flat (the design system is small enough). Use
-the matching layer first; only create a new component when no existing
-one fits.
+## Routes
 
-### Primitives
+`+layout.ts` sets `ssr = false` and `prerender = false`; `adapter-static`
+emits an `index.html` fallback so deep links work.
+[`+layout.svelte`](../../../src/routes/+layout.svelte) is the 420 px phone
+frame and mounts `Auth`, `DevAuth` and `DealsLoader` once.
 
-- `Avatar.svelte` — round image with text-initials fallback (sm 32 / md 48 / lg 76 / xl 134 px).
-- `Backdrop.svelte` — full-screen dim + optional spinner.
-- `BottomNav.svelte` — rounded-top white card with the ambient lift shadow + raised centre button.
-- `BrandHeader.svelte` — full-bleed coloured header (`tone="primary"` purple or `tone="success"` green) + Tabs / FilterChip slot.
-- `Button.svelte` — CTA button (primary / secondary / ghost; xs 31 / sm 36 / md 40 / lg 54 px; loading state).
-- `ChatBubble.svelte` — bot / user speech bubble (panda avatar + soft-bg bubble or right-aligned brand bubble).
-- `ChatChoiceRow.svelte` — array-driven row of outlined / filled reply pills aligned under the bot.
-- `Chip.svelte` — small chip / badge / filter pill (solid / outline / soft / success / warning / danger).
-- `Countdown.svelte` — live `<time>` element ticking every second.
-- `EmptyState.svelte` — dashed "nothing here yet" placeholder.
-- `FilterChip.svelte` — single dropdown-style filter chip (label + funnel + chevron).
-- `FormField.svelte` — label-above input wrapper. `labelFamily="sans" | "serif-ui"`.
-- `IconButton.svelte` — square / circular icon-only button (4 variants × 3 sizes).
-- `InfoLink.svelte` — info-icon + Poppins Light 15 px link ("Do you need help?").
-- `Modal.svelte` — generic dialog shell (title / children / footer + Esc to close).
-- `Money.svelte` — formatted token amount (signed / colorize / sm / md / lg).
-- `PandaBotAvatar.svelte` — lavender disc with the panda silhouette (chat-bubble face).
-- `PandaMark.svelte` — brand mark (panda in a lavender squircle, real artwork from `static/brand/panda.png`).
-- `ProfileFieldRow.svelte` — label-left / green-value-right inline-editable row.
-- `Sheet.svelte` — white off-white card with `rounded-t-[40px]` sliding over the BrandHeader.
-- `Tabs.svelte` — generic segmented control `<T extends string>` (matches Toggle Pay/Receive).
-- `TextInput.svelte` — themed `<input>` (41 px h, 8 px radius, 1.5 px light-purple border, `variant="default" | "active"`).
-- `UploadCTA.svelte` — purple "Choose files to upload" + "Zip, Jpg or Pdf …" caption pair.
-- `PanelSizePicker.svelte` — three concentric-circle radios for the per-deal arbitrator count (3 / 7 / 11), bound to `CreateDealArgs.panel_size`.
-- `VotePicker.svelte` — stacked CC / IC / Abstain radio cards (cast vote + withdraw proposal).
-- `DisputePhaseBadge.svelte` — 24 px phase pill (Evidence / Voting / Resolved).
-- `EvidenceList.svelte` — list view of `Evidence[]` (submitter + timestamp + note + URL + SHA-256).
-- `EvidenceForm.svelte` — three-field form (note / URL / hash) for `submit_evidence`.
-- `DisputeCard.svelte` — single-dispute preview (red title bar + phase + fee + countdown).
+| Route                      | Access | Page                                                                                                |
+| -------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `/`                        | both   | `WelcomeScreen` when signed out, the chat wizard when signed in                                     |
+| `/claim/[deal_id]?code=…`  | public | Claim a tip from the QR or share link                                                               |
+| `/deals/new`               | auth   | Create a deal (Pay / Receive, panel size, fee summary)                                              |
+| `/deals/[deal_id]`         | auth   | Deal detail with `DealActions`                                                                      |
+| `/deals/[deal_id]/dispute` | auth   | Open, evidence, vote, withdraw, finalize, outcome                                                   |
+| `/history`                 | auth   | All deals with a `FilterChip` (`?filter=`)                                                          |
+| `/transactions`            | auth   | Pending / Created / Disputed tabs (`?tab=`)                                                         |
+| `/profile`                 | auth   | Profile, avatar, links to the pages below                                                           |
+| `/profile/edit`            | auth   | Edit username, name, surname, avatar                                                                |
+| `/profile/wallet`          | auth   | Balances per supported token                                                                        |
+| `/profile/arbitrator`      | auth   | Arbitrator profile, assigned disputes, self-deregister (link shown when `$isArbitrator`)            |
+| `/profile/admin`           | auth   | Controller-only arbitrator curation and treasury (the canister rejects others with `NotAuthorised`) |
 
-### Composed
+Auth routes start with `<AuthGuard />`. A new route needs a reason and a
+question first.
 
-- `AppBottomNav.svelte` — wires `BottomNav` to /transactions · / · /profile.
-- `Auth.svelte` — behaviour-only: subscribes to `onAuthStateChange` and bootstraps `profileStore` via `ensureProfile` after sign-in.
-- `AuthGuard.svelte` — behaviour-only redirect guard for logged-in routes.
-- `DealActions.svelte` — context-aware action bar (Consent / Reject / Cancel / Confirm completion / Reject completion / Accept (tip only) / Reclaim / Dispute).
-- `DealCard.svelte` — single-deal preview (purple title bar + status icon + signed amount + countdown + optional inline `actions` snippet).
-- `DealStatusIcon.svelte` — 24 px circular status badge (check / cross / dot / swap / refresh).
-- `DealsTable.svelte` — list wrapper (loading / empty / `<ul>` of `DealCard` links).
-- `Login.svelte` — Internet Identity sign-in button (forwards `fullWidth` / `size` / `label`).
-- `LogoutConfirmModal.svelte` — sign-out confirmation (solid `#3B2370` backdrop, both purple CTAs).
-- `ShareLinkModal.svelte` — post-create QR + copyable share link.
-- `UserPrincipalBadge.svelte` — short-principal + Avatar pair for the BrandHeader trailing slot.
-- `WelcomeScreen.svelte` — full-screen logged-out connect-wallet hero.
+## Naming
 
-### Icons (`components/icons/`)
+| Thing             | Convention                                               | Example                               |
+| ----------------- | -------------------------------------------------------- | ------------------------------------- |
+| Component file    | `PascalCase.svelte`                                      | `DealCard.svelte`                     |
+| Icon              | `icons/<Name>Icon.svelte`                                | `icons/BackIcon.svelte`               |
+| TS file           | kebab-case plus a suffix                                 | `escrow-error.utils.ts`               |
+| Canister wrapper  | `*.canister.ts`, class `XCanister`                       | `EscrowCanister`                      |
+| API facade        | `*.api.ts`                                               | `escrow.api.ts`                       |
+| Service           | `*.services.ts`, camelCase verbs                         | `createAndFundDeal`                   |
+| Store             | `*.store.ts`, `xStore`                                   | `dealsStore`                          |
+| Derived           | `*.derived.ts`, a predicate or noun                      | `userSignedIn`, `openDisputes`        |
+| Constants         | `*.constants.ts`, `SCREAMING_SNAKE`                      | `ESCROW_CANISTER_ID`                  |
+| Enum              | `enums/<name>.ts`, plural const object plus `XName` type | `DealStatuses`, `DealStatusName`      |
+| Type              | `types/<name>.ts`, PascalCase                            | `Deal`, `DealSide`                    |
+| Vitest spec       | `*.spec.ts` next to the file                             | `format.utils.spec.ts`                |
+| Playwright spec   | `e2e/<flow>.test.ts`                                     | `homepage.test.ts`                    |
+| Test id           | `data-tid="kebab-case"`                                  | `data-tid="deal-card"`                |
+| Project DOM event | `pandame*`                                               | `pandameReloadDeals`                  |
+| Time value        | `_ms` in app logic, `_ns` at the canister boundary       | `expires_at_ns`                       |
+| Boolean           | Affirmative                                              | `isOpen`, `hasFooter`, `userSignedIn` |
 
-`BackIcon`, `ChevronDownIcon`, `FilterIcon`, `HomeIcon`, `InfoIcon`,
-`PencilIcon`, `PlusIcon`, `ProfileIcon`, `SwapIcon`. Each is a single
-24-viewBox stroked path keyed by `currentColor`. Add new icons as
-their own files; consider `lucide-svelte` once we cross ~12.
+Cross units with `nsToDate` / `msToNs` from
+[`format.utils.ts`](../../../src/lib/utils/format.utils.ts) and the scales in
+[`app.constants.ts`](../../../src/lib/constants/app.constants.ts).
 
-## Naming conventions
+## Imports
 
-Strict — eslint / svelte-check enforce only some of this.
-
-### File suffixes
-
-| Suffix               | Meaning                                            | Example                           |
-| -------------------- | -------------------------------------------------- | --------------------------------- |
-| `*.svelte`           | Component (PascalCase filename)                    | `DealCard.svelte`, `Modal.svelte` |
-| `*.canister.ts`      | IC actor wrapper extending `Canister<S>`           | `escrow.canister.ts`              |
-| `*.api.ts`           | Identity-passing facade over a `*.canister.ts`     | `escrow.api.ts`                   |
-| `*.services.ts`      | Side-effectful orchestration                       | `deal.services.ts`                |
-| `*.store.ts`         | Svelte store factory                               | `deals.store.ts`                  |
-| `*.derived.ts`       | Derived Svelte store                               | `deals.derived.ts`                |
-| `*.constants.ts`     | App-wide constants & lookup tables                 | `tokens.constants.ts`             |
-| `*.utils.ts`         | Pure helpers                                       | `format.utils.ts`                 |
-| `*.spec.ts`          | Vitest spec, colocated next to the file under test | `format.utils.spec.ts`            |
-| `*.test.ts`          | Playwright E2E spec under `e2e/`                   | `homepage.test.ts`                |
-| `*.ts` (in `types/`) | Interfaces / types                                 | `deal.ts`, `token.ts`             |
-| `*.ts` (in `enums/`) | Plain TS enums / const objects                     | `deal-status.ts`                  |
-
-### Casing
-
-| Thing                    | Style                         | Example                     |
-| ------------------------ | ----------------------------- | --------------------------- |
-| `.svelte` filename       | `PascalCase`                  | `DealCard.svelte`           |
-| `.ts` filename           | `kebab-case` (or single word) | `deal.services.ts`          |
-| Folder                   | `kebab-case` (or single word) | `components/`, `canisters/` |
-| Component name           | `PascalCase`                  | `DealCard`, `BrandHeader`   |
-| TS type / interface      | `PascalCase`                  | `Deal`, `DealSide`          |
-| Function / variable      | `camelCase`                   | `createAndFundDeal`         |
-| Constant export          | `SCREAMING_SNAKE`             | `ESCROW_CANISTER_ID`        |
-| Test ID / data attribute | `kebab-case`                  | `data-tid="deal-card"`      |
-
-### Time variables — `_ms` / `_ns`
-
-Time values must carry their unit in the variable name:
-
-- **`_ms`** — milliseconds (default for business logic).
-- **`_ns`** — nanoseconds (canister-boundary fields like `expires_at_ns`,
-  `created_at_ns` — match the generated Candid field names).
-
-Use `nsToDate` / `msToNs` from
-[`format.utils.ts`](../../../src/lib/utils/format.utils.ts) when
-crossing units.
-
-### Imports — aliases only
-
-`import/no-relative-parent-imports` is **`error`** under `src/**`. Use
-the path aliases declared in
-[`svelte.config.js`](../../../svelte.config.js):
+`import/no-relative-parent-imports` is an error under `src/**`. Aliases
+(from [`svelte.config.js`](../../../svelte.config.js)):
 
 | Alias           | Path               |
 | --------------- | ------------------ |
 | `$lib`          | `src/lib`          |
 | `$declarations` | `src/declarations` |
 | `$routes`       | `src/routes`       |
-| `$satellite`    | `src/satellite`    |
 | `$root`         | repo root          |
 
-Single tolerated exception: the side-effect CSS import in
-[`+layout.svelte`](../../../src/routes/+layout.svelte) (`import '../app.css'`)
-which carries an inline `eslint-disable-next-line`.
+`$satellite` is still declared but points at a folder that no longer exists;
+do not use it. The only tolerated relative import is `import '../app.css'` in
+`+layout.svelte`, with its inline disable. Imports in `.svelte` files are
+alphabetised (`import/order`); `prettier-plugin-organize-imports` sorts TS.
 
-### Forbidden imports / patterns
+## Where new code goes
 
-- Relative imports across folders (`../../...`) under `src/**`.
-- Hand-edits to `src/lib/types/i18n.d.ts` — generated by `npm run i18n`.
-- Hand-edits to anything under `src/declarations/escrow/` — generated
-  by `npm run did`.
-- Importing from `$declarations/**` outside of `$lib/{api,canisters}/` —
-  re-export through `$lib/types/` and `$lib/api/` so callers don't
-  depend on the generated layer.
-- Hex literals or arbitrary `bg-[#...]` classes — use the design tokens
-  in `src/app.css` (`bg-primary`, `text-default`, `border-soft`, …).
-  See [stack-and-patterns.md](./stack-and-patterns.md#tailwind-v4--design-tokens).
-- Raw `text-white` / `bg-white` / `bg-black` / `border-black` in
-  component markup — use the inverse / surface tokens
-  (`text-default-inverse`, `bg-bg`, `bg-bg-elevated`, `bg-bg-inverse`,
-  `border-default`) so dark mode flips correctly.
-- Tailwind `dark:` utility variants. Dark mode is wired via CSS-variable
-  swap on `[data-theme='dark']` in [`src/app.css`](../../../src/app.css);
-  per-utility `dark:` classes bypass that and break theme switching.
-
-## Where to put new files (decision tree)
-
-1. **New URL?** Add a `src/routes/<segment>/+page.svelte`. Mobile-first
-   layout = wrap content in `BrandHeader` + content section + `AppBottomNav`.
-2. **UI component?** → `$lib/components/<Name>.svelte`. Look at
-   the existing inventory first; reach for primitives before composing.
-3. **New icon?** → `$lib/components/icons/<Name>Icon.svelte`. Single
-   24-viewBox stroked path keyed by `currentColor`.
-4. **Side-effectful business logic?** → `*.services.ts` under
-   `$lib/services/`.
-5. **New canister endpoint?** → bump `$lib/canisters/escrow.canister.ts`
-   - the matching `$lib/api/escrow.api.ts` facade. New canister
-     entirely → see
-     [`workflows/regenerate-bindings.md`](./workflows/regenerate-bindings.md).
-6. **Svelte store?** → `*.store.ts` under `$lib/stores/`.
-7. **Derived store?** → `*.derived.ts` under `$lib/derived/`.
-8. **Pure helper?** → `*.utils.ts` under `$lib/utils/` plus a
-   colocated `*.spec.ts`.
-9. **TypeScript type / interface?** → `$lib/types/<name>.ts`.
-10. **Constant / lookup table?** → `*.constants.ts` in
-    `$lib/constants/`, or a const-object enum in `$lib/enums/`.
-11. **Translation key?** → add to every `src/lib/i18n/<locale>.json`
-    (today: `en.json`) and run `npm run i18n`.
-12. **Generated?** → don't create it by hand. Run the generator
-    (`npm run did` for Candid, `npm run i18n` for `i18n.d.ts`).
-13. **None of the above?** → ask. Don't invent a folder.
+1. **A page?** `src/routes/<segment>/+page.svelte` (ask first). Compose
+   `BrandHeader` + `Sheet` or a content section + `AppBottomNav`.
+2. **UI?** `$lib/components/<Name>.svelte`, after checking the catalog.
+3. **An icon?** `$lib/components/icons/<Name>Icon.svelte`.
+4. **A new escrow endpoint?** `escrow.canister.ts` method, `escrow.api.ts`
+   facade, then a service function; see
+   [`workflows/new-service.md`](./workflows/new-service.md).
+5. **Logic with I/O, identity or store writes?** `$lib/services/<concern>.services.ts`.
+6. **Pure logic?** `$lib/utils/<concern>.utils.ts` with a `*.spec.ts`.
+7. **Shared state?** `$lib/stores/` and `$lib/derived/`; see
+   [`workflows/new-store.md`](./workflows/new-store.md).
+8. **A value, ID, threshold or path used in more than one place?**
+   `$lib/constants/<x>.constants.ts`; a closed set of names goes in `$lib/enums/`.
+9. **A type?** `$lib/types/<name>.ts`; re-export generated types from there.
+10. **Copy?** `src/lib/i18n/en.json`, then `npm run i18n`.
+11. **Generated?** Run the generator, never write it by hand.
+12. **None of these?** Ask.

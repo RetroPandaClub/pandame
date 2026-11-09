@@ -1,94 +1,41 @@
-# Workflow: Add a new store / derived store
+# Workflow: add a store or a derived store
 
-Use this when you need cross-component reactive state that isn't covered
-by a simple component-local `$state` rune.
+| Situation                                | Use                                                   |
+| ---------------------------------------- | ----------------------------------------------------- |
+| State inside one component               | `$state` / `$derived`                                 |
+| Passed to a child or two                 | Props or snippets                                     |
+| I/O bound to a component's life          | `$effect`                                             |
+| Shared across components or routes       | `$lib/stores/<concept>.store.ts`                      |
+| Computed from one or more stores         | `$lib/derived/<concept>.derived.ts`                   |
+| Refreshed on a cadence and after actions | A behaviour-only loader component, like `DealsLoader` |
 
-## When to add a store vs use runes
+## A store
 
-| Situation                                      | Tool                                 |
-| ---------------------------------------------- | ------------------------------------ |
-| Component-local mutable value                  | `$state`                             |
-| Component-local computed value                 | `$derived` / `$derived.by`           |
-| Side-effect bound to component lifecycle       | `$effect` / `onMount`                |
-| Value passed to ≤ 2 children in the same view  | Plain props / snippets               |
-| Value shared **across components / pages**     | `*.store.ts` under `$lib/stores/`    |
-| Computed value derived from one or more stores | `*.derived.ts` under `$lib/derived/` |
+1. **Search** the [catalog](../reusability.md): deals, disputes, profile,
+   arbitrator, user, i18n already exist. A related value extends one of them.
+2. **Name:** `<concept>.store.ts` exporting `<concept>Store`.
+3. **Shape:** for loaded data, a factory over `writable<T | undefined>` that
+   exposes intent methods, as
+   [`deals.store.ts`](../../../../src/lib/stores/deals.store.ts) does
+   (`set`, `upsert`, `remove`, `reset`). `undefined` means not loaded, `null`
+   loaded and empty.
+4. **Writers:** services write the store after a canister call; components
+   read it. Reset it on sign-out where `DealsLoader` / `Auth` already do.
+5. **Tests** if it has logic; **catalog** row; **gates**.
 
-## Steps — adding a new `*.store.ts`
+## A derived store
 
-1. **Search first.** `Grep` `$lib/stores/` for a near-fit. Pandame's
-   stores today are `user.store.ts`, `i18n.store.ts`, `deals.store.ts`,
-   `balance.store.ts`, and `profile.store.ts` — extend one of them if
-   it's a related concern (e.g. another auth-derived value goes on
-   `user.store`, another deal-shaped collection on `deals.store`,
-   editable user metadata on `profile.store`).
-2. **Pick the name.** `<concept>.store.ts` (kebab-case, lowercase). The
-   exported store name follows `camelCase` and ends in `Store` —
-   `userStore`, `i18nStore`. Keep both names in sync.
-3. **Pick the shape.** Default to `writable<T | null | undefined>` for an
-   async-loaded value, `writable<T>(seed)` for an always-present value.
-   Use `readable` only if the store is genuinely never set from outside.
-4. **Initial value semantics.**
-   - `undefined` → not yet loaded.
-   - `null` → loaded, no value (e.g. signed-out user).
-   - `T` → loaded value.
+1. Its sources are stores already; promote component state first if not.
+2. It lives in the file of its domain (`deals.derived.ts` for deals).
+3. Name it as a predicate or a noun: `userSignedIn`, `openDisputes`,
+   `dealsAttentionCount`.
+4. Pure: no I/O in the callback. Model:
+   [`deals.derived.ts`](../../../../src/lib/derived/deals.derived.ts).
+5. Tests, catalog row, gates.
 
-   Encode this convention in your derived predicates and tests, so the
-   rest of the app can rely on it.
+## Do not
 
-5. **Add the file.** Example shape:
-
-   ```ts
-   import type { User } from '$lib/types/user';
-   import { writable } from 'svelte/store';
-
-   export const userStore = writable<User | null | undefined>(undefined);
-   ```
-
-6. **Add a derived store** if other components need a computed view —
-   `$lib/derived/<concept>.derived.ts`:
-
-   ```ts
-   import { userStore } from '$lib/stores/user.store';
-   import { isNullish, nonNullish } from '@dfinity/utils';
-   import { derived } from 'svelte/store';
-
-   export const userSignedIn = derived(userStore, (user) => nonNullish(user));
-   export const userNotSignedIn = derived(userStore, (user) => isNullish(user));
-   ```
-
-7. **Tests.** Stores with non-trivial logic (computation, persistence,
-   cross-store derivation) need a `*.spec.ts`. Pure passthroughs don't.
-   See [`../testing.md`](../testing.md).
-8. **Catalog update** — add a row to
-   [`../reusability.md`](../reusability.md#stores--derived). This is the
-   [meta-update rule](../../governance.md#meta-update-rule).
-9. **Run quality gates** (`npm run quality && npm run check && npm run test -- --run`).
-
-## Steps — adding a new `*.derived.ts`
-
-1. **Source store(s) must exist already.** Don't create a derived store
-   that wraps a value still held in component-local `$state` — promote
-   the source to a real store first.
-2. **Co-locate by domain.** A derived value that fans out from
-   `user.store` lives in `user.derived.ts`. A new domain gets a new file.
-3. **Name like a question or predicate.** `userSignedIn`,
-   `activeLanguage`, `noteCount`. Avoid generic names like `data` or
-   `value`.
-4. **Keep it pure.** No I/O inside `derived(...)`. If you need to fetch
-   when the source changes, do it in a service / `$effect` and write to
-   another store — not in the derived callback.
-5. **Catalog + tests** — same as above.
-
-## Anti-patterns (do not do these)
-
-- Mirroring a `DealView` from the canister into a store just to "have it
-  available". Push refresh through `deal.services` so the canister stays
-  the source of truth — only promote to a new store when ≥ 2 components
-  share exactly the same shape and you're avoiding redundant calls.
-- Sprinkling `derived(...)` calls inside components. If the same
-  computation appears in two places, extract it.
-- Using a store for transient form state — that's a `$state` rune.
-- Subscribing manually with `$store_name.subscribe(...)` inside a
-  component — use the `$store` shorthand.
-- Storing functions in a store — pass them as props or import them.
+- Mirror canister data into a store just to have it around.
+- Repeat the same `derived(...)` in two components.
+- Keep form state in a store, or functions in a store.
+- `.subscribe()` by hand in a component; use `$store`.

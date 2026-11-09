@@ -1,136 +1,100 @@
 # Governance
 
-This page defines what agents may, should, and must not do. It applies to
-every agent (Claude Code, Cursor, Copilot, Codex, Aider, opencode, …).
+What an agent may do on its own, what it must ask about, and which page to
+update when the code changes. The truth hierarchy is in
+[`AGENTS.md`](../../AGENTS.md#6-truth-hierarchy); on any contradiction, stop
+and ask instead of guessing.
 
-## Truth hierarchy
+## Working style
 
-When two sources disagree, the higher one wins:
+Most non-trivial PRs go through three roles in order. Keep them separate.
 
-1. **The code** (`src/**`, `scripts/**`) — current state of reality.
-2. **CI workflows** ([`.github/workflows/**`](../../.github/workflows/)) —
-   non-negotiable gates that must be green to merge.
-3. **CODEOWNERS** ([`.github/CODEOWNERS`](../../.github/CODEOWNERS)) —
-   defines who must approve each path.
-4. **This file + sibling pages under `docs/ai/`** — policy.
-5. [`AGENTS.md`](../../AGENTS.md) — universal entry, points at the above.
-6. **Tool-specific layers** ([`CLAUDE.md`](../../CLAUDE.md),
-   [`.claude/rules/`](../../.claude/rules/), `.cursor/rules/`,
-   `.github/copilot-instructions.md`). These never contradict 1–5.
+- **Planner.** For anything over one file or about 50 lines, write a three to
+  six step plan in plain text before editing, and surface trade-offs. If the
+  scope, the atomicity or a policy is ambiguous, ask one question rather than
+  open a sprawling PR.
+- **Implementer.** Read a file (or its relevant range) before changing it.
+  Make targeted edits; never rewrite a whole file for a few lines. Batch
+  independent reads and searches. Follow
+  [`frontend/structure.md`](./frontend/structure.md) and
+  [`frontend/stack-and-patterns.md`](./frontend/stack-and-patterns.md), then
+  run the [local gates](./pr-and-ci.md#4-local-quality-gates).
+- **Reviewer.** Before opening the PR, check the diff against the
+  [officina standard](https://github.com/AntonioVentilii/officina/blob/main/standards/code.md),
+  the [repo additions](../../AGENTS.md#4-the-standard-and-what-this-repo-adds),
+  the [reusability catalog](./frontend/reusability.md) (did you duplicate
+  something?), [a11y](./frontend/a11y.md) and [PR conventions](./pr-and-ci.md).
 
-If an agent finds a contradiction, the agent **stops and asks** instead of
-guessing.
+## Protected and generated paths
 
-## Roles
+Agents may read these. They change only when the user's prompt asks for it,
+and the PR body calls the change out.
 
-You can play any of these roles in a single session — most non-trivial PRs
-involve all three, in order. Keep them mentally separated.
+| Path                                                                                                         | Why                                                                                             |
+| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `.github/workflows/**`, `.github/actions/**`                                                                 | CI integrity. Only `ci(...)` PRs touch them.                                                    |
+| `.github/CODEOWNERS`, `.github/dependabot.yml`                                                               | Review routing, dependency policy.                                                              |
+| `package.json` (dependencies), `package-lock.json`                                                           | A new or upgraded dependency needs explicit approval.                                           |
+| `icp.yaml`, `.icp/data/mappings/**`, `dfx.json`                                                              | Canister IDs and recipes. Losing the mapping loses the canisters.                               |
+| `src/profiles/**`                                                                                            | The profiles canister; schema drift breaks stored profiles. See [backend](./backend/README.md). |
+| `eslint.config.js`, `.prettierrc`, `.prettierignore`, `tsconfig*.json`, `svelte.config.js`, `vite.config.ts` | Lint, format, TS and build policy.                                                              |
+| `scripts/{did,import-candid,compile-idl-js}.sh`, `scripts/lib/**`                                            | Bindings pipeline.                                                                              |
+| `static/.ic-assets.json5`                                                                                    | Asset canister headers (CSP, caching).                                                          |
+| `AntonioVentilii/escrow` (`../escrow/**`)                                                                    | External repo. Open it as its own workspace and follow its README.                              |
 
-### Planner
+Generated, never hand-edited:
 
-Decompose the task. Surface trade-offs in plain text _before_ editing
-files. For anything > ~50 changed lines or touching > 3 files, write a
-short bullet plan and confirm scope with the human.
+| Path                                                                         | Regenerated by                                                                        |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `src/declarations/escrow/**`                                                 | `npm run did` (pinned by `ESCROW_REF` in `scripts/import-candid.sh`)                  |
+| `src/declarations/profiles/**`                                               | The CI `canister` job (candid-extractor + `compile-idl-js.sh`), auto-committed on PRs |
+| `src/lib/types/i18n.d.ts`                                                    | `npm run i18n`, also auto-committed by `auto-update-i18n.yml`                         |
+| `node_modules/`, `.svelte-kit/`, `build/`, `target/`, `.dfx/`, `.icp/cache/` | Build output, never committed                                                         |
 
-### Implementer
+## Allowed without asking
 
-Execute the plan with **targeted edits**. Strictly follow:
+- Edit `src/lib/**`, `src/routes/**`, `src/app.css`, `src/app.html`,
+  `src/app.d.ts`, `src/custom-events.d.ts`, `e2e/**`.
+- Add files inside the existing taxonomy ([structure](./frontend/structure.md)).
+- Run any `npm run` script listed in [`AGENTS.md`](../../AGENTS.md#2-commands)
+  except the `deploy*` ones.
+- Update `docs/ai/**` when the meta-update rule fires.
 
-- [`frontend/structure.md`](./frontend/structure.md) and
-  [`frontend/stack-and-patterns.md`](./frontend/stack-and-patterns.md).
+## Ask first
 
-Run the local quality gates from [`pr-and-ci.md`](./pr-and-ci.md) before
-declaring done.
-
-### Reviewer
-
-Before opening / merging, self-review against:
-
-- [11 commandments](../../AGENTS.md#2-the-11-commandments-read-before-every-change)
-- [PR conventions](./pr-and-ci.md)
-- [Reusability catalog](./frontend/reusability.md) — flag duplication you
-  re-introduced.
-- [a11y rules](./frontend/a11y.md).
-
-## Boundaries
-
-These paths are **protected**. Agents may read them, but must not modify
-them without an explicit ask in the user prompt.
-
-| Path                                                                                           | Reason                                                                   | Owner            |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------- |
-| `.github/workflows/**`                                                                         | CI integrity. Only `ci(...)` PRs touch these.                            | repo maintainers |
-| `.github/CODEOWNERS`, `.github/actions/**`                                                     | Review routing & action policy.                                          | repo maintainers |
-| `.github/dependabot.yml`                                                                       | Dependency update policy.                                                | repo maintainers |
-| `package.json` (deps), `package-lock.json`                                                     | New / upgraded dependencies require explicit approval.                   | repo maintainers |
-| `icp.yaml`, `.icp/data/mappings/`                                                              | Canister IDs and recipes. Losing the mapping loses the canisters.        | repo maintainers |
-| `eslint.config.js`, `.prettierrc`, `tsconfig*.json`                                            | Lint / format / TS policy.                                               | repo maintainers |
-| `src/profiles/`, `src/declarations/profiles/profiles.did`                                      | The profiles canister and its Candid surface. Drift breaks stored data.  | repo maintainers |
-| `src/lib/types/i18n.d.ts`                                                                      | Generated from `src/lib/i18n/*.json` by `npm run i18n`. Don't hand-edit. | —                |
-| `src/declarations/**`                                                                          | Generated from upstream `escrow.did` by `npm run did`. Don't hand-edit.  | —                |
-| `scripts/{did,import-candid,compile-idl-js}.sh`, `scripts/lib/**`                              | Bindings pipeline. Touch only when prompted.                             | repo maintainers |
-| [`AntonioVentilii/escrow`](https://github.com/AntonioVentilii/escrow) (locally `../escrow/**`) | External repo. Open it as a separate workspace; obey its README first.   | escrow team      |
-| `node_modules/`, `.svelte-kit/`, `build/`, `target/`, `.dfx/`                                  | Build output. Never commit.                                              | —                |
-
-If a change must touch a protected path, call it out explicitly in the PR
-description.
-
-## Capabilities — quick reference
-
-### Allowed without prompting
-
-- Edit any file under `src/lib/**`, `src/routes/**`.
-- Edit `src/app.css`, `src/app.html`, `src/app.d.ts`,
-  `src/custom-events.d.ts`.
-- Add files inside the existing folder taxonomy
-  ([FE structure](./frontend/structure.md)).
-- Run `npm run format`, `npm run lint`, `npm run check`,
-  `npm run quality`, `npm run dev`, `npm run build`,
-  `npm run preview`, `npm run test`, `npm run e2e`, `npm run i18n`,
-  `npm run did`.
-- Update these `docs/ai/**` pages when the meta-update rule fires.
-
-### Forbidden without explicit prompt
-
-- Add a new dependency or upgrade one (`package.json`).
-- Add a new top-level folder under `src/` or `src/lib/`.
-- Edit any path in the [Boundaries](#boundaries) table.
-- Disable an ESLint rule, suppress a `svelte-check` warning, or use `any`
-  / `as unknown as …` to bypass a type.
-- Skip / `.skip()` / `.todo()` an existing test.
-- `git push --force`, amend a pushed commit, rebase to "tidy history", or
-  rewrite shared history. "Explicit prompt" means the user names the
-  operation directly — any unambiguous phrasing works (e.g.
-  "force-push", "force push", "push --force", "push -f", "amend",
-  "git commit --amend", "rebase", "git rebase", "rewrite history").
-  Task-level delegation like "do what you think is best" or "do what's
-  most correct" does **NOT** count. See
-  [`pr-and-ci.md#7-updating-an-existing-pr`](./pr-and-ci.md#7-updating-an-existing-pr).
-- Commit secrets, `.env*` (other than examples), or large binaries.
+- A new dependency or a dependency upgrade.
+- A new top-level folder under `src/` or `src/lib/`.
+- A new SvelteKit route.
+- A new canister wrapper, or a new upstream escrow contract (`ESCROW_REF` bump).
+- Anything in the protected table above.
+- Disabling a lint rule, suppressing a `svelte-check` warning, `any`,
+  `as unknown as`, `.skip()` / `.todo()` on a test.
+- Any deploy (`npm run deploy*`, `icp deploy`, `icp sync`).
+- Force-push, amending a pushed commit, rebasing a PR branch. Only the user
+  naming that operation counts; see
+  [`pr-and-ci.md`](./pr-and-ci.md#6-updating-an-existing-pr).
+- Committing secrets, `.env*` files (other than examples) or large binaries:
+  never.
 
 ## Meta-update rule
 
-> If a PR introduces a new pattern, new shared component, new shared type,
-> new naming convention, new policy, or a new workflow, the PR **MUST**
-> also update the relevant page under `docs/ai/**` so the next agent picks
-> it up.
+A PR that adds a pattern, a shared piece, a naming convention, a policy or a
+workflow updates the page below in the same PR, with the smallest delta (a
+row, a bullet, a swapped example), and says so under `# Changes`.
 
-How:
+| You changed...                                                 | Update                                                                     |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Folder taxonomy, file suffix, alias, route                     | [`frontend/structure.md`](./frontend/structure.md)                         |
+| A shared component, util, service, store, constant, type, enum | [`frontend/reusability.md`](./frontend/reusability.md)                     |
+| A pattern (state, data flow, errors, theming, events)          | [`frontend/stack-and-patterns.md`](./frontend/stack-and-patterns.md)       |
+| A test convention or tool                                      | [`frontend/testing.md`](./frontend/testing.md)                             |
+| An a11y rule                                                   | [`frontend/a11y.md`](./frontend/a11y.md)                                   |
+| A recurring change recipe                                      | a page under [`frontend/workflows/`](./frontend/workflows/)                |
+| The profiles canister                                          | [`backend/README.md`](./backend/README.md)                                 |
+| Local network, deploy, canister IDs                            | [`.agents/workflows/deployment.md`](../../.agents/workflows/deployment.md) |
+| PR title, body, CI job                                         | [`pr-and-ci.md`](./pr-and-ci.md)                                           |
+| A policy or a protected path                                   | this page                                                                  |
+| A repo-wide rule                                               | [`AGENTS.md`](../../AGENTS.md)                                             |
 
-1. Identify which page describes the area you changed:
-   - Folder taxonomy → `frontend/structure.md`.
-   - New shared component / util / store → `frontend/reusability.md`.
-   - New test pattern → `frontend/testing.md`.
-   - New PR / CI rule → `pr-and-ci.md`.
-   - New policy / boundary → this file.
-   - New workflow → add a page under `frontend/workflows/`.
-2. Edit that page in the same PR with the smallest possible delta — add a
-   bullet, add a row, swap a code sample.
-3. Mention the doc update in the PR body under `# Changes`.
-4. If the change is structural enough that the existing taxonomy stops
-   making sense, open a separate **doc-only** PR first:
-   `docs(ai): <reshape>` — and land it before the code PR.
-
-This is what makes the docs _auto-adapting_: every PR is a small
-opportunity to keep them honest. Reviewers should reject code PRs that
-introduce a new pattern without the matching doc update.
+If the taxonomy itself stops making sense, land a docs-only
+`docs(ai): ...` PR that reshapes it before the code PR.
