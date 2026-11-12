@@ -59,6 +59,11 @@ with its exact headings:
 
 ## 3. Atomicity
 
+One purpose per PR, and PRs in parallel from `main` rather than stacked: rules
+[2, Scoped](https://github.com/AntonioVentilii/officina/blob/main/standards/code.md#2-scoped)
+and [3, Parallel, not stacked](https://github.com/AntonioVentilii/officina/blob/main/standards/code.md#3-parallel-not-stacked)
+of the standard. Stack only when a PR needs the other's code.
+
 | Instead of                                | Do                                                             |
 | ----------------------------------------- | -------------------------------------------------------------- |
 | "Add feature X and rename a component"    | `refactor:` the rename, then `feat:` X                         |
