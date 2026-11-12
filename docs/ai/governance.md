@@ -67,8 +67,10 @@ Generated, never hand-edited:
 - A new SvelteKit route.
 - A new canister wrapper, or a new upstream escrow contract (`ESCROW_REF` bump).
 - Anything in the protected table above.
-- Disabling a lint rule, suppressing a `svelte-check` warning, `any`,
-  `as unknown as`, `.skip()` / `.todo()` on a test.
+- Disabling a lint rule, adding an entry to `eslint-suppressions.json` or
+  raising a gate threshold (pruning entries is always allowed), suppressing a
+  `svelte-check` warning, `any`, `as unknown as`, `.skip()` / `.todo()` on a
+  test.
 - Any deploy (`npm run deploy*`, `icp deploy`, `icp sync`).
 - Force-push, amending a pushed commit, rebasing a PR branch. Only the user
   naming that operation counts; see

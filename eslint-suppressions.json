@@ -1,0 +1,40 @@
+{
+  "src/lib/api/escrow.api.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/lib/canisters/escrow.canister.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/lib/components/DealActions.svelte": {
+    "no-restricted-imports": {
+      "count": 1
+    }
+  },
+  "src/lib/utils/escrow-error.utils.ts": {
+    "no-restricted-imports": {
+      "count": 1
+    }
+  },
+  "src/routes/deals/[deal_id]/dispute/+page.svelte": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/routes/deals/new/+page.svelte": {
+    "complexity": {
+      "count": 1
+    },
+    "no-restricted-imports": {
+      "count": 1
+    }
+  },
+  "src/routes/profile/admin/+page.svelte": {
+    "max-lines": {
+      "count": 1
+    }
+  }
+}

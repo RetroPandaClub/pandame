@@ -12,3 +12,6 @@ yarn.lock
 
 # JSON5 with comments that document the header rules — left as written.
 static/.ic-assets.json5
+
+# Written by ESLint (--suppress-all / --prune-suppressions); its own format.
+eslint-suppressions.json
