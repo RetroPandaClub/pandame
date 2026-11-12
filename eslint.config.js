@@ -116,7 +116,9 @@ export default tseslint.config(
 								'$declarations/*',
 								'$lib/api/*',
 								'$lib/canisters/*',
-								'$lib/actors/*'
+								'$lib/actors/*',
+								'$root',
+								'$root/*'
 							],
 							message: 'Go through $lib/services and $lib/types.'
 						}
@@ -141,7 +143,9 @@ export default tseslint.config(
 								'$lib/canisters/*',
 								'$lib/actors/*',
 								'$lib/services/*',
-								'$lib/stores/*'
+								'$lib/stores/*',
+								'$root',
+								'$root/*'
 							],
 							message: 'Utils are pure: no I/O, no stores, generated types only through $lib/types.'
 						}

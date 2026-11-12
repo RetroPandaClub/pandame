@@ -91,13 +91,18 @@ npm run test -- --run   # vitest, single pass
 and comments excluded, generated `i18n.d.ts` excluded), no explicit `any`, no
 non-null assertion, and import boundaries (routes and components may not
 import `$declarations`, `$lib/api`, `$lib/canisters`, `$lib/actors`; utils may
-not import `$declarations`, api, canisters, actors, services or stores).
+not import `$declarations`, api, canisters, actors, services or stores; neither
+may import through `$root`).
 
 Today's violations are baselined in
 [`eslint-suppressions.json`](../../eslint-suppressions.json), which ESLint
-reads on its own. The baseline only shrinks:
+reads on its own. An entry is a count per file and rule, not a specific line:
 
-- New code that breaks a rule fails `lint`; fix the code.
+- A violation in a file or rule with no entry, or one more than the count,
+  fails `lint`; fix the code.
+- A file with an entry can still swap one violation for another of the same
+  rule without failing. Do not: reviewers check that a baselined file only
+  gets smaller.
 - When you fix a baselined violation, run `npx eslint . --prune-suppressions`
   and commit the smaller file; a stale entry makes `lint` fail.
 - Never add entries (`--suppress-all`, `--suppress-rule`) or raise a
